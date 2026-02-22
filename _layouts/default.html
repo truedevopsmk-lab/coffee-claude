@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ page.title }} | {{ site.title }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ "/assets/coffee.css" | relative_url }}">
+</head>
+<body>
+  <div class="site">
+
+    <aside class="sidebar">
+      <h1>Coffee Journal</h1>
+      <p>Brewing notes, beans, and experiments.</p>
+
+      <nav class="nav">
+      <a href="{{ "/" | relative_url }}">Home</a>
+      <a href="{{ "/brews/" | relative_url }}">Brews</a>
+      <a href="{{ "/beans/" | relative_url }}">Beans</a>
+      <a href="{{ "/methods/" | relative_url }}">Methods</a>
+      <a href="{{ "/brews-and-frames/" | relative_url }}">Brews &amp; Frames</a>
+      <a href="{{ "/tools/brew-calculator/" | relative_url }}">Tools</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      {% if page.title %}
+        <h1>{{ page.title }}</h1>
+      {% endif %}
+      {{ content }}
+    </main>
+
+  </div>
+</body>
+</html>

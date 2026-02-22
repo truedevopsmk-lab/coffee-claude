@@ -1,0 +1,10 @@
+title: Coffee Journal
+description: Personal coffee brewing & tasting journal
+markdown: kramdown
+permalink: pretty
+
+baseurl: /coffee-test
+url: https://truedevopsmk-lab.github.io
+
+plugins:
+  - jekyll-seo-tag

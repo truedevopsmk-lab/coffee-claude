@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ page.title }} | {{ site.title }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ "/assets/coffee.css" | relative_url }}">
+</head>
+<body>
+  <div class="site">
+
+    <aside class="sidebar">
+      <h1>Coffee Journal</h1>
+      <p>Brewing notes, beans, and experiments.</p>
+
+      <nav class="nav">
+      <a href="{{ "/" | relative_url }}">Home</a>
+      <a href="{{ "/brews/" | relative_url }}">Brews</a>
+      <a href="{{ "/beans/" | relative_url }}">Beans</a>
+      <a href="{{ "/methods/" | relative_url }}">Methods</a>
+      <a href="{{ "/tools/brew-calculator/" | relative_url }}">Tools</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+   
+
+      {{ content }}s
+
+      <div class="brew-nav">
+        {% if page.previous %}
+          ← <a href="{{ page.previous.url | relative_url }}">{{ page.previous.title }}</a>
+        {% endif %}
+        {% if page.next %}
+          <a href="{{ page.next.url | relative_url }}">{{ page.next.title }}</a> →
+        {% endif %}
+      </div>
+    </main>
+
+  </div>
+</body>
+</html>

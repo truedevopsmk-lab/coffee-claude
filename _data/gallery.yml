@@ -1,0 +1,51 @@
+sections:
+  - key: brewers
+    title: "☕ Brewers"
+    folder: "/assets/gallery/brewers/"
+  - key: beans
+    title: "📦 Beans"
+    folder: "/assets/gallery/beans/"
+  - key: brewed_elsewhere
+    title: "🌍 Brewed Elsewhere"
+    folder: "/assets/gallery/travel/"
+  - key: experiments
+    title: "🧪 Experiments"
+    folder: "/assets/gallery/experiments/"
+
+captions:
+  "/assets/gallery/Crema-Chronicles/IMG_4256.jpeg": "Golden crema, perfect extraction"
+  "/assets/gallery/Crema-Chronicles/IMG_4802-Medium.jpeg": "Silky espresso moment"
+  "/assets/gallery/Crema-Chronicles/IMG_4104-Medium.jpeg": "Crema chronicles continue"
+  "/assets/gallery/Crema-Chronicles/IMG_1808-Medium.jpeg": "Morning shot with tiger striping"
+  "/assets/gallery/Crema-Chronicles/IMG_4265-Medium.jpeg": "Dialed-in espresso bliss"
+  "/assets/gallery/Crema-Chronicles/IMG_8922.jpeg": "Liquid gold in a demitasse"
+
+  "/assets/gallery/experiments/IMG_6805-2.jpeg": "Late-night brew experiment"
+  "/assets/gallery/experiments/IMG_5114.jpeg": "Grind size comparison test"
+  "/assets/gallery/experiments/IMG_7628-2.jpeg": "Bloom phase observation"
+  "/assets/gallery/experiments/IMG_1780-2.jpeg": "Water temperature tweak"
+  "/assets/gallery/experiments/IMG_4067-2.jpeg": "Extraction time trial"
+  "/assets/gallery/experiments/IMG_3315-2.jpeg": "TDS testing session"
+  "/assets/gallery/experiments/IMG_4632-2.jpeg": "Cupping notes in progress"
+
+  "/assets/gallery/beans/IMG_5382-Medium.jpeg": "Freshly rested beans"
+  "/assets/gallery/beans/IMG_3118-Medium.jpeg": "Single origin discovery"
+  "/assets/gallery/beans/IMG_9249-Medium.jpeg": "Roast profile perfection"
+  "/assets/gallery/beans/IMG_0338-Medium.jpeg": "Beans before the grind"
+  "/assets/gallery/beans/IMG_4944.jpg": "New bag, new excitement"
+  "/assets/gallery/beans/IMG_5493-Medium.jpeg": "Aromatic natural process"
+  "/assets/gallery/beans/IMG_4908-Medium.jpeg": "Washed and wonderful"
+  "/assets/gallery/beans/IMG_2887-Medium.jpeg": "Notes of citrus and cocoa"
+  "/assets/gallery/beans/IMG_2888-Medium.jpeg": "Small batch magic"
+
+  "/assets/gallery/brewers/IMG_3481-Medium.jpeg": "Manual brewing therapy"
+  "/assets/gallery/brewers/IMG_0726-Medium.jpeg": "Pour-over precision"
+  "/assets/gallery/brewers/vase.jpg": "Minimalist brew aesthetic"
+  "/assets/gallery/brewers/IMG_0729-Medium.jpeg": "Blooming beautifully"
+  "/assets/gallery/brewers/IMG_3474-Medium.jpeg": "Slow coffee, slow morning"
+  "/assets/gallery/brewers/IMG_3056-Medium.jpeg": "Home barista setup"
+  "/assets/gallery/brewers/IMG_7542-Medium.jpeg": "Brewing with intention"
+  "/assets/gallery/brewers/AeroPress.jpeg": "AeroPress travel companion"
+
+  "/assets/gallery/events/iicf.jpg": "Coffee event energy"
+  "/assets/gallery/travel/IMG_3170.jpeg": "Brewing memories abroad"
