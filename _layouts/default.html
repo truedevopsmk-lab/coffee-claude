@@ -5,6 +5,16 @@
   <title>{{ page.title }} | {{ site.title }}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="{{ "/assets/coffee.css" | relative_url }}">
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/coffee-claude/manifest.json">
+  <meta name="theme-color" content="#b5621e">
+
+  <!-- iOS PWA support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Coffee Journal">
+  <link rel="apple-touch-icon" href="/coffee-claude/assets/icons/icon-192.png">
 </head>
 <body>
   <div class="site">
