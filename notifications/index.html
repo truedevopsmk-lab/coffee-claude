@@ -1,0 +1,49 @@
+---
+layout: default
+title: Notification Preferences
+---
+
+<h1>☕ Brew Reminders</h1>
+
+<p>Subscribe to get occasional reminders to log your brews and tasting notes.</p>
+
+<div id="notification-status" style="margin: 1.5rem 0; padding: 1rem; background: #f5ede0; border-radius: 8px;">
+  Checking notification status...
+</div>
+
+<button id="notify-btn" style="padding: 0.6rem 1.4rem; background: #b5621e; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem;">
+  Subscribe
+</button>
+
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    const isPushSupported = OneSignal.Notifications.isPushSupported();
+    const statusEl = document.getElementById('notification-status');
+    const btn = document.getElementById('notify-btn');
+
+    if (!isPushSupported) {
+      statusEl.textContent = 'Push notifications are not supported in this browser.';
+      btn.style.display = 'none';
+      return;
+    }
+
+    const isSubscribed = await OneSignal.User.PushSubscription.optedIn;
+    statusEl.textContent = isSubscribed
+      ? '✅ You are currently subscribed to brew reminders.'
+      : '🔔 You are not subscribed yet.';
+    btn.textContent = isSubscribed ? 'Unsubscribe' : 'Subscribe';
+
+    btn.addEventListener('click', async () => {
+      if (await OneSignal.User.PushSubscription.optedIn) {
+        await OneSignal.User.PushSubscription.optOut();
+        statusEl.textContent = '🔕 You have unsubscribed.';
+        btn.textContent = 'Subscribe';
+      } else {
+        await OneSignal.User.PushSubscription.optIn();
+        statusEl.textContent = '✅ You are now subscribed!';
+        btn.textContent = 'Unsubscribe';
+      }
+    });
+  });
+</script>

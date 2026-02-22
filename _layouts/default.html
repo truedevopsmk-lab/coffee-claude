@@ -15,6 +15,61 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Coffee Journal">
   <link rel="apple-touch-icon" href="/coffee-claude/assets/icons/icon-192.png">
+
+  <!-- OneSignal Push Notifications -->
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "1d199315-1efa-496e-8cff-06894493dbd2",
+        safari_web_id: "",
+        notifyButton: {
+          enable: true,
+          size: 'medium',
+          theme: 'default',
+          position: 'bottom-right',
+          text: {
+            'tip.state.unsubscribed': 'Get brew reminders',
+            'tip.state.subscribed': 'Notifications on',
+            'tip.state.blocked': 'Notifications blocked',
+            'message.prenotify': 'Click to subscribe to brew reminders',
+            'message.action.subscribed': "You're subscribed!",
+            'message.action.resubscribed': "You're subscribed!",
+            'message.action.unsubscribed': "You won't receive brew reminders",
+            'dialog.main.title': 'Manage Notifications',
+            'dialog.main.button.subscribe': 'Subscribe',
+            'dialog.main.button.unsubscribe': 'Unsubscribe',
+            'dialog.blocked.title': 'Unblock Notifications',
+            'dialog.blocked.body': 'Enable notifications in your browser settings.'
+          }
+        },
+        welcomeNotification: {
+          title: "Coffee Journal",
+          message: "Thanks for subscribing to brew reminders! ☕",
+        },
+        promptOptions: {
+          slidedown: {
+            prompts: [
+              {
+                type: "push",
+                autoPrompt: false,
+                text: {
+                  actionMessage: "Would you like brew reminders from your Coffee Journal?",
+                  acceptButton: "Yes, notify me",
+                  cancelButton: "Not now"
+                },
+                delay: {
+                  pageViews: 2,
+                  timeDelay: 10
+                }
+              }
+            ]
+          }
+        }
+      });
+    });
+  </script>
 </head>
 <body>
   <div class="site">
@@ -30,6 +85,7 @@
       <a href="{{ "/methods/" | relative_url }}">Methods</a>
       <a href="{{ "/brews-and-frames/" | relative_url }}">Brews &amp; Frames</a>
       <a href="{{ "/tools/brew-calculator/" | relative_url }}">Tools</a>
+      <a href="{{ "/notifications/" | relative_url }}">🔔 Reminders</a>
       </nav>
     </aside>
 
