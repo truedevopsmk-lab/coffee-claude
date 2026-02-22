@@ -1,0 +1,313 @@
+---
+layout: null
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log a Brew — Coffee Journal</title>
+  <style>
+    :root {
+      --espresso: #1a0f00;
+      --caramel: #b5621e;
+      --cream: #f5ede0;
+      --gold: #d4a244;
+      --input-bg: #2a1500;
+      --border: #4a2800;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--espresso);
+      color: var(--cream);
+      font-family: Georgia, serif;
+      padding: 1.5rem;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    header a { color: var(--gold); text-decoration: none; font-size: 0.9rem; }
+    h1 { font-size: 1.6rem; color: var(--gold); }
+    .form-group { margin-bottom: 1.25rem; }
+    label {
+      display: block;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #c9a882;
+      margin-bottom: 0.4rem;
+    }
+    input, select, textarea {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--cream);
+      padding: 0.65rem 0.85rem;
+      font-size: 1rem;
+      font-family: Georgia, serif;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--caramel);
+    }
+    textarea { min-height: 100px; resize: vertical; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .rating-row { display: flex; gap: 0.5rem; }
+    .star {
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--border);
+      transition: color 0.15s;
+    }
+    .star.active { color: var(--gold); }
+    .submit-btn {
+      width: 100%;
+      padding: 0.85rem;
+      background: var(--caramel);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.05rem;
+      font-family: Georgia, serif;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: background 0.2s;
+    }
+    .submit-btn:hover { background: #d4731e; }
+    .submit-btn:disabled { background: #555; cursor: not-allowed; }
+    #status {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      display: none;
+    }
+    #status.success { background: #1a4a2a; color: #6fcf97; display: block; }
+    #status.error { background: #4a1a1a; color: #eb5757; display: block; }
+    #status.loading { background: #2a1f00; color: var(--gold); display: block; }
+    .settings-link {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.8rem;
+      color: #888;
+    }
+    .settings-link a { color: var(--gold); }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="/coffee-claude/">← Journal</a>
+  <h1>☕ Log a Brew</h1>
+</header>
+
+<form id="brew-form">
+
+  <div class="form-group">
+    <label>Date</label>
+    <input type="date" id="brew-date" required>
+  </div>
+
+  <div class="form-group">
+    <label>Bean / Coffee</label>
+    <input type="text" id="bean" placeholder="e.g. Ethiopia Bekele, Sidama" required>
+  </div>
+
+  <div class="form-group">
+    <label>Roaster</label>
+    <input type="text" id="roaster" placeholder="e.g. Beyond Within">
+  </div>
+
+  <div class="form-group">
+    <label>Brew Method</label>
+    <select id="method" required>
+      <option value="">Select method…</option>
+      <option>V60</option>
+      <option>AeroPress</option>
+      <option>Chemex</option>
+      <option>French Press</option>
+      <option>Espresso</option>
+      <option>Cold Brew</option>
+      <option>Moka Pot</option>
+      <option>B75</option>
+      <option>Other</option>
+    </select>
+  </div>
+
+  <div class="row">
+    <div class="form-group">
+      <label>Coffee Dose (g)</label>
+      <input type="number" id="dose" placeholder="15" step="0.1">
+    </div>
+    <div class="form-group">
+      <label>Water (ml)</label>
+      <input type="number" id="water" placeholder="250">
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="form-group">
+      <label>Water Temp (°C)</label>
+      <input type="number" id="temp" placeholder="93">
+    </div>
+    <div class="form-group">
+      <label>Brew Time</label>
+      <input type="text" id="brew-time" placeholder="3:30">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label>Grind Size</label>
+    <input type="text" id="grind" placeholder="e.g. Medium-fine, Comandante 22 clicks">
+  </div>
+
+  <div class="form-group">
+    <label>Rating</label>
+    <div class="rating-row">
+      <span class="star" data-val="1">★</span>
+      <span class="star" data-val="2">★</span>
+      <span class="star" data-val="3">★</span>
+      <span class="star" data-val="4">★</span>
+      <span class="star" data-val="5">★</span>
+    </div>
+    <input type="hidden" id="rating" value="0">
+  </div>
+
+  <div class="form-group">
+    <label>Tasting Notes</label>
+    <textarea id="notes" placeholder="Flavours, aroma, body, finish…"></textarea>
+  </div>
+
+  <div class="form-group">
+    <label>What I'd Change Next Time</label>
+    <textarea id="next-time" placeholder="Grind coarser, increase water temp…" style="min-height:70px;"></textarea>
+  </div>
+
+  <button type="submit" class="submit-btn" id="submit-btn">Commit Brew to Journal</button>
+  <div id="status"></div>
+
+</form>
+
+<div class="settings-link">
+  <a href="/coffee-claude/journal-settings/">⚙ Journal settings</a>
+</div>
+
+<script>
+  // --- Star rating ---
+  const stars = document.querySelectorAll('.star');
+  const ratingInput = document.getElementById('rating');
+  stars.forEach(star => {
+    star.addEventListener('click', () => {
+      const val = parseInt(star.dataset.val);
+      ratingInput.value = val;
+      stars.forEach(s => s.classList.toggle('active', parseInt(s.dataset.val) <= val));
+    });
+  });
+
+  // --- Set today's date as default ---
+  document.getElementById('brew-date').value = new Date().toISOString().split('T')[0];
+
+  // --- Form submit ---
+  document.getElementById('brew-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const token = localStorage.getItem('gh_pat');
+    if (!token) {
+      showStatus('error', '⚠ No GitHub token set. Go to Journal Settings first.');
+      return;
+    }
+
+    const date = document.getElementById('brew-date').value;
+    const bean = document.getElementById('bean').value.trim();
+    const roaster = document.getElementById('roaster').value.trim();
+    const method = document.getElementById('method').value;
+    const dose = document.getElementById('dose').value;
+    const water = document.getElementById('water').value;
+    const temp = document.getElementById('temp').value;
+    const brewTime = document.getElementById('brew-time').value;
+    const grind = document.getElementById('grind').value.trim();
+    const rating = document.getElementById('rating').value;
+    const notes = document.getElementById('notes').value.trim();
+    const nextTime = document.getElementById('next-time').value.trim();
+
+    const slug = `${date}-${bean.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${method.toLowerCase()}`;
+    const filename = `brews/${slug}.md`;
+
+    const content = `---
+layout: brew
+title: "${method} Brew Log — ${bean}"
+date: ${date}
+bean: "${bean}"
+roaster: "${roaster}"
+method: "${method}"
+dose: ${dose || ''}
+water: ${water || ''}
+water_temp: ${temp || ''}
+brew_time: "${brewTime}"
+grind: "${grind}"
+rating: ${rating}
+---
+
+## Tasting Notes
+
+${notes || '_No notes recorded._'}
+
+## What I'd Change Next Time
+
+${nextTime || '_Nothing noted._'}
+`;
+
+    const encoded = btoa(unescape(encodeURIComponent(content)));
+
+    showStatus('loading', '⏳ Committing brew to GitHub…');
+    document.getElementById('submit-btn').disabled = true;
+
+    try {
+      const res = await fetch(
+        `https://api.github.com/repos/truedevopsmk-lab/coffee-claude/contents/${filename}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `token ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: `brew: add ${method} log — ${bean} (${date})`,
+            content: encoded,
+            branch: 'main'
+          })
+        }
+      );
+
+      if (res.ok) {
+        showStatus('success', `✅ Brew logged! GitHub Pages will rebuild in ~1 min. <a href="/coffee-claude/brews/" style="color:#6fcf97">View brews →</a>`);
+        document.getElementById('brew-form').reset();
+        document.getElementById('brew-date').value = new Date().toISOString().split('T')[0];
+        stars.forEach(s => s.classList.remove('active'));
+        ratingInput.value = 0;
+      } else {
+        const err = await res.json();
+        showStatus('error', `❌ GitHub API error: ${err.message}`);
+      }
+    } catch (err) {
+      showStatus('error', `❌ Network error: ${err.message}`);
+    }
+
+    document.getElementById('submit-btn').disabled = false;
+  });
+
+  function showStatus(type, html) {
+    const el = document.getElementById('status');
+    el.className = type;
+    el.innerHTML = html;
+  }
+</script>
+</body>
+</html>
