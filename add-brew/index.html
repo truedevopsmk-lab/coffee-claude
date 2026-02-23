@@ -1,115 +1,81 @@
 ---
-layout: null
+layout: default
+title: Log a Brew
 ---
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Log a Brew — Coffee Journal</title>
-  <style>
-    :root {
-      --espresso: #1a0f00;
-      --caramel: #b5621e;
-      --cream: #f5ede0;
-      --gold: #d4a244;
-      --input-bg: #2a1500;
-      --border: #4a2800;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: var(--espresso);
-      color: var(--cream);
-      font-family: Georgia, serif;
-      padding: 1.5rem;
-      max-width: 560px;
-      margin: 0 auto;
-    }
-    header {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 2rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid var(--border);
-    }
-    header a { color: var(--gold); text-decoration: none; font-size: 0.9rem; }
-    h1 { font-size: 1.6rem; color: var(--gold); }
-    .form-group { margin-bottom: 1.25rem; }
-    label {
-      display: block;
-      font-size: 0.8rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #c9a882;
-      margin-bottom: 0.4rem;
-    }
-    input, select, textarea {
-      width: 100%;
-      background: var(--input-bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--cream);
-      padding: 0.65rem 0.85rem;
-      font-size: 1rem;
-      font-family: Georgia, serif;
-    }
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: var(--caramel);
-    }
-    textarea { min-height: 100px; resize: vertical; }
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    .rating-row { display: flex; gap: 0.5rem; }
-    .star {
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: var(--border);
-      transition: color 0.15s;
-    }
-    .star.active { color: var(--gold); }
-    .submit-btn {
-      width: 100%;
-      padding: 0.85rem;
-      background: var(--caramel);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 1.05rem;
-      font-family: Georgia, serif;
-      cursor: pointer;
-      margin-top: 0.5rem;
-      transition: background 0.2s;
-    }
-    .submit-btn:hover { background: #d4731e; }
-    .submit-btn:disabled { background: #555; cursor: not-allowed; }
-    #status {
-      margin-top: 1rem;
-      padding: 0.75rem 1rem;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      display: none;
-    }
-    #status.success { background: #1a4a2a; color: #6fcf97; display: block; }
-    #status.error { background: #4a1a1a; color: #eb5757; display: block; }
-    #status.loading { background: #2a1f00; color: var(--gold); display: block; }
-    .settings-link {
-      text-align: center;
-      margin-top: 1.5rem;
-      font-size: 0.8rem;
-      color: #888;
-    }
-    .settings-link a { color: var(--gold); }
-  </style>
-</head>
-<body>
 
-<header>
-  <a href="/coffee-claude/">← Journal</a>
-  <h1>☕ Log a Brew</h1>
-</header>
+<style>
+  .brew-form .form-group { margin-bottom: 1.25rem; }
+  .brew-form label {
+    display: block;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #6b5e57;
+    margin-bottom: 0.4rem;
+  }
+  .brew-form input,
+  .brew-form select,
+  .brew-form textarea {
+    width: 100%;
+    background: #f7f3ef;
+    border: 1px solid #c9b8a5;
+    border-radius: 6px;
+    color: #2b2b2b;
+    padding: 0.65rem 0.85rem;
+    font-size: 1rem;
+    font-family: inherit;
+  }
+  .brew-form input:focus,
+  .brew-form select:focus,
+  .brew-form textarea:focus {
+    outline: none;
+    border-color: #8b5a2b;
+  }
+  .brew-form textarea { min-height: 100px; resize: vertical; }
+  .brew-form .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .brew-form .rating-row { display: flex; gap: 0.5rem; }
+  .brew-form .star {
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #c9b8a5;
+    transition: color 0.15s;
+  }
+  .brew-form .star.active { color: #d4a244; }
+  .brew-form .submit-btn {
+    width: 100%;
+    padding: 0.85rem;
+    background: #8b5a2b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-family: inherit;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: background 0.2s;
+  }
+  .brew-form .submit-btn:hover { background: #a0692f; }
+  .brew-form .submit-btn:disabled { background: #bbb; cursor: not-allowed; }
+  #status {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    display: none;
+  }
+  #status.success { background: #e6f4ea; color: #2e7d32; display: block; }
+  #status.success a { color: #2e7d32; }
+  #status.error { background: #fce8e6; color: #c62828; display: block; }
+  #status.loading { background: #fff8e1; color: #8b5a2b; display: block; }
+  .settings-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.85rem;
+  }
+  .settings-link a { color: #8b5a2b; }
+</style>
 
-<form id="brew-form">
+<form id="brew-form" class="brew-form">
 
   <div class="form-group">
     <label>Date</label>
@@ -287,7 +253,7 @@ ${nextTime || '_Nothing noted._'}
       );
 
       if (res.ok) {
-        showStatus('success', `✅ Brew logged! GitHub Pages will rebuild in ~1 min. <a href="/coffee-claude/brews/" style="color:#6fcf97">View brews →</a>`);
+        showStatus('success', `✅ Brew logged! GitHub Pages will rebuild in ~1 min. <a href="/coffee-claude/brews/">View brews →</a>`);
         document.getElementById('brew-form').reset();
         document.getElementById('brew-date').value = new Date().toISOString().split('T')[0];
         stars.forEach(s => s.classList.remove('active'));
@@ -309,5 +275,3 @@ ${nextTime || '_Nothing noted._'}
     el.innerHTML = html;
   }
 </script>
-</body>
-</html>

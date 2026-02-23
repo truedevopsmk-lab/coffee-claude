@@ -1,83 +1,105 @@
 ---
-layout: null
+layout: default
+title: Journal Settings
 ---
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Settings — Coffee Journal</title>
-  <style>
-    :root { --espresso: #1a0f00; --caramel: #b5621e; --cream: #f5ede0; --gold: #d4a244; --input-bg: #2a1500; --border: #4a2800; }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--espresso); color: var(--cream); font-family: Georgia, serif; padding: 1.5rem; max-width: 560px; margin: 0 auto; }
-    header { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
-    header a { color: var(--gold); text-decoration: none; font-size: 0.9rem; display: block; margin-bottom: 0.5rem; }
-    h1 { font-size: 1.6rem; color: var(--gold); }
-    h2 { font-size: 1.1rem; color: var(--gold); margin-bottom: 0.75rem; }
-    .card { background: #2a1500; border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; margin-bottom: 1.5rem; }
-    label { display: block; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: #c9a882; margin-bottom: 0.4rem; }
-    input[type="password"], input[type="text"] { width: 100%; background: #1a0f00; border: 1px solid var(--border); border-radius: 6px; color: var(--cream); padding: 0.65rem 0.85rem; font-size: 0.95rem; font-family: monospace; }
-    .btn { padding: 0.65rem 1.2rem; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
-    .btn-save { background: var(--caramel); color: white; }
-    .btn-clear { background: transparent; color: #eb5757; border: 1px solid #8b1a1a; }
-    .btn-row { display: flex; gap: 0.75rem; margin-top: 0.75rem; }
-    #token-status { margin-top: 0.75rem; font-size: 0.85rem; color: #c9a882; }
-    .note { font-size: 0.82rem; color: #a08060; line-height: 1.6; margin-top: 0.75rem; }
-    .note a { color: var(--gold); }
-  </style>
-</head>
-<body>
-  <header>
-    <a href="/coffee-claude/">← Journal</a>
-    <h1>⚙ Journal Settings</h1>
-  </header>
 
-  <div class="card">
-    <h2>GitHub Token</h2>
-    <p class="note" style="margin-top:0; margin-bottom:1rem;">
-      Required to log brews from your phone. Your token is stored only in this browser — it never leaves your device except when talking directly to GitHub's API.
-      <br><br>
-      <a href="https://github.com/settings/tokens/new" target="_blank">Create a token on GitHub →</a> (check the <code>repo</code> scope)
-    </p>
-    <label for="pat-input">Personal Access Token</label>
-    <input type="password" id="pat-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-    <div class="btn-row">
-      <button class="btn btn-save" onclick="saveToken()">Save Token</button>
-      <button class="btn btn-clear" onclick="clearToken()">Clear Token</button>
-    </div>
-    <div id="token-status"></div>
+<style>
+  .settings-card {
+    background: #f3ede7;
+    border: 1px solid #e2d8cf;
+    border-radius: 10px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  .settings-card h2 {
+    font-size: 1.1rem;
+    color: #4b2e2b;
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+  }
+  .settings-card label {
+    display: block;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #6b5e57;
+    margin-bottom: 0.4rem;
+  }
+  .settings-card input[type="password"],
+  .settings-card input[type="text"] {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #c9b8a5;
+    border-radius: 6px;
+    color: #2b2b2b;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.95rem;
+    font-family: monospace;
+  }
+  .settings-card input:focus {
+    outline: none;
+    border-color: #8b5a2b;
+  }
+  .settings-card .btn {
+    padding: 0.65rem 1.2rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+  }
+  .settings-card .btn-save { background: #8b5a2b; color: white; }
+  .settings-card .btn-save:hover { background: #a0692f; }
+  .settings-card .btn-clear { background: transparent; color: #c62828; border: 1px solid #c62828; }
+  .settings-card .btn-row { display: flex; gap: 0.75rem; margin-top: 0.75rem; }
+  #token-status { margin-top: 0.75rem; font-size: 0.85rem; color: #6b5e57; }
+  .settings-card .note { font-size: 0.85rem; color: #6b5e57; line-height: 1.6; margin-top: 0.75rem; }
+  .settings-card .note a { color: #8b5a2b; }
+  .settings-card code { background: #e2d8cf; padding: 0.15rem 0.35rem; border-radius: 3px; font-size: 0.85em; }
+</style>
+
+<div class="settings-card">
+  <h2>GitHub Token</h2>
+  <p class="note" style="margin-top:0; margin-bottom:1rem;">
+    Required to log brews from your phone. Your token is stored only in this browser — it never leaves your device except when talking directly to GitHub's API.
+    <br><br>
+    <a href="https://github.com/settings/tokens/new" target="_blank">Create a token on GitHub →</a> (check the <code>repo</code> scope)
+  </p>
+  <label for="pat-input">Personal Access Token</label>
+  <input type="password" id="pat-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+  <div class="btn-row">
+    <button class="btn btn-save" onclick="saveToken()">Save Token</button>
+    <button class="btn btn-clear" onclick="clearToken()">Clear Token</button>
   </div>
+  <div id="token-status"></div>
+</div>
 
-  <div class="card">
-    <h2>Quick Links</h2>
-    <p class="note">
-      <a href="/coffee-claude/add-brew/">☕ Log a new brew</a><br><br>
-      <a href="/coffee-claude/notifications/">🔔 Manage notifications</a><br><br>
-      <a href="https://github.com/truedevopsmk-lab/coffee-claude/actions" target="_blank">🔧 GitHub Actions (build status)</a>
-    </p>
-  </div>
+<div class="settings-card">
+  <h2>Quick Links</h2>
+  <p class="note">
+    <a href="/coffee-claude/add-brew/">☕ Log a new brew</a><br><br>
+    <a href="/coffee-claude/notifications/">🔔 Manage notifications</a><br><br>
+    <a href="https://github.com/truedevopsmk-lab/coffee-claude/actions" target="_blank">🔧 GitHub Actions (build status)</a>
+  </p>
+</div>
 
-  <script>
-    function saveToken() {
-      const val = document.getElementById('pat-input').value.trim();
-      if (!val) { setStatus('Enter a token first.'); return; }
-      localStorage.setItem('gh_pat', val);
-      document.getElementById('pat-input').value = '';
-      setStatus('✅ Token saved. You can now log brews from this device.');
-    }
-    function clearToken() {
-      localStorage.removeItem('gh_pat');
-      setStatus('🗑 Token cleared from this browser.');
-    }
-    function setStatus(msg) {
-      document.getElementById('token-status').textContent = msg;
-    }
-    // Show whether a token is already saved
-    window.onload = () => {
-      const has = !!localStorage.getItem('gh_pat');
-      setStatus(has ? '✅ A token is currently saved on this device.' : 'No token saved yet.');
-    };
-  </script>
-</body>
-</html>
+<script>
+  function saveToken() {
+    const val = document.getElementById('pat-input').value.trim();
+    if (!val) { setStatus('Enter a token first.'); return; }
+    localStorage.setItem('gh_pat', val);
+    document.getElementById('pat-input').value = '';
+    setStatus('✅ Token saved. You can now log brews from this device.');
+  }
+  function clearToken() {
+    localStorage.removeItem('gh_pat');
+    setStatus('🗑 Token cleared from this browser.');
+  }
+  function setStatus(msg) {
+    document.getElementById('token-status').textContent = msg;
+  }
+  // Show whether a token is already saved
+  window.onload = () => {
+    const has = !!localStorage.getItem('gh_pat');
+    setStatus(has ? '✅ A token is currently saved on this device.' : 'No token saved yet.');
+  };
+</script>
