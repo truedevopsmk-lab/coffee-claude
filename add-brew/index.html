@@ -63,18 +63,58 @@ title: Log a Brew
     font-size: 0.9rem;
     display: none;
   }
-  #status.success { background: #e6f4ea; color: #2e7d32; display: block; }
-  #status.success a { color: #2e7d32; }
-  #status.error { background: #fce8e6; color: #c62828; display: block; }
-  #status.loading { background: #fff8e1; color: #8b5a2b; display: block; }
+  #status.success, #paste-status.success { background: #e6f4ea; color: #2e7d32; }
+  #status.success a, #paste-status.success a { color: #2e7d32; }
+  #status.error, #paste-status.error { background: #fce8e6; color: #c62828; }
+  #status.loading, #paste-status.loading { background: #fff8e1; color: #8b5a2b; }
   .settings-link {
     text-align: center;
     margin-top: 1.5rem;
     font-size: 0.85rem;
   }
   .settings-link a { color: #8b5a2b; }
+
+  /* Tabs */
+  .brew-tabs { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 2px solid #e2d8cf; }
+  .brew-tab {
+    padding: 0.6rem 1.2rem;
+    background: none;
+    border: none;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: #6b5e57;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+  }
+  .brew-tab.active { color: #8b5a2b; border-bottom-color: #8b5a2b; font-weight: 600; }
+  .brew-panel { display: none; }
+  .brew-panel.active { display: block; }
+
+  /* Paste area */
+  #paste-raw {
+    width: 100%;
+    min-height: 320px;
+    background: #f7f3ef;
+    border: 1px solid #c9b8a5;
+    border-radius: 6px;
+    color: #2b2b2b;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    font-family: monospace;
+    resize: vertical;
+    line-height: 1.5;
+  }
+  #paste-raw:focus { outline: none; border-color: #8b5a2b; }
+  .paste-hint { font-size: 0.82rem; color: #6b5e57; margin-bottom: 0.75rem; }
 </style>
 
+<div class="brew-tabs">
+  <button class="brew-tab active" data-panel="panel-form">Form</button>
+  <button class="brew-tab" data-panel="panel-paste">Paste Markdown</button>
+</div>
+
+<div id="panel-form" class="brew-panel active">
 <form id="brew-form" class="brew-form">
 
   <div class="form-group">
@@ -161,6 +201,24 @@ title: Log a Brew
   <div id="status"></div>
 
 </form>
+
+</div><!-- /panel-form -->
+
+<div id="panel-paste" class="brew-panel">
+<div class="brew-form">
+  <p class="paste-hint">Paste a full brew log including the <code>---</code> front matter block. The file needs at least <code>title</code> and <code>date</code> in the front matter.</p>
+  <textarea id="paste-raw" placeholder="---
+layout: brew
+title: V60 Brew Log — Ethiopia Bekele
+date: 2026-02-23
+---
+
+## Tasting Notes
+..."></textarea>
+  <button type="button" class="submit-btn" id="paste-submit-btn" style="margin-top:1rem;">Commit Brew to Journal</button>
+  <div id="paste-status" style="margin-top:1rem; padding:0.75rem 1rem; border-radius:6px; font-size:0.9rem; display:none;"></div>
+</div>
+</div><!-- /panel-paste -->
 
 <div class="settings-link">
   <a href="/coffee-claude/journal-settings/">⚙ Journal settings</a>
@@ -274,4 +332,91 @@ ${nextTime || '_Nothing noted._'}
     el.className = type;
     el.innerHTML = html;
   }
+
+  // --- Tab switching ---
+  document.querySelectorAll('.brew-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.brew-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.brew-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.panel).classList.add('active');
+    });
+  });
+
+  // --- Paste markdown submit ---
+  function showPasteStatus(type, html) {
+    const el = document.getElementById('paste-status');
+    el.className = type;
+    el.style.display = 'block';
+    el.innerHTML = html;
+  }
+
+  document.getElementById('paste-submit-btn').addEventListener('click', async () => {
+    const token = localStorage.getItem('gh_pat');
+    if (!token) {
+      showPasteStatus('error', '⚠ No GitHub token set. Go to Journal Settings first.');
+      return;
+    }
+
+    const raw = document.getElementById('paste-raw').value.trim();
+    if (!raw) {
+      showPasteStatus('error', '⚠ Paste your markdown content first.');
+      return;
+    }
+
+    // Parse front matter
+    const fmMatch = raw.match(/^---\s*\n([\s\S]*?)\n---/);
+    if (!fmMatch) {
+      showPasteStatus('error', '⚠ No front matter found. Content must start with --- block.');
+      return;
+    }
+
+    const fm = fmMatch[1];
+    const titleMatch = fm.match(/^title:\s*["']?(.+?)["']?\s*$/m);
+    const dateMatch = fm.match(/^date:\s*(\d{4}-\d{2}-\d{2})/m);
+
+    if (!titleMatch || !dateMatch) {
+      showPasteStatus('error', '⚠ Front matter must include title and date (YYYY-MM-DD).');
+      return;
+    }
+
+    const title = titleMatch[1];
+    const date = dateMatch[1];
+    const slug = `${date}-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`;
+    const filename = `brews/${slug}.md`;
+    const encoded = btoa(unescape(encodeURIComponent(raw)));
+
+    showPasteStatus('loading', '⏳ Committing brew to GitHub…');
+    document.getElementById('paste-submit-btn').disabled = true;
+
+    try {
+      const res = await fetch(
+        `https://api.github.com/repos/truedevopsmk-lab/coffee-claude/contents/${filename}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `token ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: `brew: add ${title} (${date})`,
+            content: encoded,
+            branch: 'main'
+          })
+        }
+      );
+
+      if (res.ok) {
+        showPasteStatus('success', `✅ Brew logged! GitHub Pages will rebuild in ~1 min. <a href="/coffee-claude/brews/" style="color:#2e7d32">View brews →</a>`);
+        document.getElementById('paste-raw').value = '';
+      } else {
+        const err = await res.json();
+        showPasteStatus('error', `❌ GitHub API error: ${err.message}`);
+      }
+    } catch (err) {
+      showPasteStatus('error', `❌ Network error: ${err.message}`);
+    }
+
+    document.getElementById('paste-submit-btn').disabled = false;
+  });
 </script>
