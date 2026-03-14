@@ -1,15 +1,15 @@
 sections:
   - key: brewers
-    title: "☕ Brewers"
+    title: "â Brewers"
     folder: "/assets/gallery/brewers/"
   - key: beans
-    title: "📦 Beans"
+    title: "ð¦ Beans"
     folder: "/assets/gallery/beans/"
   - key: brewed_elsewhere
-    title: "🌍 Brewed Elsewhere"
+    title: "ð Brewed Elsewhere"
     folder: "/assets/gallery/travel/"
   - key: experiments
-    title: "🧪 Experiments"
+    title: "ð§ª Experiments"
     folder: "/assets/gallery/experiments/"
 
 captions:
@@ -49,3 +49,4 @@ captions:
 
   "/assets/gallery/events/iicf.jpg": "Coffee event energy"
   "/assets/gallery/travel/IMG_3170.jpeg": "Brewing memories abroad"
+  "/assets/gallery/beans/2026-03-14-img-5709.jpg": "Burundi"
