@@ -1,15 +1,15 @@
 sections:
   - key: brewers
-    title: "â Brewers"
+    title: "☕ Brewers"
     folder: "/assets/gallery/brewers/"
   - key: beans
-    title: "ð¦ Beans"
+    title: "📦 Beans"
     folder: "/assets/gallery/beans/"
   - key: brewed_elsewhere
-    title: "ð Brewed Elsewhere"
+    title: "🌍 Brewed Elsewhere"
     folder: "/assets/gallery/travel/"
   - key: experiments
-    title: "ð§ª Experiments"
+    title: "🧪 Experiments"
     folder: "/assets/gallery/experiments/"
 
 captions:
