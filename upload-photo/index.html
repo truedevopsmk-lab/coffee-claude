@@ -1,0 +1,1269 @@
+---
+layout: null
+title: Upload Photo
+permalink: /upload-photo/
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ page.title }} | {{ site.title }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1a0f00">
+  <link rel="manifest" href="/coffee-claude/manifest.json">
+  <link rel="apple-touch-icon" href="/coffee-claude/assets/icons/icon-192.png">
+  <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+  <style>
+    :root {
+      --bg: #1a0f00;
+      --card: #2a1500;
+      --border: #4a2800;
+      --text: #f5ede0;
+      --muted: #d8c5ad;
+      --accent: #b5621e;
+      --gold: #d4a244;
+      --success-bg: #2d6a4f;
+      --success: #6fcf97;
+      --error-bg: #8b1a1a;
+      --error: #eb5757;
+      --shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top, rgba(212, 162, 68, 0.18), transparent 35%),
+        linear-gradient(180deg, #2b1704 0%, var(--bg) 55%);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+
+    a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .page {
+      width: min(1100px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 1.25rem 0 3rem;
+    }
+
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .topbar nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1rem;
+      font-size: 0.95rem;
+    }
+
+    .hero,
+    .panel,
+    .upload-panel {
+      background: rgba(42, 21, 0, 0.94);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .eyebrow {
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.78rem;
+      margin: 0 0 0.45rem;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 4vw, 3.25rem);
+      margin-bottom: 0.6rem;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 60ch;
+      color: var(--muted);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .stack {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .panel,
+    .upload-panel {
+      padding: 1.25rem;
+    }
+
+    .panel h2,
+    .upload-panel h2 {
+      font-size: 1.35rem;
+      margin-bottom: 0.95rem;
+    }
+
+    .panel-intro {
+      margin: -0.2rem 0 1rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .quality-selector label,
+    .field label {
+      display: block;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.78rem;
+      color: var(--gold);
+    }
+
+    .quality-options {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+
+    .q-btn {
+      border: 1px solid var(--border);
+      background: #351b04;
+      color: var(--text);
+      border-radius: 14px;
+      padding: 0.95rem;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .q-btn:hover,
+    .q-btn:focus-visible {
+      border-color: var(--gold);
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .q-btn.active {
+      background: linear-gradient(180deg, rgba(181, 98, 30, 0.35), rgba(53, 27, 4, 0.92));
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px rgba(212, 162, 68, 0.15);
+    }
+
+    .q-note {
+      display: block;
+      margin-top: 0.25rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .drop-zone {
+      position: relative;
+      border: 1.5px dashed rgba(212, 162, 68, 0.55);
+      border-radius: 18px;
+      padding: 2rem 1rem;
+      min-height: 220px;
+      background:
+        linear-gradient(135deg, rgba(181, 98, 30, 0.14), rgba(26, 15, 0, 0.3)),
+        #221100;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s ease, transform 0.15s ease, background 0.15s ease;
+    }
+
+    .drop-zone.dragover {
+      border-color: var(--gold);
+      background:
+        linear-gradient(135deg, rgba(212, 162, 68, 0.18), rgba(26, 15, 0, 0.4)),
+        #221100;
+      transform: translateY(-1px);
+    }
+
+    .drop-zone h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .drop-zone p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .drop-zone input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.85rem;
+    }
+
+    .empty-state {
+      border: 1px dashed rgba(212, 162, 68, 0.35);
+      border-radius: 16px;
+      padding: 1rem;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .photo-card {
+      position: relative;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      background: #341904;
+    }
+
+    .photo-card img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      background: #170b00;
+    }
+
+    .photo-body {
+      padding: 0.85rem;
+      display: grid;
+      gap: 0.55rem;
+    }
+
+    .photo-header {
+      display: flex;
+      gap: 0.6rem;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .file-meta {
+      min-width: 0;
+    }
+
+    .file-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      word-break: break-word;
+    }
+
+    .file-size,
+    .file-error,
+    .upload-note {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .file-error {
+      color: #ffd2d2;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      border-radius: 999px;
+      padding: 0.25rem 0.55rem;
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      white-space: nowrap;
+    }
+
+    .badge.gold {
+      background: rgba(212, 162, 68, 0.15);
+      color: var(--gold);
+    }
+
+    .badge.neutral {
+      background: rgba(245, 237, 224, 0.08);
+      color: var(--text);
+    }
+
+    .badge.success {
+      background: rgba(111, 207, 151, 0.14);
+      color: var(--success);
+    }
+
+    .badge.error {
+      background: rgba(235, 87, 87, 0.14);
+      color: var(--error);
+    }
+
+    .remove-btn {
+      border: 0;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 999px;
+      background: rgba(26, 15, 0, 0.9);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 1.15rem;
+      line-height: 1;
+      display: inline-grid;
+      place-items: center;
+      flex: 0 0 auto;
+    }
+
+    .remove-btn:hover,
+    .remove-btn:focus-visible {
+      outline: none;
+      background: rgba(139, 26, 26, 0.95);
+    }
+
+    .meta-form {
+      display: none;
+      gap: 0.85rem;
+    }
+
+    .meta-form.visible {
+      display: grid;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #1d0f00;
+      color: var(--text);
+      padding: 0.8rem 0.9rem;
+      font: inherit;
+    }
+
+    .field input::placeholder {
+      color: rgba(245, 237, 224, 0.4);
+    }
+
+    .field input:focus,
+    .field select:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(212, 162, 68, 0.12);
+    }
+
+    .field small {
+      display: block;
+      margin-top: 0.35rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .status-banner {
+      display: none;
+      border-radius: 14px;
+      padding: 0.9rem 1rem;
+      margin-bottom: 1rem;
+      border: 1px solid transparent;
+    }
+
+    .status-banner.visible {
+      display: block;
+    }
+
+    .status-banner.success {
+      background: rgba(45, 106, 79, 0.2);
+      border-color: rgba(111, 207, 151, 0.35);
+      color: var(--success);
+    }
+
+    .status-banner.error {
+      background: rgba(139, 26, 26, 0.22);
+      border-color: rgba(235, 87, 87, 0.35);
+      color: #ffd2d2;
+    }
+
+    .status-banner.loading {
+      background: rgba(181, 98, 30, 0.14);
+      border-color: rgba(212, 162, 68, 0.24);
+      color: var(--gold);
+    }
+
+    .upload-progress {
+      display: none;
+      margin-bottom: 0.75rem;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .upload-progress.visible {
+      display: block;
+    }
+
+    .upload-btn {
+      width: 100%;
+      border: 0;
+      border-radius: 14px;
+      padding: 0.95rem 1rem;
+      background: linear-gradient(135deg, var(--accent), #d48b39);
+      color: #fffaf3;
+      font: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+
+    .upload-btn:hover,
+    .upload-btn:focus-visible {
+      outline: none;
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    .upload-btn:disabled {
+      cursor: not-allowed;
+      transform: none;
+      filter: grayscale(0.25);
+      opacity: 0.65;
+    }
+
+    .footnote {
+      margin-top: 0.75rem;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        width: min(100% - 1rem, 100%);
+      }
+
+      .hero,
+      .panel,
+      .upload-panel {
+        border-radius: 18px;
+      }
+
+      .quality-options,
+      .field-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .drop-zone {
+        min-height: 180px;
+        padding: 1.5rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <strong>Coffee Journal</strong>
+      <nav aria-label="Upload page links">
+        <a href="/coffee-claude/brews-and-frames/">Brews &amp; Frames</a>
+        <a href="/coffee-claude/add-brew/">Log Brew</a>
+        <a href="/coffee-claude/journal-settings/">Settings</a>
+      </nav>
+    </div>
+
+    <section class="hero">
+      <p class="eyebrow">Photo Journal</p>
+      <h1>Upload Coffee Photos</h1>
+      <p>Pick photos from your phone or Mac, convert HEIC files to JPEG in the browser, compare the size savings, and push everything straight into your journal via GitHub.</p>
+    </section>
+
+    <div id="page-status" class="status-banner" role="status" aria-live="polite"></div>
+
+    <div class="layout">
+      <div class="stack">
+        <section class="panel quality-selector">
+          <h2>Output Quality</h2>
+          <p class="panel-intro">Choose how aggressively HEIC files should be compressed before upload.</p>
+          <label for="quality-controls">Output Quality</label>
+          <div id="quality-controls" class="quality-options">
+            <button class="q-btn" data-quality="0.9" data-label="High" type="button">
+              High <span class="q-note">~90% - best detail</span>
+            </button>
+            <button class="q-btn active" data-quality="0.7" data-label="Medium" type="button">
+              Medium <span class="q-note">~70% - recommended</span>
+            </button>
+            <button class="q-btn" data-quality="0.4" data-label="Low" type="button">
+              Low <span class="q-note">~40% - smallest size</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Choose Photos</h2>
+          <div class="drop-zone" id="drop-zone" tabindex="0" role="button" aria-label="Tap to choose photos or drag and drop images">
+            <input id="photo-input" type="file" accept="image/*,.heic,.heif" multiple>
+            <div>
+              <h3>Tap to choose photos</h3>
+              <p>Drag and drop on desktop. HEIC, JPEG, PNG, and WebP are all supported.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Processing &amp; Preview</h2>
+          <div id="preview-grid" class="preview-grid">
+            <div class="empty-state">Your selected photos will show up here with conversion status, size details, and upload progress.</div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="upload-panel">
+        <h2>Photo Details</h2>
+        <p class="panel-intro">Pick an album, add a caption, and upload when every photo is ready.</p>
+
+        <form id="meta-form" class="meta-form" novalidate>
+          <div class="field">
+            <label for="photo-album">Album / Folder</label>
+            <select id="photo-album"></select>
+          </div>
+
+          <div class="field hidden" id="new-album-field">
+            <label for="photo-album-new">New Album Name</label>
+            <input id="photo-album-new" type="text" placeholder="e.g. morning-rituals">
+            <small>New albums are saved as a folder slug so GitHub Pages paths stay clean.</small>
+          </div>
+
+          <div class="field">
+            <label for="photo-caption">Caption</label>
+            <input id="photo-caption" type="text" placeholder="e.g. Blooming beautifully at sunrise">
+          </div>
+
+          <div class="field">
+            <label for="photo-tags">Tags</label>
+            <input id="photo-tags" type="text" placeholder="v60, ethiopia, morning">
+            <small>Tags are collected here for future metadata use. The current gallery.yml schema stores captions only.</small>
+          </div>
+
+          <div class="field-grid">
+            <div class="field">
+              <label for="photo-date">Date</label>
+              <input id="photo-date" type="date">
+            </div>
+            <div class="field">
+              <label for="selected-count">Ready to Upload</label>
+              <input id="selected-count" type="text" value="0 photo(s)" readonly>
+            </div>
+          </div>
+        </form>
+
+        <div id="upload-progress" class="upload-progress" aria-live="polite"></div>
+        <button id="upload-btn" class="upload-btn" type="button" disabled>Upload 0 photo(s) to Journal</button>
+        <p class="footnote">Uploads go directly to GitHub via the Contents API. Nothing is sent anywhere else.</p>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const SITE_BASE = '/coffee-claude';
+    const REPO_OWNER = 'truedevopsmk-lab';
+    const REPO_NAME = 'coffee-claude';
+    const TARGET_BRANCH = 'main';
+    const GALLERY_PATH = '_data/gallery.yml';
+    const MAX_FILE_SIZE = 10 * 1024 * 1024;
+    const galleryData = {{ site.data.gallery | jsonify }};
+
+    let outputQuality = 0.7;
+    let items = [];
+    let isUploading = false;
+    let itemCounter = 0;
+
+    const qualityButtons = Array.from(document.querySelectorAll('.q-btn'));
+    const photoInput = document.getElementById('photo-input');
+    const dropZone = document.getElementById('drop-zone');
+    const previewGrid = document.getElementById('preview-grid');
+    const metaForm = document.getElementById('meta-form');
+    const albumSelect = document.getElementById('photo-album');
+    const newAlbumField = document.getElementById('new-album-field');
+    const newAlbumInput = document.getElementById('photo-album-new');
+    const captionInput = document.getElementById('photo-caption');
+    const tagsInput = document.getElementById('photo-tags');
+    const dateInput = document.getElementById('photo-date');
+    const selectedCountInput = document.getElementById('selected-count');
+    const uploadButton = document.getElementById('upload-btn');
+    const uploadProgress = document.getElementById('upload-progress');
+    const pageStatus = document.getElementById('page-status');
+
+    initialize();
+
+    function initialize() {
+      dateInput.value = getLocalToday();
+      populateAlbumOptions();
+      bindEvents();
+      render();
+    }
+
+    function bindEvents() {
+      qualityButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          qualityButtons.forEach((candidate) => candidate.classList.remove('active'));
+          button.classList.add('active');
+          outputQuality = parseFloat(button.dataset.quality);
+        });
+      });
+
+      photoInput.addEventListener('change', (event) => {
+        handleSelectedFiles(event.target.files);
+        event.target.value = '';
+      });
+
+      dropZone.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        dropZone.classList.add('dragover');
+      });
+
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+      });
+
+      dropZone.addEventListener('drop', (event) => {
+        event.preventDefault();
+        dropZone.classList.remove('dragover');
+        handleSelectedFiles(event.dataTransfer.files);
+      });
+
+      dropZone.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          photoInput.click();
+        }
+      });
+
+      albumSelect.addEventListener('change', () => {
+        const isNewAlbum = albumSelect.value === '__new__';
+        newAlbumField.classList.toggle('hidden', !isNewAlbum);
+      });
+
+      uploadButton.addEventListener('click', uploadFilesSequentially);
+    }
+
+    function populateAlbumOptions() {
+      const options = [];
+      const seen = new Set();
+
+      (galleryData.sections || []).forEach((section) => {
+        const folder = getFolderFromGalleryPath(section.folder || '');
+        if (!folder || seen.has(folder)) {
+          return;
+        }
+
+        seen.add(folder);
+        options.push({
+          value: folder,
+          label: section.title || humanizeFolder(folder)
+        });
+      });
+
+      Object.keys(galleryData.captions || {}).forEach((path) => {
+        const folder = getFolderFromGalleryPath(path);
+        if (!folder || seen.has(folder)) {
+          return;
+        }
+
+        seen.add(folder);
+        options.push({
+          value: folder,
+          label: humanizeFolder(folder)
+        });
+      });
+
+      options.sort((left, right) => left.label.localeCompare(right.label));
+
+      albumSelect.innerHTML = [
+        '<option value="">Select album...</option>',
+        ...options.map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`),
+        '<option value="__new__">➕ New album...</option>'
+      ].join('');
+    }
+
+    function handleSelectedFiles(fileList) {
+      const incomingFiles = Array.from(fileList || []).filter((file) => {
+        if (!file) {
+          return false;
+        }
+
+        return file.type.startsWith('image/') || /\.(heic|heif)$/i.test(file.name || '');
+      });
+      if (incomingFiles.length === 0) {
+        return;
+      }
+
+      clearPageStatus();
+
+      const newItems = incomingFiles.map((file) => {
+        const item = {
+          id: ++itemCounter,
+          originalFile: file,
+          processedFile: null,
+          previewUrl: '',
+          status: 'queued',
+          uploadStatus: 'idle',
+          formatLabel: detectFormatLabel(file),
+          sizeText: formatFileSize(file.size),
+          errorMessage: '',
+          sizeSummary: '',
+          isHeic: isHeicFile(file)
+        };
+
+        items.push(item);
+        return item;
+      });
+
+      render();
+      Promise.allSettled(newItems.map((item) => processItem(item))).then(() => {
+        render();
+      });
+    }
+
+    async function processItem(item) {
+      item.status = item.isHeic ? 'converting' : 'processing';
+      item.sizeText = formatFileSize(item.originalFile.size);
+      render();
+
+      const processedFile = await processFile(item.originalFile, item);
+      if (!processedFile) {
+        render();
+        return;
+      }
+
+      if (processedFile.size > MAX_FILE_SIZE) {
+        const message = `⚠ ${processedFile.name} is still ${formatFileSize(processedFile.size)} after conversion. GitHub limit is 10MB. Try Low quality.`;
+        item.status = 'error';
+        item.errorMessage = message;
+        item.processedFile = null;
+        item.previewUrl = '';
+        render();
+        return;
+      }
+
+      item.processedFile = processedFile;
+      item.previewUrl = URL.createObjectURL(processedFile);
+      item.status = 'ready';
+      item.uploadStatus = 'idle';
+      if (!item.sizeSummary) {
+        item.sizeSummary = formatFileSize(processedFile.size);
+      }
+      render();
+    }
+
+    async function processFile(file, item) {
+      if (item.isHeic) {
+        if (typeof window.heic2any !== 'function') {
+          item.status = 'error';
+          item.errorMessage = '⚠ HEIC converter not loaded. Check your internet connection and refresh.';
+          return null;
+        }
+
+        try {
+          const convertedBlob = await window.heic2any({
+            blob: file,
+            toType: 'image/jpeg',
+            quality: outputQuality
+          });
+
+          const resultBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+          const originalNameWithoutExt = file.name.replace(/\.(heic|heif)$/i, '');
+          const convertedFile = new File([resultBlob], `${originalNameWithoutExt}.jpg`, {
+            type: 'image/jpeg'
+          });
+
+          const saved = file.size > 0 ? (((file.size - convertedFile.size) / file.size) * 100).toFixed(0) : '0';
+          item.formatLabel = 'HEIC -> JPEG';
+          item.sizeSummary = `${formatFileSize(file.size)} -> ${formatFileSize(convertedFile.size)} (-${saved}%)`;
+          return convertedFile;
+        } catch (error) {
+          item.status = 'error';
+          item.errorMessage = `❌ Could not convert ${file.name}. Try a different photo or convert manually.`;
+          item.sizeSummary = '';
+          return null;
+        }
+      }
+
+      item.formatLabel = detectFormatLabel(file);
+      item.sizeSummary = formatFileSize(file.size);
+      return file;
+    }
+
+    function render() {
+      renderPreviewGrid();
+      const readyItems = items.filter((item) => item.status === 'ready' && item.uploadStatus !== 'uploaded');
+      const isBusy = items.some((item) => item.status === 'converting' || item.status === 'processing') || isUploading;
+      metaForm.classList.toggle('visible', items.length > 0);
+      selectedCountInput.value = `${readyItems.length} photo(s)`;
+      uploadButton.disabled = readyItems.length === 0 || isBusy;
+      uploadButton.textContent = `Upload ${readyItems.length} photo(s) to Journal`;
+      if (!isUploading && !uploadProgress.textContent) {
+        uploadProgress.classList.remove('visible');
+      }
+    }
+
+    function renderPreviewGrid() {
+      if (items.length === 0) {
+        previewGrid.innerHTML = '<div class="empty-state">Your selected photos will show up here with conversion status, size details, and upload progress.</div>';
+        return;
+      }
+
+      previewGrid.innerHTML = items.map((item) => {
+        const preview = item.previewUrl
+          ? `<img src="${item.previewUrl}" alt="${escapeHtml(item.originalFile.name)} preview">`
+          : `<div style="display:grid;place-items:center;aspect-ratio:1/1;background:#170b00;color:#d8c5ad;padding:1rem;text-align:center;">Processing preview...</div>`;
+
+        return `
+          <article class="photo-card">
+            ${preview}
+            <div class="photo-body">
+              <div class="photo-header">
+                <div class="file-meta">
+                  <div class="file-name">${escapeHtml(item.originalFile.name)}</div>
+                  <div class="file-size">${escapeHtml(item.sizeSummary || item.sizeText)}</div>
+                </div>
+                <button class="remove-btn" type="button" data-remove-id="${item.id}" aria-label="Remove ${escapeHtml(item.originalFile.name)}" ${item.uploadStatus === 'uploading' ? 'disabled' : ''}>×</button>
+              </div>
+              <div class="badge-row">
+                ${renderStatusBadge(item)}
+                ${renderUploadBadge(item)}
+              </div>
+              ${item.errorMessage ? `<div class="file-error">${escapeHtml(item.errorMessage)}</div>` : ''}
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      previewGrid.querySelectorAll('[data-remove-id]').forEach((button) => {
+        button.addEventListener('click', () => removeItem(Number(button.dataset.removeId)));
+      });
+    }
+
+    function renderStatusBadge(item) {
+      if (item.status === 'converting') {
+        return '<span class="badge gold">HEIC -&gt; JPEG</span>';
+      }
+      if (item.status === 'error') {
+        return '<span class="badge error">Conversion failed</span>';
+      }
+      return `<span class="badge ${item.isHeic ? 'gold' : 'neutral'}">${escapeHtml(item.formatLabel)}</span>`;
+    }
+
+    function renderUploadBadge(item) {
+      if (item.uploadStatus === 'uploading') {
+        return '<span class="badge gold">⏳ Uploading</span>';
+      }
+      if (item.uploadStatus === 'uploaded') {
+        return '<span class="badge success">✅ Uploaded</span>';
+      }
+      if (item.uploadStatus === 'failed') {
+        return '<span class="badge error">❌ Failed</span>';
+      }
+      return '';
+    }
+
+    function removeItem(itemId) {
+      const item = items.find((candidate) => candidate.id === itemId);
+      if (!item || item.uploadStatus === 'uploading') {
+        return;
+      }
+
+      if (item.previewUrl) {
+        URL.revokeObjectURL(item.previewUrl);
+      }
+
+      items = items.filter((candidate) => candidate.id !== itemId);
+      render();
+    }
+
+    async function uploadFilesSequentially() {
+      const token = localStorage.getItem('gh_pat');
+      if (!token) {
+        showPageStatus('error', '⚠ No GitHub token saved. <a href="/coffee-claude/journal-settings/">Go to Settings →</a>');
+        return;
+      }
+
+      if (!navigator.onLine) {
+        showPageStatus('error', '❌ No internet connection. Upload requires a connection to GitHub.');
+        return;
+      }
+
+      const album = resolveAlbumFolder();
+      if (!album) {
+        showPageStatus('error', albumSelect.value === '__new__' ? '⚠ Enter a new album name before uploading.' : '⚠ Choose an album before uploading.');
+        return;
+      }
+
+      const caption = captionInput.value.trim();
+      if (!caption) {
+        showPageStatus('error', '⚠ Add a caption before uploading.');
+        return;
+      }
+
+      const date = dateInput.value || getLocalToday();
+      const tags = tagsInput.value.trim();
+      const readyItems = items.filter((item) => item.status === 'ready' && item.processedFile && item.uploadStatus !== 'uploaded');
+
+      if (readyItems.length === 0) {
+        showPageStatus('error', '⚠ Wait until at least one photo is ready before uploading.');
+        return;
+      }
+
+      isUploading = true;
+      showPageStatus('loading', `Uploading ${readyItems.length} photo(s) to GitHub...`);
+      uploadProgress.classList.add('visible');
+
+      const batchNames = new Set();
+      let uploadedCount = 0;
+      let failureCount = 0;
+      let fatalStatusHtml = '';
+
+      for (let index = 0; index < readyItems.length; index += 1) {
+        const item = readyItems[index];
+        item.uploadStatus = 'uploading';
+        uploadProgress.textContent = `Uploading ${index + 1} of ${readyItems.length}... ⏳`;
+        render();
+
+        try {
+          const processedFile = item.processedFile;
+          if (processedFile.size > MAX_FILE_SIZE) {
+            throw new Error(`⚠ ${processedFile.name} is still ${formatFileSize(processedFile.size)} after conversion. GitHub limit is 10MB. Try Low quality.`);
+          }
+
+          const base64 = await fileToBase64(processedFile);
+          const safeName = makeUniqueFileName(processedFile.name, date, batchNames);
+          const repoPath = `assets/gallery/${album}/${safeName}`;
+          const galleryImagePath = `/${repoPath}`;
+          const itemCaption = buildCaption(caption, item, readyItems.length);
+
+          await uploadImageFile({
+            token,
+            repoPath,
+            base64,
+            commitMessage: `photo: add ${safeName} to ${album}`
+          });
+
+          const { currentSha, currentContent } = await fetchGalleryYaml(token);
+          const updatedContent = appendGalleryCaption(currentContent, galleryImagePath, itemCaption);
+          const updatedBase64 = utf8ToBase64(updatedContent);
+
+          await commitGalleryYaml({
+            token,
+            base64: updatedBase64,
+            sha: currentSha,
+            commitMessage: `gallery: add ${safeName} to ${album}${tags ? ` [${tags}]` : ''}`
+          });
+
+          item.uploadStatus = 'uploaded';
+          item.errorMessage = '';
+          uploadedCount += 1;
+        } catch (error) {
+          item.uploadStatus = 'failed';
+          item.errorMessage = error.message || 'Upload failed.';
+          if ((error.message || '').startsWith('❌ Token rejected.')) {
+            fatalStatusHtml = '❌ Token rejected. It may have expired - <a href="/coffee-claude/journal-settings/">update in Settings</a>.';
+            showPageStatus('error', fatalStatusHtml);
+          } else if ((error.message || '').startsWith('❌ No internet connection.')) {
+            fatalStatusHtml = '❌ No internet connection. Upload requires a connection to GitHub.';
+            showPageStatus('error', fatalStatusHtml);
+          }
+          failureCount += 1;
+        }
+
+        render();
+
+        if (fatalStatusHtml) {
+          break;
+        }
+      }
+
+      isUploading = false;
+      uploadProgress.textContent = '';
+      uploadProgress.classList.remove('visible');
+      render();
+
+      if (fatalStatusHtml && uploadedCount === 0) {
+        showPageStatus('error', fatalStatusHtml);
+      } else if (uploadedCount > 0 && failureCount === 0) {
+        showPageStatus('success', `✅ Uploaded ${uploadedCount} photo(s). GitHub Pages will rebuild in about a minute. <a href="/coffee-claude/brews-and-frames/">View the gallery →</a>`);
+      } else if (uploadedCount > 0) {
+        showPageStatus('error', `Uploaded ${uploadedCount} photo(s), but ${failureCount} failed. Review the cards below and retry the failed uploads.`);
+      } else {
+        showPageStatus('error', 'No photos were uploaded. Review the errors below and try again.');
+      }
+    }
+
+    async function uploadImageFile({ token, repoPath, base64, commitMessage }) {
+      let response;
+      try {
+        response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${repoPath}`, {
+          method: 'PUT',
+          headers: {
+            Authorization: `token ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: commitMessage,
+            content: base64,
+            branch: TARGET_BRANCH
+          })
+        });
+      } catch (error) {
+        throw new Error(navigator.onLine ? '❌ Upload failed before GitHub responded. Try again.' : '❌ No internet connection. Upload requires a connection to GitHub.');
+      }
+
+      await ensureGitHubResponse(response, repoPath);
+    }
+
+    async function fetchGalleryYaml(token) {
+      let response;
+      try {
+        response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${GALLERY_PATH}`, {
+          headers: {
+            Authorization: `token ${token}`
+          }
+        });
+      } catch (error) {
+        throw new Error(navigator.onLine ? '❌ Could not load gallery.yml from GitHub. Try again.' : '❌ No internet connection. Upload requires a connection to GitHub.');
+      }
+
+      await ensureGitHubResponse(response, GALLERY_PATH);
+      const payload = await response.json();
+      return {
+        currentSha: payload.sha,
+        currentContent: atob((payload.content || '').replace(/\n/g, ''))
+      };
+    }
+
+    async function commitGalleryYaml({ token, base64, sha, commitMessage }) {
+      let response;
+      try {
+        response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${GALLERY_PATH}`, {
+          method: 'PUT',
+          headers: {
+            Authorization: `token ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: commitMessage,
+            content: base64,
+            sha,
+            branch: TARGET_BRANCH
+          })
+        });
+      } catch (error) {
+        throw new Error(navigator.onLine ? '❌ Could not update gallery.yml on GitHub. Try again.' : '❌ No internet connection. Upload requires a connection to GitHub.');
+      }
+
+      await ensureGitHubResponse(response, GALLERY_PATH);
+    }
+
+    async function ensureGitHubResponse(response, repoPath) {
+      if (response.ok) {
+        return;
+      }
+
+      if (response.status === 401) {
+        throw new Error('❌ Token rejected. It may have expired - update in Settings.');
+      }
+
+      if (response.status === 409) {
+        throw new Error('❌ File already exists with this name. Rename and retry.');
+      }
+
+      let errorMessage = `GitHub request failed (${response.status})`;
+      try {
+        const payload = await response.json();
+        if (payload && payload.message) {
+          errorMessage = payload.message;
+        }
+      } catch (error) {
+        // Ignore JSON parsing errors and fall back to the status-based message.
+      }
+
+      throw new Error(`❌ ${repoPath}: ${errorMessage}`);
+    }
+
+    function appendGalleryCaption(currentContent, imagePath, caption) {
+      const normalized = currentContent.endsWith('\n') ? currentContent : `${currentContent}\n`;
+      return `${normalized}  "${imagePath}": ${yamlQuote(caption)}\n`;
+    }
+
+    function buildCaption(baseCaption, item, totalCount) {
+      if (totalCount <= 1) {
+        return baseCaption;
+      }
+
+      const stem = item.processedFile.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ');
+      return `${baseCaption} (${stem})`;
+    }
+
+    function resolveAlbumFolder() {
+      if (albumSelect.value === '__new__') {
+        return slugifyFolderName(newAlbumInput.value);
+      }
+      return albumSelect.value;
+    }
+
+    function getFolderFromGalleryPath(path) {
+      const match = path.match(/\/assets\/gallery\/([^/]+)\//);
+      return match ? match[1] : '';
+    }
+
+    function humanizeFolder(folder) {
+      return folder
+        .replace(/[-_]+/g, ' ')
+        .replace(/\b\w/g, (letter) => letter.toUpperCase());
+    }
+
+    function slugifyFolderName(value) {
+      return value
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    }
+
+    function detectFormatLabel(file) {
+      if (file.type === 'image/jpeg' || /\.jpe?g$/i.test(file.name)) return 'JPEG';
+      if (file.type === 'image/png' || /\.png$/i.test(file.name)) return 'PNG';
+      if (file.type === 'image/webp' || /\.webp$/i.test(file.name)) return 'WebP';
+      if (isHeicFile(file)) return 'HEIC';
+      return (file.type || 'Image').replace('image/', '').toUpperCase();
+    }
+
+    function isHeicFile(file) {
+      return file.type === 'image/heic'
+        || file.type === 'image/heif'
+        || /\.(heic|heif)$/i.test(file.name || '');
+    }
+
+    function makeUniqueFileName(originalName, date, usedNames) {
+      const safeName = originalName
+        .toLowerCase()
+        .replace(/[^a-z0-9.]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+      const extIndex = safeName.lastIndexOf('.');
+      const base = extIndex === -1 ? safeName : safeName.slice(0, extIndex);
+      const ext = extIndex === -1 ? '' : safeName.slice(extIndex);
+
+      let candidate = `${date}-${safeName}`;
+      let suffix = 2;
+      while (usedNames.has(candidate)) {
+        candidate = `${date}-${base}-${suffix}${ext}`;
+        suffix += 1;
+      }
+      usedNames.add(candidate);
+      return candidate;
+    }
+
+    function yamlQuote(value) {
+      return `"${String(value)
+        .replace(/\\/g, '\\\\')
+        .replace(/"/g, '\\"')
+        .replace(/\r?\n/g, '\\n')}"`;
+    }
+
+    function utf8ToBase64(value) {
+      return btoa(unescape(encodeURIComponent(value)));
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+      return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
+
+    function getLocalToday() {
+      const now = new Date();
+      const offset = now.getTimezoneOffset() * 60000;
+      return new Date(now.getTime() - offset).toISOString().split('T')[0];
+    }
+
+    function showPageStatus(type, html) {
+      pageStatus.className = `status-banner ${type} visible`;
+      pageStatus.innerHTML = html;
+    }
+
+    function clearPageStatus() {
+      pageStatus.className = 'status-banner';
+      pageStatus.innerHTML = '';
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/coffee-claude/sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>

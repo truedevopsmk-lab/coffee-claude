@@ -1,7 +1,7 @@
 ---
 ---
 
-const CACHE_NAME = 'coffee-journal-v1';
+const CACHE_NAME = 'coffee-journal-v2';
 
 const PRECACHE_URLS = [
   '/coffee-claude/',
@@ -17,6 +17,7 @@ const PRECACHE_URLS = [
   '/coffee-claude/methods/moka-pot/',
   '/coffee-claude/methods/b75/',
   '/coffee-claude/tools/brew-calculator/',
+  '/coffee-claude/upload-photo/',
   '/coffee-claude/offline.html'
 ];
 
