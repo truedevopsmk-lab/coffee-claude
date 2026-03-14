@@ -997,7 +997,8 @@ permalink: /upload-photo/
 
           const { currentSha, currentContent } = await fetchGalleryYaml(token);
           const updatedContent = appendGalleryCaption(currentContent, galleryImagePath, itemCaption);
-          const updatedBase64 = utf8ToBase64(updatedContent);
+          isValidYamlStart(updatedContent);
+          const updatedBase64 = safeBase64Encode(updatedContent);
 
           await commitGalleryYaml({
             token,
@@ -1083,7 +1084,7 @@ permalink: /upload-photo/
       const payload = await response.json();
       return {
         currentSha: payload.sha,
-        currentContent: atob((payload.content || '').replace(/\n/g, ''))
+        currentContent: safeBase64Decode(payload.content || '')
       };
     }
 
@@ -1137,8 +1138,22 @@ permalink: /upload-photo/
     }
 
     function appendGalleryCaption(currentContent, imagePath, caption) {
-      const normalized = currentContent.endsWith('\n') ? currentContent : `${currentContent}\n`;
+      const normalizedContent = currentContent.replace(/^\uFEFF/, '');
+      const normalized = normalizedContent.endsWith('\n') ? normalizedContent : `${normalizedContent}\n`;
       return `${normalized}  "${imagePath}": ${yamlQuote(caption)}\n`;
+    }
+
+    function isValidYamlStart(content) {
+      const clean = content.replace(/^\uFEFF/, '').trimStart();
+      if (!clean) {
+        throw new Error('gallery.yml appears corrupt - file is empty after cleanup.');
+      }
+
+      if (!/^[-\w#]/.test(clean)) {
+        throw new Error(`gallery.yml appears corrupt - starts with unexpected character (charCode: ${clean.charCodeAt(0)})`);
+      }
+
+      return true;
     }
 
     function buildCaption(baseCaption, item, totalCount) {
@@ -1216,8 +1231,27 @@ permalink: /upload-photo/
         .replace(/\r?\n/g, '\\n')}"`;
     }
 
-    function utf8ToBase64(value) {
-      return btoa(unescape(encodeURIComponent(value)));
+    function safeBase64Encode(value) {
+      const clean = value.replace(/^\uFEFF/, '');
+      const bytes = new TextEncoder().encode(clean);
+      let binary = '';
+
+      for (const byte of bytes) {
+        binary += String.fromCharCode(byte);
+      }
+
+      return btoa(binary);
+    }
+
+    function safeBase64Decode(base64) {
+      const binary = atob(base64.replace(/\n/g, ''));
+      const bytes = new Uint8Array(binary.length);
+
+      for (let index = 0; index < binary.length; index += 1) {
+        bytes[index] = binary.charCodeAt(index);
+      }
+
+      return new TextDecoder('utf-8').decode(bytes).replace(/^\uFEFF/, '');
     }
 
     function fileToBase64(file) {
