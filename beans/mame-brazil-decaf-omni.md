@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: bean
 title: MAME — Brazil Decaf Omni
 origin: Brazil, Santos
 variety: Not specified

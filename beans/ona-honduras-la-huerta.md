@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: bean
 title: ONA — La Huerta, Honduras
 origin: Honduras
 variety: Catimor

@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: bean
 title: Ruckus — All Killa No Filla (Kerehaklu)
 origin: Cauvery, India
 variety: Catimor, Obata, Kerebica, Sarchimor

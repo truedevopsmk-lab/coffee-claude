@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: bean
 title: Subtext Gesha — La Pradera, Colombia
 origin: Colombia, Nariño
 variety: Gesha

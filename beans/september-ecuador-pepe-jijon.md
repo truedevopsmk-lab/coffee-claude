@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: bean
 title: September Coffee Co. — Pepe Jijón, Ecuador
 origin: Ecuador
 variety: Mejorado (Typica)

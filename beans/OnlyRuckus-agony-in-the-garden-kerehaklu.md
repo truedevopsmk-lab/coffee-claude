@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: bean
 title: Ruckus — Agony in the Garden (Kerehaklu)
 origin: Cauvery, India
 variety: Kerebica

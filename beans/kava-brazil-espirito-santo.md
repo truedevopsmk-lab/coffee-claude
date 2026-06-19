@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: bean
 title: Kava Coffee — Brazil Espirito Santo
 origin: Espirito Santo, Brazil
 variety: Not specified

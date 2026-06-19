@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: bean
 title: Sprout — Lasso Lassi, Colombia
 origin: Colombia, Huila
 variety: Various

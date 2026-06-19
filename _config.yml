@@ -1,5 +1,5 @@
 title: Coffee Journal
-description: Personal coffee brewing & tasting journal
+description: A personal coffee brewing & tasting lab notebook — brews, beans, methods, and experiments.
 markdown: kramdown
 permalink: pretty
 
@@ -8,3 +8,12 @@ url: https://truedevopsmk-lab.github.io
 
 plugins:
   - jekyll-seo-tag
+
+# Keep local tooling out of the built site.
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - .bundle
+  - README.md
+  - templates

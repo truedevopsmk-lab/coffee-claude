@@ -1,268 +1,261 @@
 ---
 layout: default
 title: Log a Brew
+show_title: false
+plain: true
 ---
 
 <style>
-  .brew-form .form-group { margin-bottom: 1.25rem; }
-  .brew-form label {
-    display: block;
-    font-size: 0.8rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: #6b5e57;
-    margin-bottom: 0.4rem;
-  }
-  .brew-form input,
-  .brew-form select,
-  .brew-form textarea {
-    width: 100%;
-    background: #f7f3ef;
-    border: 1px solid #c9b8a5;
-    border-radius: 6px;
-    color: #2b2b2b;
-    padding: 0.65rem 0.85rem;
-    font-size: 1rem;
-    font-family: inherit;
-  }
-  .brew-form input:focus,
-  .brew-form select:focus,
-  .brew-form textarea:focus {
-    outline: none;
-    border-color: #8b5a2b;
-  }
-  .brew-form textarea { min-height: 100px; resize: vertical; }
-  .brew-form .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  .brew-form .rating-row { display: flex; gap: 0.5rem; }
-  .brew-form .star {
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #c9b8a5;
-    transition: color 0.15s;
-  }
-  .brew-form .star.active { color: #d4a244; }
-  .brew-form .submit-btn {
-    width: 100%;
-    padding: 0.85rem;
-    background: #8b5a2b;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1.05rem;
-    font-family: inherit;
-    cursor: pointer;
-    margin-top: 0.5rem;
-    transition: background 0.2s;
-  }
-  .brew-form .submit-btn:hover { background: #a0692f; }
-  .brew-form .submit-btn:disabled { background: #bbb; cursor: not-allowed; }
-  #status {
-    margin-top: 1rem;
-    padding: 0.75rem 1rem;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    display: none;
-  }
-  #status.success, #paste-status.success { background: #e6f4ea; color: #2e7d32; }
-  #status.success a, #paste-status.success a { color: #2e7d32; }
-  #status.error, #paste-status.error { background: #fce8e6; color: #c62828; }
-  #status.loading, #paste-status.loading { background: #fff8e1; color: #8b5a2b; }
-  .settings-link {
-    text-align: center;
-    margin-top: 1.5rem;
-    font-size: 0.85rem;
-  }
-  .settings-link a { color: #8b5a2b; }
+  .lb-grid { display: grid; grid-template-columns: 1fr; gap: 1.4rem; }
+  @media (min-width: 900px) { .lb-grid { grid-template-columns: 1fr 300px; align-items: start; } }
+  .lb-aside { position: sticky; top: 78px; display: grid; gap: 1rem; }
+  .lb-readout { font-family: var(--mono); }
+  .lb-readout .big { font-size: 2.2rem; color: var(--brass); font-family: var(--serif); line-height: 1; }
+  .lb-readout .sub { color: var(--ink-faint); font-size: 0.85rem; margin-top: 0.3rem; }
 
-  /* Tabs */
-  .brew-tabs { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 2px solid #e2d8cf; }
-  .brew-tab {
-    padding: 0.6rem 1.2rem;
-    background: none;
-    border: none;
-    font-size: 0.95rem;
-    font-family: inherit;
-    color: #6b5e57;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -2px;
-  }
-  .brew-tab.active { color: #8b5a2b; border-bottom-color: #8b5a2b; font-weight: 600; }
-  .brew-panel { display: none; }
-  .brew-panel.active { display: block; }
+  .slider-row { margin-bottom: 1rem; }
+  .slider-row label { display: flex; justify-content: space-between; font-size: 0.8rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; margin-bottom: 0.4rem; }
+  .slider-row label b { color: var(--brass-deep); font-family: var(--mono); }
+  .slider-row input[type=range] { width: 100%; accent-color: var(--brass); }
+  .slider-row small { color: var(--ink-faint); font-size: 0.76rem; }
 
-  /* Paste area */
-  #paste-raw {
-    width: 100%;
-    min-height: 320px;
-    background: #f7f3ef;
-    border: 1px solid #c9b8a5;
-    border-radius: 6px;
-    color: #2b2b2b;
-    padding: 0.75rem;
-    font-size: 0.9rem;
-    font-family: monospace;
-    resize: vertical;
-    line-height: 1.5;
-  }
-  #paste-raw:focus { outline: none; border-color: #8b5a2b; }
-  .paste-hint { font-size: 0.82rem; color: #6b5e57; margin-bottom: 0.75rem; }
+  .stars { display: inline-flex; gap: 0.3rem; }
+  .stars .star { font-size: 1.6rem; cursor: pointer; color: var(--border); transition: color .15s; }
+  .stars .star.active { color: var(--gold); }
+
+  #paste-raw { font-family: var(--mono); font-size: 0.88rem; min-height: 320px; line-height: 1.5; }
 </style>
 
-<div class="brew-tabs">
-  <button class="brew-tab active" data-panel="panel-form">Form</button>
-  <button class="brew-tab" data-panel="panel-paste">Paste Markdown</button>
+<div class="page-head">
+  <p class="eyebrow">Logbook</p>
+  <h1>Log a Brew</h1>
+  <p>Capture the recipe and the cup. This writes a structured entry straight to your journal — ratio, grind, and tasting profile all show up on the brew page.</p>
 </div>
 
-<div id="panel-form" class="brew-panel active">
-<form id="brew-form" class="brew-form">
-
-  <div class="form-group">
-    <label>Date</label>
-    <input type="date" id="brew-date" required>
-  </div>
-
-  <div class="form-group">
-    <label>Bean / Coffee</label>
-    <input type="text" id="bean" placeholder="e.g. Ethiopia Bekele, Sidama" required>
-  </div>
-
-  <div class="form-group">
-    <label>Roaster</label>
-    <input type="text" id="roaster" placeholder="e.g. Beyond Within">
-  </div>
-
-  <div class="form-group">
-    <label>Brew Method</label>
-    <select id="method" required>
-      <option value="">Select method…</option>
-      <option>V60</option>
-      <option>AeroPress</option>
-      <option>Chemex</option>
-      <option>French Press</option>
-      <option>Espresso</option>
-      <option>Cold Brew</option>
-      <option>Moka Pot</option>
-      <option>B75</option>
-      <option>Other</option>
-    </select>
-  </div>
-
-  <div class="row">
-    <div class="form-group">
-      <label>Coffee Dose (g)</label>
-      <input type="number" id="dose" placeholder="15" step="0.1">
-    </div>
-    <div class="form-group">
-      <label>Water (ml)</label>
-      <input type="number" id="water" placeholder="250">
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="form-group">
-      <label>Water Temp (°C)</label>
-      <input type="number" id="temp" placeholder="93">
-    </div>
-    <div class="form-group">
-      <label>Brew Time</label>
-      <input type="text" id="brew-time" placeholder="3:30">
-    </div>
-  </div>
-
-  <div class="form-group">
-    <label>Grind Size</label>
-    <input type="text" id="grind" placeholder="e.g. Medium-fine, Comandante 22 clicks">
-  </div>
-
-  <div class="form-group">
-    <label>Rating</label>
-    <div class="rating-row">
-      <span class="star" data-val="1">★</span>
-      <span class="star" data-val="2">★</span>
-      <span class="star" data-val="3">★</span>
-      <span class="star" data-val="4">★</span>
-      <span class="star" data-val="5">★</span>
-    </div>
-    <input type="hidden" id="rating" value="0">
-  </div>
-
-  <div class="form-group">
-    <label>Tasting Notes</label>
-    <textarea id="notes" placeholder="Flavours, aroma, body, finish…"></textarea>
-  </div>
-
-  <div class="form-group">
-    <label>What I'd Change Next Time</label>
-    <textarea id="next-time" placeholder="Grind coarser, increase water temp…" style="min-height:70px;"></textarea>
-  </div>
-
-  <button type="submit" class="submit-btn" id="submit-btn">Commit Brew to Journal</button>
-  <div id="status"></div>
-
-</form>
-
-</div><!-- /panel-form -->
-
-<div id="panel-paste" class="brew-panel">
-<div class="brew-form">
-  <p class="paste-hint">Paste a full brew log including the <code>---</code> front matter block. The file needs at least <code>title</code> and <code>date</code> in the front matter.</p>
-  <textarea id="paste-raw" placeholder="---
-layout: brew
-title: V60 Brew Log — Ethiopia Bekele
-date: 2026-02-23
----
-
-## Tasting Notes
-..."></textarea>
-  <button type="button" class="submit-btn" id="paste-submit-btn" style="margin-top:1rem;">Commit Brew to Journal</button>
-  <div id="paste-status" style="margin-top:1rem; padding:0.75rem 1rem; border-radius:6px; font-size:0.9rem; display:none;"></div>
+<div class="tabs" role="tablist">
+  <button class="tab active" data-panel="panel-form" role="tab">Guided form</button>
+  <button class="tab" data-panel="panel-paste" role="tab">Paste markdown</button>
 </div>
-</div><!-- /panel-paste -->
 
-<div class="settings-link">
-  <a href="/coffee-claude/journal-settings/">⚙ Journal settings</a>
+<div id="panel-form" class="tab-panel active">
+  <form id="brew-form" class="lb-grid">
+    <div>
+      <div class="field-row">
+        <div class="field">
+          <label for="brew-date">Date</label>
+          <input type="date" id="brew-date" required>
+        </div>
+        <div class="field">
+          <label for="method">Method</label>
+          <select id="method" required>
+            <option value="">Select method…</option>
+            <option>V60</option><option>AeroPress</option><option>Chemex</option>
+            <option>French Press</option><option>Espresso</option><option>Cold Brew</option>
+            <option>Moka Pot</option><option>B75</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="bean">Bean / Coffee</label>
+        <input type="text" id="bean" placeholder="e.g. Ethiopia Bekele, Sidama" required list="bean-list">
+        <datalist id="bean-list">
+          {% assign beans = site.pages | where_exp: "p", "p.path contains 'beans/'" | where_exp: "p", "p.name != 'index.md'" | sort: "title" %}
+          {% for b in beans %}<option value="{{ b.title | escape }}">{% endfor %}
+        </datalist>
+      </div>
+
+      <div class="field">
+        <label for="roaster">Roaster</label>
+        <input type="text" id="roaster" placeholder="e.g. Beyond Within">
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="dose">Coffee dose (g)</label>
+          <input type="number" id="dose" placeholder="15" step="0.1" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label for="water">Water (g)</label>
+          <input type="number" id="water" placeholder="250" inputmode="decimal">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="temp">Water temp (°C)</label>
+          <input type="number" id="temp" placeholder="93" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label for="brew-time">Brew time</label>
+          <input type="text" id="brew-time" placeholder="3:30">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="grind">Grind size</label>
+        <input type="text" id="grind" placeholder="e.g. Medium-fine · Timemore C3S 22 clicks">
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="bloom">Bloom</label>
+          <input type="text" id="bloom" placeholder="45 g · 0:45">
+        </div>
+        <div class="field">
+          <label for="agitation">Agitation</label>
+          <input type="text" id="agitation" placeholder="2 swirls + stir">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Tasting profile</label>
+        <div class="panel" style="box-shadow:none">
+          <div class="slider-row">
+            <label for="strength">Strength <b><span id="strengthVal">3</span>/5</b></label>
+            <input type="range" id="strength" min="1" max="5" step="1" value="3">
+            <small>1 = tea-like · 3 = balanced · 5 = punchy</small>
+          </div>
+          <div class="slider-row">
+            <label for="acidity">Acidity <b><span id="acidityVal">3</span>/5</b></label>
+            <input type="range" id="acidity" min="1" max="5" step="1" value="3">
+            <small>1 = soft · 3 = clean · 5 = bright</small>
+          </div>
+          <div class="slider-row">
+            <label for="body">Body <b><span id="bodyVal">3</span>/5</b></label>
+            <input type="range" id="body" min="1" max="5" step="1" value="3">
+            <small>1 = light · 3 = medium · 5 = heavy</small>
+          </div>
+          <div class="slider-row" style="margin-bottom:0">
+            <label for="sweetness">Sweetness <b><span id="sweetnessVal">3</span>/5</b></label>
+            <input type="range" id="sweetness" min="1" max="5" step="1" value="3">
+            <small>1 = dry · 3 = balanced · 5 = syrupy</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="flavors">Flavor notes</label>
+        <input type="text" id="flavors" placeholder="toffee, lemongrass, oolong (comma separated)">
+      </div>
+
+      <div class="field">
+        <label for="notes">Tasting notes</label>
+        <textarea id="notes" placeholder="Aroma, balance, finish, mouthfeel…"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="next-time">What I'd change next time</label>
+        <textarea id="next-time" placeholder="Grind coarser, raise temp 2°C…" style="min-height:70px"></textarea>
+      </div>
+    </div>
+
+    <aside class="lb-aside">
+      <div class="panel lb-readout">
+        <h3>Live ratio</h3>
+        <div class="big" id="ratio-readout">1:–</div>
+        <div class="sub" id="ratio-sub">Enter dose &amp; water</div>
+      </div>
+      <div class="panel">
+        <h3>Rating</h3>
+        <div class="stars" id="stars">
+          <span class="star" data-val="1">★</span><span class="star" data-val="2">★</span><span class="star" data-val="3">★</span><span class="star" data-val="4">★</span><span class="star" data-val="5">★</span>
+        </div>
+        <input type="hidden" id="rating" value="0">
+      </div>
+      <button type="submit" class="btn btn-primary" id="submit-btn" style="width:100%;justify-content:center">Commit brew to journal</button>
+      <div id="status" class="status-msg"></div>
+      <p class="footnote" style="text-align:center;margin:0"><a href="{{ '/journal-settings/' | relative_url }}">⚙ Need a token?</a></p>
+    </aside>
+  </form>
+</div>
+
+<div id="panel-paste" class="tab-panel">
+  <p style="color:var(--ink-soft);font-size:0.9rem">Paste a full brew log including the <code>---</code> front matter block (needs at least <code>title</code> and <code>date</code>).</p>
+  <div class="field">
+    <textarea id="paste-raw" placeholder="---&#10;layout: brew&#10;title: V60 Brew Log — Ethiopia Bekele&#10;date: 2026-02-23&#10;method: V60&#10;---&#10;&#10;## Tasting Notes&#10;…"></textarea>
+  </div>
+  <button type="button" class="btn btn-primary" id="paste-submit-btn">Commit brew to journal</button>
+  <div id="paste-status" class="status-msg"></div>
 </div>
 
 <script>
-  // --- Star rating ---
-  const stars = document.querySelectorAll('.star');
+  const SETTINGS_HINT = 'Set one in <a href="{{ "/journal-settings/" | relative_url }}">Settings</a>.';
+  const BREWS_URL = '{{ "/brews/" | relative_url }}';
+
+  // --- Ratio live readout ---
+  const doseEl = document.getElementById('dose');
+  const waterEl = document.getElementById('water');
+  const ratioReadout = document.getElementById('ratio-readout');
+  const ratioSub = document.getElementById('ratio-sub');
+  function updateRatio() {
+    const d = parseFloat(doseEl.value), w = parseFloat(waterEl.value);
+    if (d > 0 && w > 0) {
+      ratioReadout.textContent = '1:' + (w / d).toFixed(1);
+      ratioSub.textContent = `${d} g coffee · ${w} g water`;
+    } else {
+      ratioReadout.textContent = '1:–';
+      ratioSub.textContent = 'Enter dose & water';
+    }
+  }
+  doseEl.addEventListener('input', updateRatio);
+  waterEl.addEventListener('input', updateRatio);
+
+  // --- Sliders ---
+  ['strength', 'acidity', 'body', 'sweetness'].forEach((id) => {
+    const input = document.getElementById(id);
+    const out = document.getElementById(id + 'Val');
+    input.addEventListener('input', () => { out.textContent = input.value; });
+  });
+
+  // --- Stars ---
+  const stars = document.querySelectorAll('#stars .star');
   const ratingInput = document.getElementById('rating');
-  stars.forEach(star => {
+  stars.forEach((star) => {
     star.addEventListener('click', () => {
       const val = parseInt(star.dataset.val);
       ratingInput.value = val;
-      stars.forEach(s => s.classList.toggle('active', parseInt(s.dataset.val) <= val));
+      stars.forEach((s) => s.classList.toggle('active', parseInt(s.dataset.val) <= val));
     });
   });
 
-  // --- Set today's date as default ---
   document.getElementById('brew-date').value = new Date().toISOString().split('T')[0];
 
+  // --- Tabs ---
+  document.querySelectorAll('.tab').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.panel).classList.add('active');
+    });
+  });
+
   // --- Form submit ---
-  document.getElementById('brew-form').addEventListener('submit', async e => {
+  document.getElementById('brew-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('gh_pat');
-    if (!token) {
-      showStatus('error', '⚠ No GitHub token set. Go to Journal Settings first.');
-      return;
-    }
+    if (!token) { showStatus('error', '⚠ No GitHub token saved. ' + SETTINGS_HINT); return; }
 
-    const date = document.getElementById('brew-date').value;
-    const bean = document.getElementById('bean').value.trim();
-    const roaster = document.getElementById('roaster').value.trim();
-    const method = document.getElementById('method').value;
-    const dose = document.getElementById('dose').value;
-    const water = document.getElementById('water').value;
-    const temp = document.getElementById('temp').value;
-    const brewTime = document.getElementById('brew-time').value;
-    const grind = document.getElementById('grind').value.trim();
-    const rating = document.getElementById('rating').value;
-    const notes = document.getElementById('notes').value.trim();
-    const nextTime = document.getElementById('next-time').value.trim();
+    const v = (id) => document.getElementById(id).value;
+    const date = v('brew-date');
+    const bean = v('bean').trim();
+    const roaster = v('roaster').trim();
+    const method = v('method');
+    const dose = v('dose'), water = v('water'), temp = v('temp');
+    const brewTime = v('brew-time').trim(), grind = v('grind').trim();
+    const bloom = v('bloom').trim(), agitation = v('agitation').trim();
+    const rating = v('rating');
+    const strength = v('strength'), acidity = v('acidity'), body = v('body'), sweetness = v('sweetness');
+    const flavors = v('flavors').trim();
+    const notes = v('notes').trim(), nextTime = v('next-time').trim();
 
-    const slug = `${date}-${bean.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${method.toLowerCase()}`;
+    const ratio = (dose > 0 && water > 0) ? (water / dose).toFixed(1) : '';
+    const slug = `${date}-${bean.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${method.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
     const filename = `brews/${slug}.md`;
+
+    const flavorList = flavors ? flavors.split(',').map((f) => `- ${f.trim()}`).filter((f) => f !== '-').join('\n') : '';
+    const taste = `| Strength | Acidity | Body | Sweetness |\n|:--:|:--:|:--:|:--:|\n| ${strength}/5 | ${acidity}/5 | ${body}/5 | ${sweetness}/5 |`;
 
     const content = `---
 layout: brew
@@ -277,45 +270,52 @@ water_temp: ${temp || ''}
 brew_time: "${brewTime}"
 grind: "${grind}"
 rating: ${rating}
+strength: ${strength}
+acidity: ${acidity}
+body: ${body}
+sweetness: ${sweetness}
 ---
 
-## Tasting Notes
+## ⚖️ Recipe
+
+- **Method:** ${method}
+- **Dose:** ${dose || '—'} g
+- **Water:** ${water || '—'} g${ratio ? `\n- **Ratio:** 1:${ratio}` : ''}
+- **Water temp:** ${temp || '—'} °C
+- **Grind:** ${grind || '—'}
+- **Brew time:** ${brewTime || '—'}${bloom ? `\n- **Bloom:** ${bloom}` : ''}${agitation ? `\n- **Agitation:** ${agitation}` : ''}
+
+## 👅 Cup Profile
+
+${taste}
+${flavorList ? `\n**Flavor notes**\n\n${flavorList}\n` : ''}
+## 📝 Tasting Notes
 
 ${notes || '_No notes recorded._'}
 
-## What I'd Change Next Time
+## 🔁 What I'd Change Next Time
 
 ${nextTime || '_Nothing noted._'}
 `;
 
     const encoded = btoa(unescape(encodeURIComponent(content)));
-
     showStatus('loading', '⏳ Committing brew to GitHub…');
     document.getElementById('submit-btn').disabled = true;
 
     try {
-      const res = await fetch(
-        `https://api.github.com/repos/truedevopsmk-lab/coffee-claude/contents/${filename}`,
-        {
-          method: 'PUT',
-          headers: {
-            Authorization: `token ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message: `brew: add ${method} log — ${bean} (${date})`,
-            content: encoded,
-            branch: 'main'
-          })
-        }
-      );
-
+      const res = await fetch(`https://api.github.com/repos/truedevopsmk-lab/coffee-claude/contents/${filename}`, {
+        method: 'PUT',
+        headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: `brew: add ${method} log — ${bean} (${date})`, content: encoded, branch: 'main' })
+      });
       if (res.ok) {
-        showStatus('success', `✅ Brew logged! GitHub Pages will rebuild in ~1 min. <a href="/coffee-claude/brews/">View brews →</a>`);
+        showStatus('success', `✅ Brew logged! GitHub Pages rebuilds in ~1 min. <a href="${BREWS_URL}">View brews →</a>`);
         document.getElementById('brew-form').reset();
         document.getElementById('brew-date').value = new Date().toISOString().split('T')[0];
-        stars.forEach(s => s.classList.remove('active'));
+        stars.forEach((s) => s.classList.remove('active'));
         ratingInput.value = 0;
+        ['strengthVal','acidityVal','bodyVal','sweetnessVal'].forEach((id)=>document.getElementById(id).textContent='3');
+        updateRatio();
       } else {
         const err = await res.json();
         showStatus('error', `❌ GitHub API error: ${err.message}`);
@@ -323,91 +323,50 @@ ${nextTime || '_Nothing noted._'}
     } catch (err) {
       showStatus('error', `❌ Network error: ${err.message}`);
     }
-
     document.getElementById('submit-btn').disabled = false;
   });
 
   function showStatus(type, html) {
     const el = document.getElementById('status');
-    el.className = type;
+    el.className = `status-msg ${type}`;
     el.innerHTML = html;
   }
-
-  // --- Tab switching ---
-  document.querySelectorAll('.brew-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.brew-tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.brew-panel').forEach(p => p.classList.remove('active'));
-      tab.classList.add('active');
-      document.getElementById(tab.dataset.panel).classList.add('active');
-    });
-  });
 
   // --- Paste markdown submit ---
   function showPasteStatus(type, html) {
     const el = document.getElementById('paste-status');
-    el.className = type;
-    el.style.display = 'block';
+    el.className = `status-msg ${type}`;
     el.innerHTML = html;
   }
 
   document.getElementById('paste-submit-btn').addEventListener('click', async () => {
     const token = localStorage.getItem('gh_pat');
-    if (!token) {
-      showPasteStatus('error', '⚠ No GitHub token set. Go to Journal Settings first.');
-      return;
-    }
-
+    if (!token) { showPasteStatus('error', '⚠ No GitHub token saved. ' + SETTINGS_HINT); return; }
     const raw = document.getElementById('paste-raw').value.trim();
-    if (!raw) {
-      showPasteStatus('error', '⚠ Paste your markdown content first.');
-      return;
-    }
+    if (!raw) { showPasteStatus('error', '⚠ Paste your markdown content first.'); return; }
 
-    // Parse front matter
     const fmMatch = raw.match(/^---\s*\n([\s\S]*?)\n---/);
-    if (!fmMatch) {
-      showPasteStatus('error', '⚠ No front matter found. Content must start with --- block.');
-      return;
-    }
-
+    if (!fmMatch) { showPasteStatus('error', '⚠ No front matter found. Content must start with a --- block.'); return; }
     const fm = fmMatch[1];
     const titleMatch = fm.match(/^title:\s*["']?(.+?)["']?\s*$/m);
     const dateMatch = fm.match(/^date:\s*(\d{4}-\d{2}-\d{2})/m);
+    if (!titleMatch || !dateMatch) { showPasteStatus('error', '⚠ Front matter must include title and date (YYYY-MM-DD).'); return; }
 
-    if (!titleMatch || !dateMatch) {
-      showPasteStatus('error', '⚠ Front matter must include title and date (YYYY-MM-DD).');
-      return;
-    }
-
-    const title = titleMatch[1];
-    const date = dateMatch[1];
+    const title = titleMatch[1], date = dateMatch[1];
     const slug = `${date}-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`;
     const filename = `brews/${slug}.md`;
     const encoded = btoa(unescape(encodeURIComponent(raw)));
 
     showPasteStatus('loading', '⏳ Committing brew to GitHub…');
     document.getElementById('paste-submit-btn').disabled = true;
-
     try {
-      const res = await fetch(
-        `https://api.github.com/repos/truedevopsmk-lab/coffee-claude/contents/${filename}`,
-        {
-          method: 'PUT',
-          headers: {
-            Authorization: `token ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message: `brew: add ${title} (${date})`,
-            content: encoded,
-            branch: 'main'
-          })
-        }
-      );
-
+      const res = await fetch(`https://api.github.com/repos/truedevopsmk-lab/coffee-claude/contents/${filename}`, {
+        method: 'PUT',
+        headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: `brew: add ${title} (${date})`, content: encoded, branch: 'main' })
+      });
       if (res.ok) {
-        showPasteStatus('success', `✅ Brew logged! GitHub Pages will rebuild in ~1 min. <a href="/coffee-claude/brews/" style="color:#2e7d32">View brews →</a>`);
+        showPasteStatus('success', `✅ Brew logged! GitHub Pages rebuilds in ~1 min. <a href="${BREWS_URL}">View brews →</a>`);
         document.getElementById('paste-raw').value = '';
       } else {
         const err = await res.json();
@@ -416,7 +375,6 @@ ${nextTime || '_Nothing noted._'}
     } catch (err) {
       showPasteStatus('error', `❌ Network error: ${err.message}`);
     }
-
     document.getElementById('paste-submit-btn').disabled = false;
   });
 </script>

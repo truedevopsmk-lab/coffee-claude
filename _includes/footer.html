@@ -1,0 +1,50 @@
+<footer class="footer">
+  <div class="footer-inner">
+    <div>Brewed &amp; logged by hand · {{ 'now' | date: "%Y" }}</div>
+    <nav class="footer-links" aria-label="Footer">
+      <a href="{{ '/brews/' | relative_url }}">Brews</a>
+      <a href="{{ '/beans/' | relative_url }}">Beans</a>
+      <a href="{{ '/methods/' | relative_url }}">Methods</a>
+      <a href="{{ '/brews-and-frames/' | relative_url }}">Gallery</a>
+      <a href="{{ '/notifications/' | relative_url }}">Reminders</a>
+      <a href="https://github.com/truedevopsmk-lab/coffee-claude" target="_blank" rel="noopener">Source</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+  // Mobile nav + theme toggle
+  (function () {
+    var navToggle = document.querySelector('[data-nav-toggle]');
+    var nav = document.getElementById('primary-nav');
+    if (navToggle && nav) {
+      navToggle.addEventListener('click', function () {
+        var open = nav.classList.toggle('open');
+        navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+    }
+    var themeToggle = document.querySelector('[data-theme-toggle]');
+    if (themeToggle) {
+      themeToggle.addEventListener('click', function () {
+        var root = document.documentElement;
+        var current = root.getAttribute('data-theme');
+        if (!current) {
+          current = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        var next = current === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('cj_theme', next); } catch (e) {}
+      });
+    }
+  })();
+</script>
+
+{% unless page.no_sw %}
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('{{ "/sw.js" | relative_url }}').catch(function () {});
+    });
+  }
+</script>
+{% endunless %}

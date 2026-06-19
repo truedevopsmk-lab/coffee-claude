@@ -1,0 +1,23 @@
+{% assign u = page.url %}
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="{{ '/' | relative_url }}">
+      <span class="brand-mark">☕</span>
+      <span>Coffee Journal</span>
+    </a>
+
+    <button class="nav-toggle" type="button" aria-label="Toggle menu" aria-expanded="false" data-nav-toggle>☰</button>
+
+    <nav class="nav" id="primary-nav" aria-label="Primary">
+      <a href="{{ '/brews/' | relative_url }}" {% if u contains '/brews/' %}class="active"{% endif %}>Brews</a>
+      <a href="{{ '/beans/' | relative_url }}" {% if u contains '/beans/' %}class="active"{% endif %}>Beans</a>
+      <a href="{{ '/methods/' | relative_url }}" {% if u contains '/methods/' %}class="active"{% endif %}>Methods</a>
+      <a href="{{ '/brews-and-frames/' | relative_url }}" {% if u contains '/brews-and-frames/' %}class="active"{% endif %}>Gallery</a>
+      <a href="{{ '/tools/brew-calculator/' | relative_url }}" {% if u contains '/tools/' %}class="active"{% endif %}>Calculator</a>
+      <a href="{{ '/add-brew/' | relative_url }}" class="nav-cta">＋ Log Brew</a>
+      <a href="{{ '/upload-photo/' | relative_url }}" {% if u contains '/upload-photo/' %}class="active"{% endif %}>Upload</a>
+      <a href="{{ '/journal-settings/' | relative_url }}" {% if u contains '/journal-settings/' %}class="active"{% endif %}>Settings</a>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle dark mode" title="Toggle dark mode">◐</button>
+    </nav>
+  </div>
+</header>

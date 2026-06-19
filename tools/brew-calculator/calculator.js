@@ -561,22 +561,17 @@ window.downloadBrewLog = function () {
 
 window.copyBrewLog = function () {
   const pre = document.getElementById("brew-markdown-output");
+  const button = document.getElementById("copy-brew-log");
 
   navigator.clipboard.writeText(pre.textContent).then(
     () => {
       const originalText = button.textContent;
       button.textContent = "Copied ✓";
-
-      setTimeout(() => {
-        button.textContent = originalText;
-      }, 1500);
+      setTimeout(() => { button.textContent = originalText; }, 1500);
     },
     () => {
       button.textContent = "Copy failed";
-
-      setTimeout(() => {
-        button.textContent = "Copy Brew Log";
-      }, 1500);
+      setTimeout(() => { button.textContent = "Copy"; }, 1500);
     }
   );
 };

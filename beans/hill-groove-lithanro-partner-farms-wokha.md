@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: bean
 title: Hill Groove — Lithanro Partner Farms, Wokha - Nagaland
 origin: Wokha, Nagaland, India
 variety: SL 9/15

@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: bean
 title: Coffee Mechanics — Srilakshmi Estate, Chikmagalur
 origin: Chikmagalur, Karnataka, India
 variety: Not specified

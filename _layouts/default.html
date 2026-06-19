@@ -1,20 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>{{ page.title }} | {{ site.title }}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="{{ "/assets/coffee.css" | relative_url }}">
-
-  <!-- PWA Manifest -->
-  <link rel="manifest" href="/coffee-claude/manifest.json">
-  <meta name="theme-color" content="#b5621e">
-
-  <!-- iOS PWA support -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Coffee Journal">
-  <link rel="apple-touch-icon" href="/coffee-claude/assets/icons/icon-192.png">
+  {% include head.html %}
 
   <!-- OneSignal Push Notifications -->
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
@@ -59,10 +46,7 @@
                   acceptButton: "Yes, notify me",
                   cancelButton: "Not now"
                 },
-                delay: {
-                  pageViews: 2,
-                  timeDelay: 10
-                }
+                delay: { pageViews: 2, timeDelay: 10 }
               }
             ]
           }
@@ -72,44 +56,22 @@
   </script>
 </head>
 <body>
-  <div class="site">
+  {% include nav.html %}
 
-    <aside class="sidebar">
-      <h1>Coffee Journal</h1>
-      <p>Brewing notes, beans, and experiments.</p>
-
-      <nav class="nav">
-      <a href="{{ "/" | relative_url }}">Home</a>
-      <a href="{{ "/brews/" | relative_url }}">Brews</a>
-      <a href="{{ "/beans/" | relative_url }}">Beans</a>
-      <a href="{{ "/methods/" | relative_url }}">Methods</a>
-      <a href="{{ "/brews-and-frames/" | relative_url }}">Brews &amp; Frames</a>
-      <a href="{{ "/tools/brew-calculator/" | relative_url }}">Tools</a>
-      <a href="{{ "/notifications/" | relative_url }}">🔔 Reminders</a>
-      <a href="{{ "/add-brew/" | relative_url }}">☕ Log Brew</a>
-      <a href="{{ "/upload-photo/" | relative_url }}">📷 Upload Photo</a>
-      <a href="{{ "/journal-settings/" | relative_url }}">⚙ Settings</a>
-      </nav>
-    </aside>
-
-    <main class="content">
-      {% if page.title %}
+  <main class="wrap {% if page.narrow %}wrap-narrow{% endif %}">
+    {% if page.show_title != false and page.title %}
+      <div class="page-head">
+        {% if page.eyebrow %}<p class="eyebrow">{{ page.eyebrow }}</p>{% endif %}
         <h1>{{ page.title }}</h1>
-      {% endif %}
+        {% if page.description %}<p>{{ page.description }}</p>{% endif %}
+      </div>
+    {% endif %}
+
+    <div class="{% if page.plain %}{% else %}prose{% endif %}">
       {{ content }}
-    </main>
+    </div>
+  </main>
 
-  </div>
-
-<!-- Service Worker Registration -->
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/coffee-claude/sw.js')
-        .then(reg => console.log('SW registered:', reg.scope))
-        .catch(err => console.warn('SW registration failed:', err));
-    });
-  }
-</script>
+  {% include footer.html %}
 </body>
 </html>

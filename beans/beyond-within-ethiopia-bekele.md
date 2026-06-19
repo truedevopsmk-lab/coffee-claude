@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: bean
 title: Beyond Within — Ethiopia Bekele
 origin: Sidama, Ethiopia
 variety: Not specified

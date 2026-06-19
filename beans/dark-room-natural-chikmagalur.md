@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: bean
 title: Dark Room Natural — Chikmagalur, India
 origin: Chikmagalur, Karnataka, India
 variety: Catuai

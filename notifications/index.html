@@ -1,19 +1,20 @@
 ---
 layout: default
-title: Notification Preferences
+title: Brew Reminders
+show_title: false
+plain: true
 ---
 
-<h1>☕ Brew Reminders</h1>
-
-<p>Subscribe to get occasional reminders to log your brews and tasting notes.</p>
-
-<div id="notification-status" style="margin: 1.5rem 0; padding: 1rem; background: #f5ede0; border-radius: 8px;">
-  Checking notification status...
+<div class="page-head">
+  <p class="eyebrow">Reminders</p>
+  <h1>Brew Reminders</h1>
+  <p>Subscribe to get the occasional nudge to log your brews and tasting notes before you forget them.</p>
 </div>
 
-<button id="notify-btn" style="padding: 0.6rem 1.4rem; background: #b5621e; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem;">
-  Subscribe
-</button>
+<div class="card" style="max-width:560px">
+  <div id="notification-status" class="status-msg loading visible" style="margin:0 0 1rem">Checking notification status…</div>
+  <button id="notify-btn" class="btn btn-primary">Subscribe</button>
+</div>
 
 <script>
   window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -22,26 +23,30 @@ title: Notification Preferences
     const statusEl = document.getElementById('notification-status');
     const btn = document.getElementById('notify-btn');
 
+    function setStatus(type, msg) {
+      statusEl.className = 'status-msg ' + type + ' visible';
+      statusEl.textContent = msg;
+    }
+
     if (!isPushSupported) {
-      statusEl.textContent = 'Push notifications are not supported in this browser.';
+      setStatus('error', 'Push notifications are not supported in this browser.');
       btn.style.display = 'none';
       return;
     }
 
     const isSubscribed = await OneSignal.User.PushSubscription.optedIn;
-    statusEl.textContent = isSubscribed
-      ? '✅ You are currently subscribed to brew reminders.'
-      : '🔔 You are not subscribed yet.';
+    setStatus(isSubscribed ? 'success' : 'loading',
+      isSubscribed ? '✅ You are currently subscribed to brew reminders.' : '🔔 You are not subscribed yet.');
     btn.textContent = isSubscribed ? 'Unsubscribe' : 'Subscribe';
 
     btn.addEventListener('click', async () => {
       if (await OneSignal.User.PushSubscription.optedIn) {
         await OneSignal.User.PushSubscription.optOut();
-        statusEl.textContent = '🔕 You have unsubscribed.';
+        setStatus('loading', '🔕 You have unsubscribed.');
         btn.textContent = 'Subscribe';
       } else {
         await OneSignal.User.PushSubscription.optIn();
-        statusEl.textContent = '✅ You are now subscribed!';
+        setStatus('success', '✅ You are now subscribed!');
         btn.textContent = 'Unsubscribe';
       }
     });

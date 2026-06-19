@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: bean
 title: Cafes Muda — Nestor Lasso Sidra, Colombia Huila
 origin: Colombia, Huila
 variety: Sidra

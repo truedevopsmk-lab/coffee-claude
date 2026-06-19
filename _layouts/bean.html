@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% include head.html %}
+</head>
+<body>
+  {% include nav.html %}
+
+  <main class="wrap wrap-narrow">
+    <div class="page-head">
+      <p class="eyebrow">Bean Profile</p>
+      <h1>{{ page.title }}</h1>
+      <div class="chip-row" style="margin-top:0.7rem">
+        {% if page.origin %}<span class="chip chip-origin">📍 {{ page.origin }}</span>{% endif %}
+        {% if page.process %}<span class="chip chip-process">{{ page.process }}</span>{% endif %}
+        {% if page.variety and page.variety != "Not specified" %}<span class="chip">{{ page.variety }}</span>{% endif %}
+      </div>
+    </div>
+
+    <article class="prose">
+      {{ content }}
+    </article>
+
+    <p style="margin-top:2rem"><a class="btn btn-ghost btn-sm" href="{{ '/beans/' | relative_url }}">← All beans</a></p>
+  </main>
+
+  {% include footer.html %}
+</body>
+</html>

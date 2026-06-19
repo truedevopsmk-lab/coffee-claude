@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: bean
 title: Subtext — Pablo Andres Guerrero, Colombia Narino
 origin: Colombia, Nariño
 variety: Pink Bourbon

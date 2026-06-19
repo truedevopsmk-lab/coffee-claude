@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: bean
 title: Blue Tokai — Riverdale Estate, Yercaud, India
 origin: Yercaud, Tamil Nadu, India
 variety: SLN9 + S5B

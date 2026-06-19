@@ -1,23 +1,19 @@
 ---
 ---
 
-const CACHE_NAME = 'coffee-journal-v2';
+const CACHE_NAME = 'coffee-journal-v3';
 
 const PRECACHE_URLS = [
   '/coffee-claude/',
   '/coffee-claude/brews/',
   '/coffee-claude/beans/',
   '/coffee-claude/methods/',
-  '/coffee-claude/methods/aeropress/',
-  '/coffee-claude/methods/v60/',
-  '/coffee-claude/methods/chemex/',
-  '/coffee-claude/methods/french-press/',
-  '/coffee-claude/methods/espresso/',
-  '/coffee-claude/methods/cold-brew/',
-  '/coffee-claude/methods/moka-pot/',
-  '/coffee-claude/methods/b75/',
+  '/coffee-claude/brews-and-frames/',
   '/coffee-claude/tools/brew-calculator/',
+  '/coffee-claude/add-brew/',
   '/coffee-claude/upload-photo/',
+  '/coffee-claude/journal-settings/',
+  '/coffee-claude/assets/coffee.css',
   '/coffee-claude/offline.html'
 ];
 

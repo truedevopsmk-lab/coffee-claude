@@ -31,11 +31,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
       link.href = page.url;
       link.textContent = page.title || page.url;
+      item.appendChild(link);
+
+      if (page.kind) {
+        const kind = document.createElement("span");
+        kind.className = "search-kind";
+        kind.textContent = page.kind;
+        link.insertAdjacentElement("afterend", kind);
+      }
 
       snippet.className = "search-snippet";
       snippet.textContent = page.content.slice(0, 140) + (page.content.length > 140 ? "…" : "");
 
-      item.appendChild(link);
       item.appendChild(snippet);
       resultsContainer.appendChild(item);
     });

@@ -1,42 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>{{ page.title }} | {{ site.title }}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="{{ "/assets/coffee.css" | relative_url }}">
+  {% include head.html %}
 </head>
 <body>
-  <div class="site">
+  {% include nav.html %}
 
-    <aside class="sidebar">
-      <h1>Coffee Journal</h1>
-      <p>Brewing notes, beans, and experiments.</p>
+  <main class="wrap">
+    {%- comment -%} Detect whether front matter carries structured spec data {%- endcomment -%}
+    {% assign has_specs = false %}
+    {% if page.method or page.bean or page.dose or page.water or page.grind or page.water_temp or page.brew_time %}{% assign has_specs = true %}{% endif %}
 
-      <nav class="nav">
-      <a href="{{ "/" | relative_url }}">Home</a>
-      <a href="{{ "/brews/" | relative_url }}">Brews</a>
-      <a href="{{ "/beans/" | relative_url }}">Beans</a>
-      <a href="{{ "/methods/" | relative_url }}">Methods</a>
-      <a href="{{ "/tools/brew-calculator/" | relative_url }}">Tools</a>
-      </nav>
-    </aside>
-
-    <main class="content">
-   
-
-      {{ content }}s
-
-      <div class="brew-nav">
-        {% if page.previous %}
-          ← <a href="{{ page.previous.url | relative_url }}">{{ page.previous.title }}</a>
+    <div class="brew-detail">
+      <aside class="brew-aside">
+        {% if has_specs %}
+        <div class="panel">
+          <h3>Brew Spec</h3>
+          <dl class="specs">
+            {% if page.method %}<dt>Method</dt><dd>{{ page.method }}</dd>{% endif %}
+            {% if page.bean %}<dt>Bean</dt><dd style="font-family:var(--sans);font-weight:600">{{ page.bean }}</dd>{% endif %}
+            {% if page.roaster and page.roaster != "" %}<dt>Roaster</dt><dd style="font-family:var(--sans);font-weight:600">{{ page.roaster }}</dd>{% endif %}
+            {% if page.dose and page.dose != "" %}<dt>Dose</dt><dd>{{ page.dose }} g</dd>{% endif %}
+            {% if page.water and page.water != "" %}<dt>Water</dt><dd>{{ page.water }} g</dd>{% endif %}
+            {% if page.dose and page.dose != "" and page.water and page.water != "" %}
+              {% assign dose_f = page.dose | plus: 0.0 %}
+              {% assign ratio = page.water | divided_by: dose_f | round: 1 %}
+              <dt>Ratio</dt><dd>1:{{ ratio }}</dd>
+            {% endif %}
+            {% if page.water_temp and page.water_temp != "" %}<dt>Temp</dt><dd>{{ page.water_temp }}°C</dd>{% endif %}
+            {% if page.brew_time and page.brew_time != "" %}<dt>Time</dt><dd>{{ page.brew_time }}</dd>{% endif %}
+            {% if page.grind and page.grind != "" %}<dt>Grind</dt><dd style="font-family:var(--sans);font-weight:600">{{ page.grind }}</dd>{% endif %}
+          </dl>
+        </div>
         {% endif %}
-        {% if page.next %}
-          <a href="{{ page.next.url | relative_url }}">{{ page.next.title }}</a> →
-        {% endif %}
-      </div>
-    </main>
 
-  </div>
+        {% if page.rating and page.rating != 0 and page.rating != "" %}
+        <div class="panel">
+          <h3>Rating</h3>
+          <div class="rating" aria-label="{{ page.rating }} out of 5">
+            {% for i in (1..5) %}<span class="{% if i <= page.rating %}on{% endif %}">★</span>{% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if page.strength or page.acidity or page.body or page.sweetness %}
+        <div class="panel">
+          <h3>Cup Profile</h3>
+          <dl class="taste">
+            {% assign taste_keys = "Strength:strength,Acidity:acidity,Body:body,Sweetness:sweetness" | split: "," %}
+            {% for pair in taste_keys %}
+              {% assign label = pair | split: ":" | first %}
+              {% assign key = pair | split: ":" | last %}
+              {% assign val = page[key] %}
+              {% if val and val != "" and val != 0 %}
+                {% assign pct = val | times: 20 %}
+                <div class="taste-row">
+                  <span class="taste-label">{{ label }}</span>
+                  <span class="taste-track"><span class="taste-fill" style="width:{{ pct }}%"></span></span>
+                  <span class="taste-val">{{ val }}</span>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </dl>
+        </div>
+        {% endif %}
+
+        <div class="panel">
+          <h3>Logbook</h3>
+          <dl class="specs">
+            <dt>Date</dt><dd>{{ page.date | date: "%d %b %Y" }}</dd>
+            <dt>Entry</dt><dd style="font-family:var(--sans);font-weight:600">Brew log</dd>
+          </dl>
+          <p style="margin:0.9rem 0 0"><a class="btn btn-ghost btn-sm" href="{{ '/brews/' | relative_url }}">← All brews</a></p>
+        </div>
+      </aside>
+
+      <article>
+        <div class="brew-head">
+          <p class="brew-eyebrow">{{ page.date | date: "%A, %d %B %Y" }}</p>
+          <h1 style="font-size:clamp(1.8rem,4vw,2.5rem);margin:0">{{ page.title }}</h1>
+          {% if page.method or page.bean %}
+          <div class="chip-row" style="margin-top:0.8rem">
+            {% if page.method %}<span class="chip chip-method">⚙ {{ page.method }}</span>{% endif %}
+            {% if page.roaster and page.roaster != "" %}<span class="chip">{{ page.roaster }}</span>{% endif %}
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="prose" style="margin-top:1.4rem">
+          {{ content }}
+        </div>
+
+        <nav class="brew-nav">
+          <div>
+            {% if page.previous %}
+              <span class="nv-label">← Older</span>
+              <a href="{{ page.previous.url | relative_url }}">{{ page.previous.title | truncate: 42 }}</a>
+            {% endif %}
+          </div>
+          <div style="text-align:right">
+            {% if page.next %}
+              <span class="nv-label">Newer →</span>
+              <a href="{{ page.next.url | relative_url }}">{{ page.next.title | truncate: 42 }}</a>
+            {% endif %}
+          </div>
+        </nav>
+      </article>
+    </div>
+  </main>
+
+  {% include footer.html %}
 </body>
 </html>

@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: bean
 title: Coffee & Coconuts — Colombia Decaf Santa Maria
 origin: Santa Maria, Huila, Colombia
 variety: Caturra, Castillo

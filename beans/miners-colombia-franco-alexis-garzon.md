@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: bean
 title: Miners Prague — Colombia Franco Alexis Garzón
 origin: Colombia
 variety: Not specified

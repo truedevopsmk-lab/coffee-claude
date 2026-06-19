@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: bean
 title: Sonic Beans — Plan del Hoyo, El Salvador
 origin: El Salvador
 variety: Gesha
