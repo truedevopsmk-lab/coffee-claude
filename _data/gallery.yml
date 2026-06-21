@@ -15,6 +15,9 @@ sections:
   - key: experiments
     title: "🧪 Experiments"
     folder: "/assets/gallery/experiments/"
+  - key: infographs
+    title: "📊 Infographs"
+    folder: "/assets/gallery/Infographs/"
   - key: brewed_elsewhere
     title: "🌍 Brewed Elsewhere"
     folder: "/assets/gallery/travel/"
@@ -66,6 +69,20 @@ captions:
   "/assets/gallery/brewers/2026-04-09-img-7419.jpeg": "Burundi Red Bourbon"
   "/assets/gallery/brewers/2026-04-09-img-4632.jpeg": "Caffeine at work"
   "/assets/gallery/brewers/2026-04-09-img-5274.jpeg": "Caffeine at work"
+
+  # Infographs (credit: @coffeewithdanielf)
+  "/assets/gallery/Infographs/coffeewithdanielf-01.jpeg": "Coffee infograph · @coffeewithdanielf"
+  "/assets/gallery/Infographs/coffeewithdanielf-02.jpeg": "Coffee infograph · @coffeewithdanielf"
+  "/assets/gallery/Infographs/coffeewithdanielf-03.jpeg": "Coffee infograph · @coffeewithdanielf"
+  "/assets/gallery/Infographs/coffeewithdanielf-04.jpeg": "Coffee infograph · @coffeewithdanielf"
+  "/assets/gallery/Infographs/coffeewithdanielf-05.jpeg": "Coffee infograph · @coffeewithdanielf"
+  "/assets/gallery/Infographs/coffeewithdanielf-06.jpeg": "Coffee infograph · @coffeewithdanielf"
+  "/assets/gallery/Infographs/coffeewithdanielf-07.jpeg": "Coffee infograph · @coffeewithdanielf"
+  "/assets/gallery/Infographs/coffeewithdanielf-08.jpeg": "Coffee infograph · @coffeewithdanielf"
+  "/assets/gallery/Infographs/coffeewithdanielf-09.jpeg": "Coffee infograph · @coffeewithdanielf"
+  "/assets/gallery/Infographs/coffeewithdanielf-10.jpeg": "Coffee infograph · @coffeewithdanielf"
+  "/assets/gallery/Infographs/coffeewithdanielf-11.jpeg": "Coffee infograph · @coffeewithdanielf"
+  "/assets/gallery/Infographs/coffeewithdanielf-12.jpeg": "Coffee infograph · @coffeewithdanielf"
 
   # Brewed Elsewhere / Events
   "/assets/gallery/travel/IMG_3170.jpeg": "Brewing memories abroad"
