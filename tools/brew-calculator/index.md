@@ -20,6 +20,17 @@ plain: true
     background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm);
     padding: 1rem; overflow-x: auto; font-family: var(--mono); font-size: 0.85rem; white-space: pre-wrap;
   }
+  .calc-output .pour-caption { margin: 0.9rem 0 0.4rem; font-size: 0.9rem; }
+  .calc-output table.pour-schedule { width: 100%; border-collapse: collapse; margin: 0.3rem 0 0.6rem; font-size: 0.92rem; }
+  .calc-output table.pour-schedule th,
+  .calc-output table.pour-schedule td { padding: 0.5rem 0.7rem; border: 1px solid var(--border); text-align: left; }
+  .calc-output table.pour-schedule th { background: var(--surface-2); color: var(--espresso); font-weight: 600; }
+  .calc-output table.pour-schedule td:last-child { font-variant-numeric: tabular-nums; }
+  .calc-output table.pour-schedule tr:last-child td { border-top-width: 2px; }
+  .calc-output .pour-flow {
+    margin: 0.2rem 0 0.6rem; font-family: var(--mono); font-size: 0.95rem;
+    font-weight: 600; color: var(--brass-deep); letter-spacing: 0.01em;
+  }
 </style>
 
 <div class="page-head">

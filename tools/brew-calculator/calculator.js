@@ -14,6 +14,35 @@ document.addEventListener("DOMContentLoaded", () => {
             const first = Math.round(total * 0.4);
             const second = total - first;
 
+            // Cumulative scale targets — the number your scale should read
+            // after each pour, so you never have to add in your head.
+            const targets = [
+              Math.round(first * 0.25),
+              first,
+              first + Math.round(second / 3),
+              first + Math.round((second * 2) / 3),
+              total
+            ];
+            const times = ["0:00", "0:45", "1:30", "2:15", "3:00"];
+
+            let prev = 0;
+            const rows = targets
+              .map((target, index) => {
+                const add = target - prev;
+                prev = target;
+                const addLabel = index === 0 ? `${add} g` : `+${add} g`;
+                return `
+                <tr>
+                  <td>Pour ${index + 1}</td>
+                  <td>${times[index]}</td>
+                  <td>${addLabel}</td>
+                  <td><strong>${target} g</strong></td>
+                </tr>`;
+              })
+              .join("");
+
+            const flow = targets.map((target) => `${target}`).join(" → ");
+
             return `
               <h3>Tetsu Kasuya 4:6 (V60)</h3>
               <ul>
@@ -21,10 +50,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 <li>Total water: ${total} g</li>
                 <li>Ratio: ${ratio}</li>
                 <li>Water temp: ${temp}</li>
-                <li>Pour 1: ${Math.round(first * 0.25)} g</li>
-                <li>Pour 2: ${Math.round(first * 0.75)} g</li>
-                <li>Pour 3–5: ${Math.round(second / 3)} g each</li>
               </ul>
+              <p class="pour-caption"><strong>Scale targets (cumulative)</strong> —
+              pour up to each number, don't add in your head:</p>
+              <table class="pour-schedule">
+                <thead>
+                  <tr><th>Pour</th><th>Time</th><th>Add</th><th>Scale reads</th></tr>
+                </thead>
+                <tbody>${rows}</tbody>
+              </table>
+              <p class="pour-flow">${flow} g</p>
               <p><strong>Why this works:</strong><br>
               The first 40% controls sweetness vs acidity, while the final pours
               tune strength. Lower temperatures preserve clarity.</p>
@@ -473,6 +508,32 @@ document.addEventListener("DOMContentLoaded", () => {
       .map((item) => `- ${item.textContent}`)
       .join("\n");
 
+    // If a cumulative pour schedule is present (e.g. Tetsu Kasuya 4:6),
+    // append it as a Markdown table so the brew log keeps the targets.
+    const scheduleTable = output.querySelector("table.pour-schedule");
+    let pourSchedule = "";
+    if (scheduleTable) {
+      const headers = Array.from(scheduleTable.querySelectorAll("thead th")).map(
+        (cell) => cell.textContent.trim()
+      );
+      const bodyRows = Array.from(scheduleTable.querySelectorAll("tbody tr")).map(
+        (row) =>
+          "| " +
+          Array.from(row.querySelectorAll("td"))
+            .map((cell) => cell.textContent.trim())
+            .join(" | ") +
+          " |"
+      );
+      pourSchedule = [
+        "",
+        "**Pour schedule (cumulative scale targets)**",
+        "",
+        "| " + headers.join(" | ") + " |",
+        "| " + headers.map(() => "---").join(" | ") + " |",
+        ...bodyRows
+      ].join("\n");
+    }
+
     const markdown = `
 ---
 layout: brew
@@ -491,6 +552,7 @@ This entry documents my **${recipeName}** brew and tasting notes for **${bean}**
 
 ## ⚖️ Brew Recipe
 ${brewParams}
+${pourSchedule}
 
 ---
 
