@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const lightboxDialog = lightbox?.querySelector(".gallery-lightbox-dialog");
   const lightboxImage = document.getElementById("gallery-lightbox-image");
   const lightboxCaption = document.getElementById("gallery-lightbox-caption");
+  const lightboxCount = document.getElementById("gallery-lightbox-count");
   const triggerButtons = Array.from(document.querySelectorAll(".gallery-trigger"));
   const closeButtons = lightbox?.querySelectorAll("[data-gallery-close]") || [];
   const prevButton = lightbox?.querySelector("[data-gallery-prev]");
@@ -23,17 +24,41 @@ document.addEventListener("DOMContentLoaded", () => {
     ).filter((el) => !el.hasAttribute("disabled") && el.offsetParent !== null);
   }
 
+  function wrapIndex(index) {
+    return (index + triggerButtons.length) % triggerButtons.length;
+  }
+
+  // Warm the browser cache for the neighbours so swiping feels instant
+  function preload(index) {
+    const src = triggerButtons[wrapIndex(index)].dataset.galleryImage;
+    if (src) new Image().src = src;
+  }
+
   function showAt(index) {
-    if (index < 0) index = triggerButtons.length - 1;
-    if (index >= triggerButtons.length) index = 0;
-    currentIndex = index;
-    const trigger = triggerButtons[index];
+    currentIndex = wrapIndex(index);
+    const trigger = triggerButtons[currentIndex];
     const src = trigger.dataset.galleryImage || "";
     const caption = trigger.dataset.galleryCaption || "";
-    lightboxImage.src = src;
+    // Show the already-loaded grid thumbnail instantly, then swap in the full image
+    const thumb = trigger.querySelector("img");
+    const thumbSrc = thumb && thumb.complete ? thumb.currentSrc : "";
+    if (thumbSrc && thumbSrc !== new URL(src, location.href).href) {
+      const shownIndex = currentIndex;
+      lightboxImage.src = thumbSrc;
+      const full = new Image();
+      full.onload = () => {
+        if (!lightbox.hidden && currentIndex === shownIndex) lightboxImage.src = src;
+      };
+      full.src = src;
+    } else {
+      lightboxImage.src = src;
+    }
     lightboxImage.alt = caption;
     lightboxCaption.textContent = caption;
     lightboxCaption.style.display = caption ? "" : "none";
+    if (lightboxCount) lightboxCount.textContent = `${currentIndex + 1} / ${triggerButtons.length}`;
+    preload(currentIndex + 1);
+    preload(currentIndex - 1);
   }
 
   function openLightbox(index, trigger) {
@@ -64,12 +89,18 @@ document.addEventListener("DOMContentLoaded", () => {
   prevButton?.addEventListener("click", () => showAt(currentIndex - 1));
   nextButton?.addEventListener("click", () => showAt(currentIndex + 1));
 
-  // Basic swipe support on touch devices
+  // Touch: swipe left/right to browse, swipe down to close
   let touchStartX = 0;
-  lightboxImage.addEventListener("touchstart", (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
-  lightboxImage.addEventListener("touchend", (e) => {
+  let touchStartY = 0;
+  lightboxDialog.addEventListener("touchstart", (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+  lightboxDialog.addEventListener("touchend", (e) => {
     const dx = e.changedTouches[0].screenX - touchStartX;
-    if (Math.abs(dx) > 50) showAt(currentIndex + (dx < 0 ? 1 : -1));
+    const dy = e.changedTouches[0].screenY - touchStartY;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) showAt(currentIndex + (dx < 0 ? 1 : -1));
+    else if (dy > 90 && Math.abs(dy) > Math.abs(dx) * 1.5) closeLightbox();
   }, { passive: true });
 
   lightbox.addEventListener("keydown", (event) => {

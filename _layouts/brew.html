@@ -12,6 +12,17 @@
     {% if page.method or page.bean or page.dose or page.water or page.grind or page.water_temp or page.brew_time %}{% assign has_specs = true %}{% endif %}
 
     <div class="brew-detail">
+      <header class="brew-head">
+        <p class="brew-eyebrow">{{ page.date | date: "%A, %d %B %Y" }}</p>
+        <h1 style="font-size:clamp(1.8rem,4vw,2.5rem);margin:0">{{ page.title }}</h1>
+        {% if page.method or page.bean %}
+        <div class="chip-row" style="margin-top:0.8rem">
+          {% if page.method %}<span class="chip chip-method">⚙ {{ page.method }}</span>{% endif %}
+          {% if page.roaster and page.roaster != "" %}<span class="chip">{{ page.roaster }}</span>{% endif %}
+        </div>
+        {% endif %}
+      </header>
+
       <aside class="brew-aside">
         {% if has_specs %}
         <div class="panel">
@@ -75,19 +86,8 @@
         </div>
       </aside>
 
-      <article>
-        <div class="brew-head">
-          <p class="brew-eyebrow">{{ page.date | date: "%A, %d %B %Y" }}</p>
-          <h1 style="font-size:clamp(1.8rem,4vw,2.5rem);margin:0">{{ page.title }}</h1>
-          {% if page.method or page.bean %}
-          <div class="chip-row" style="margin-top:0.8rem">
-            {% if page.method %}<span class="chip chip-method">⚙ {{ page.method }}</span>{% endif %}
-            {% if page.roaster and page.roaster != "" %}<span class="chip">{{ page.roaster }}</span>{% endif %}
-          </div>
-          {% endif %}
-        </div>
-
-        <div class="prose" style="margin-top:1.4rem">
+      <article class="brew-body">
+        <div class="prose">
           {{ content }}
         </div>
 

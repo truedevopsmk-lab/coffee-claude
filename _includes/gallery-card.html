@@ -1,0 +1,19 @@
+{%- comment -%}
+  One gallery tile. The grid loads the small copy from /assets/gallery-thumbs/
+  when one exists (same folder + filename); the lightbox always opens the full image.
+  Params: file (static file), thumbs (array of thumbnail paths).
+{%- endcomment -%}
+{%- assign caption = site.data.gallery.captions[include.file.path] | default: "" -%}
+{%- assign thumb = include.file.path | replace_first: '/assets/gallery/', '/assets/gallery-thumbs/' -%}
+{%- unless include.thumbs contains thumb -%}{%- assign thumb = include.file.path -%}{%- endunless -%}
+<figure class="gallery-card">
+  <button
+    class="gallery-trigger"
+    type="button"
+    data-gallery-image="{{ include.file.path | relative_url }}"
+    data-gallery-caption="{{ caption | escape }}"
+    aria-label="Open image{% if caption != '' %}: {{ caption | escape }}{% endif %}">
+    <img src="{{ thumb | relative_url }}" alt="{{ caption | escape }}" loading="lazy" decoding="async">
+  </button>
+  {% if caption != "" %}<figcaption>{{ caption | escape }}</figcaption>{% endif %}
+</figure>

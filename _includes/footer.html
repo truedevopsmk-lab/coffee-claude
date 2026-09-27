@@ -18,10 +18,21 @@
     var navToggle = document.querySelector('[data-nav-toggle]');
     var nav = document.getElementById('primary-nav');
     if (navToggle && nav) {
-      navToggle.addEventListener('click', function () {
-        var open = nav.classList.toggle('open');
+      var setOpen = function (open) {
+        nav.classList.toggle('open', open);
         navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        navToggle.textContent = open ? '✕' : '☰';
+      };
+      navToggle.addEventListener('click', function () { setOpen(!nav.classList.contains('open')); });
+      // Close on outside tap, Escape, picking a link, or returning via back/forward cache
+      document.addEventListener('click', function (e) {
+        if (nav.classList.contains('open') && !nav.contains(e.target) && !navToggle.contains(e.target)) setOpen(false);
       });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && nav.classList.contains('open')) { setOpen(false); navToggle.focus(); }
+      });
+      nav.addEventListener('click', function (e) { if (e.target.closest('a')) setOpen(false); });
+      window.addEventListener('pageshow', function () { setOpen(false); });
     }
     var themeToggle = document.querySelector('[data-theme-toggle]');
     if (themeToggle) {

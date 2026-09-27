@@ -6,8 +6,12 @@ show_title: false
 plain: true
 ---
 
+{%- assign gallery_files = site.static_files | where_exp: "f", "f.path contains '/assets/gallery/'" -%}
+{%- capture disk_folders_csv -%}{%- for f in gallery_files -%}{{ f.path | remove_first: '/assets/gallery/' | split: '/' | first }}{%- unless forloop.last -%}|{%- endunless -%}{%- endfor -%}{%- endcapture -%}
+{%- assign disk_folders = disk_folders_csv | split: '|' | uniq -%}
+
 <style>
-  .up-layout { display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 1.2rem; align-items: start; }
+  .up-layout { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); gap: 1.2rem; align-items: start; }
   .up-stack { display: grid; gap: 1.2rem; }
   .up-panel {
     background: var(--surface); border: 1px solid var(--border);
@@ -15,17 +19,24 @@ plain: true
   }
   .up-panel h2 { font-size: 1.2rem; margin: 0 0 0.3rem; }
   .up-panel .intro { margin: 0 0 1rem; color: var(--ink-soft); font-size: 0.92rem; }
+  .up-panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
 
-  .quality-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
+  .quality-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
   .q-btn {
     border: 1px solid var(--border); background: var(--surface-2); color: var(--ink);
-    border-radius: var(--radius-sm); padding: 0.8rem; font: inherit; text-align: left; cursor: pointer;
+    border-radius: var(--radius-sm); padding: 0.65rem 0.7rem; font: inherit; text-align: left; cursor: pointer;
     transition: transform .15s, border-color .15s, background .15s;
   }
-  .q-btn:hover, .q-btn:focus-visible { border-color: var(--brass); transform: translateY(-1px); outline: none; }
+  .q-btn:hover, .q-btn:focus-visible { border-color: var(--brass); outline: none; }
   .q-btn.active { border-color: var(--brass); background: color-mix(in srgb, var(--brass) 14%, var(--surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brass) 30%, transparent); }
-  .q-btn b { font-weight: 700; }
-  .q-note { display: block; margin-top: 0.2rem; color: var(--ink-faint); font-size: 0.82rem; }
+  .q-btn:disabled { opacity: .55; cursor: not-allowed; }
+  .q-btn b { font-weight: 700; font-size: 0.92rem; }
+  .q-note { display: block; margin-top: 0.15rem; color: var(--ink-faint); font-size: 0.76rem; line-height: 1.35; }
+  .size-field { margin: 1.1rem 0 0; }
+  .size-field > label {
+    display: block; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--ink-faint); font-weight: 600; margin-bottom: 0.45rem;
+  }
 
   .source-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; margin-bottom: 0.9rem; }
   .source-btn {
@@ -34,13 +45,14 @@ plain: true
     border-radius: var(--radius-sm); padding: 1rem; cursor: pointer; font: inherit; font-weight: 600;
     transition: transform .15s, border-color .15s;
   }
-  .source-btn:hover { border-color: var(--brass); transform: translateY(-1px); }
+  .source-btn:hover { border-color: var(--brass); }
+  .source-btn:active { transform: scale(.98); }
   .source-btn .ico { font-size: 1.6rem; }
   .source-btn small { font-weight: 400; color: var(--ink-faint); }
 
   .drop-zone {
     position: relative; border: 1.5px dashed color-mix(in srgb, var(--brass) 55%, var(--border));
-    border-radius: var(--radius-sm); padding: 1.8rem 1rem; min-height: 150px;
+    border-radius: var(--radius-sm); padding: 1.6rem 1rem; min-height: 130px;
     background: var(--surface-2); display: grid; place-items: center; text-align: center; cursor: pointer;
     transition: border-color .15s, background .15s, transform .15s;
   }
@@ -49,49 +61,82 @@ plain: true
   .drop-zone p { margin: 0; color: var(--ink-faint); font-size: 0.9rem; }
   .drop-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 
-  .preview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.8rem; }
+  .preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 0.8rem; }
   .empty-state { border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 1rem; color: var(--ink-faint); grid-column: 1 / -1; }
 
-  .photo-card { position: relative; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; background: var(--surface-2); }
-  .photo-card img { display: block; width: 100%; aspect-ratio: 1/1; object-fit: cover; background: var(--surface); }
-  .photo-card .processing { display: grid; place-items: center; aspect-ratio: 1/1; color: var(--ink-faint); padding: 1rem; text-align: center; font-size: 0.85rem; }
-  .photo-body { padding: 0.7rem; display: grid; gap: 0.45rem; }
-  .photo-header { display: flex; gap: 0.5rem; align-items: flex-start; justify-content: space-between; }
-  .file-name { font-weight: 600; font-size: 0.86rem; word-break: break-word; }
-  .file-size { font-size: 0.78rem; color: var(--ink-faint); }
+  .photo-card { position: relative; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; background: var(--surface-2); transition: border-color .2s; }
+  .photo-card.is-done { border-color: color-mix(in srgb, var(--sage) 55%, var(--border)); }
+  .photo-card.is-failed { border-color: rgba(192,57,43,.45); }
+  .photo-media img { display: block; width: 100%; aspect-ratio: 1/1; object-fit: cover; background: var(--surface); }
+  .photo-media .processing { display: grid; place-items: center; aspect-ratio: 1/1; color: var(--ink-faint); padding: 1rem; text-align: center; font-size: 0.85rem; }
+  .photo-body { padding: 0.65rem; display: grid; gap: 0.45rem; }
+  .photo-header { display: flex; gap: 0.5rem; align-items: flex-start; justify-content: space-between; min-width: 0; }
+  .photo-meta { min-width: 0; }
+  .file-name { font-weight: 600; font-size: 0.84rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-size { font-size: 0.72rem; color: var(--ink-faint); font-family: var(--mono); line-height: 1.45; }
+  .file-size span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .file-error { font-size: 0.78rem; color: #c0392b; }
+  .card-caption {
+    width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--ink); padding: 0.5rem 0.6rem; font: inherit; font-size: 16px; /* 16px stops iOS zoom-on-focus */
+  }
+  .card-caption:focus { outline: none; border-color: var(--brass); box-shadow: 0 0 0 3px color-mix(in srgb, var(--brass) 14%, transparent); }
+  .card-caption:disabled { opacity: .7; }
   .remove-btn {
-    border: 1px solid var(--border); width: 1.8rem; height: 1.8rem; border-radius: 999px;
+    border: 1px solid var(--border); width: 1.9rem; height: 1.9rem; border-radius: 999px;
     background: var(--surface); color: var(--ink); cursor: pointer; font-size: 1rem; line-height: 1;
     display: inline-grid; place-items: center; flex: 0 0 auto;
   }
   .remove-btn:hover { border-color: #c0392b; color: #c0392b; }
+  .remove-btn:disabled { opacity: .4; cursor: not-allowed; }
 
-  .upload-progress { display: none; margin-bottom: 0.7rem; color: var(--brass-deep); font-size: 0.9rem; font-weight: 600; }
+  .upload-progress { display: none; margin-bottom: 0.7rem; }
   .upload-progress.visible { display: block; }
+  .up-progress-label { color: var(--brass-deep); font-size: 0.88rem; font-weight: 600; margin-bottom: 0.35rem; }
+  .up-progress-track { height: 6px; border-radius: var(--radius-pill); background: var(--surface-2); border: 1px solid var(--border); overflow: hidden; }
+  .up-progress-fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--gold), var(--brass)); transition: width .3s ease; }
   .upload-bar {
     width: 100%; border: 0; border-radius: var(--radius-pill); padding: 0.9rem 1rem;
     background: linear-gradient(135deg, var(--brass), var(--brass-deep)); color: #fff7ee;
     font: inherit; font-size: 1rem; font-weight: 700; cursor: pointer; transition: transform .15s, filter .15s;
   }
-  .upload-bar:hover { filter: brightness(1.06); transform: translateY(-1px); }
+  .upload-bar:hover { filter: brightness(1.06); }
+  .upload-bar:active { transform: scale(.99); }
   .upload-bar:disabled { opacity: .55; cursor: not-allowed; transform: none; filter: grayscale(.3); }
+  .up-actions { margin-top: 1.1rem; }
   .meta-form { display: none; gap: 0.9rem; }
   .meta-form.visible { display: grid; }
   .footnote { margin-top: 0.7rem; color: var(--ink-faint); font-size: 0.82rem; }
 
+  @media (min-width: 861px) {
+    .up-aside { position: sticky; top: var(--sticky-top); }
+  }
   @media (max-width: 860px) {
-    .up-layout { grid-template-columns: 1fr; }
-    .up-aside { position: sticky; bottom: 0; z-index: 20; }
-    /* On mobile, keep the upload button reachable */
-    .up-aside .upload-bar { box-shadow: var(--shadow-lg); }
+    .up-layout { grid-template-columns: minmax(0, 1fr); }
+    .preview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
+    /* Once photos are picked, the upload button floats above the home indicator */
+    .up-actions.floating {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; margin: 0;
+      padding: 0.7rem max(var(--gutter), var(--safe-right)) calc(0.7rem + var(--safe-bottom)) max(var(--gutter), var(--safe-left));
+      background: color-mix(in srgb, var(--paper) 90%, transparent);
+      -webkit-backdrop-filter: saturate(140%) blur(12px); backdrop-filter: saturate(140%) blur(12px);
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -10px 30px rgba(40, 24, 16, .12);
+    }
+    body.up-bar-on .footer { padding-bottom: calc(6rem + var(--safe-bottom)); }
+    body.up-bar-on #onesignal-bell-container { margin-bottom: calc(5rem + var(--safe-bottom)); }
+  }
+  /* Phones: the two picker buttons already cover everything the drop zone does */
+  @media (max-width: 640px) and (pointer: coarse) {
+    .drop-zone { display: none; }
+    .source-buttons { margin-bottom: 0; }
   }
 </style>
 
 <div class="page-head">
   <p class="eyebrow">Photo Journal</p>
   <h1>Add to the Frames</h1>
-  <p>Snap a photo or pick from your library. HEIC files convert to JPEG right in your browser, then everything commits straight to GitHub — nothing is sent anywhere else.</p>
+  <p>Snap or pick a whole batch at once. Photos are resized, stripped of location data, and committed to GitHub together in a single commit. Nothing goes anywhere else.</p>
 </div>
 
 <div id="page-status" class="status-msg" role="status" aria-live="polite"></div>
@@ -100,7 +145,7 @@ plain: true
   <div class="up-stack">
     <section class="up-panel">
       <h2>1 · Choose photos</h2>
-      <p class="intro">Take a new photo with your camera, or pick existing images.</p>
+      <p class="intro">Take a new photo, or select as many as you like from your library.</p>
 
       <div class="source-buttons">
         <button class="source-btn" type="button" id="camera-btn">
@@ -109,7 +154,7 @@ plain: true
         </button>
         <button class="source-btn" type="button" id="library-btn">
           <span class="ico">🖼</span> From library
-          <small>Photos or files</small>
+          <small>Select multiple</small>
         </button>
       </div>
 
@@ -117,51 +162,46 @@ plain: true
         <input id="photo-input" type="file" accept="image/*,.heic,.heif" multiple>
         <div>
           <h3>Drag &amp; drop</h3>
-          <p>…or tap to browse. HEIC, JPEG, PNG &amp; WebP supported.</p>
+          <p>…tap to browse, or paste. HEIC, JPEG, PNG &amp; WebP supported.</p>
         </div>
       </div>
-      <input id="camera-input" type="file" accept="image/*" capture="environment" style="display:none">
+      <input id="camera-input" type="file" accept="image/*" capture="environment" hidden>
     </section>
 
     <section class="up-panel">
-      <h2>2 · Output quality</h2>
-      <p class="intro">How hard to compress HEIC files before upload.</p>
-      <div class="quality-options" id="quality-controls">
-        <button class="q-btn" data-quality="0.9" data-label="High" type="button"><b>High</b><span class="q-note">~90% · best detail</span></button>
-        <button class="q-btn active" data-quality="0.7" data-label="Medium" type="button"><b>Medium</b><span class="q-note">~70% · recommended</span></button>
-        <button class="q-btn" data-quality="0.4" data-label="Low" type="button"><b>Low</b><span class="q-note">~40% · smallest</span></button>
+      <div class="up-panel-head">
+        <h2>2 · Review &amp; caption</h2>
+        <button id="clear-btn" class="btn btn-ghost btn-sm" type="button" hidden>Clear all</button>
       </div>
-    </section>
-
-    <section class="up-panel">
-      <h2>3 · Preview</h2>
+      <p class="intro">Give each photo its own caption, or leave it blank to use the default caption.</p>
       <div id="preview-grid" class="preview-grid">
-        <div class="empty-state">Selected photos appear here with conversion status, size details, and upload progress.</div>
+        <div class="empty-state" id="preview-empty">Selected photos appear here with their optimized size and upload status.</div>
       </div>
     </section>
   </div>
 
   <aside class="up-panel up-aside">
-    <h2>Details &amp; upload</h2>
-    <p class="intro">Pick an album, add a caption, then upload.</p>
+    <h2>3 · Album &amp; upload</h2>
+    <p class="intro">Pick an album, set a default caption, then upload the whole batch.</p>
 
-    <form id="meta-form" class="meta-form" novalidate>
+    <form id="meta-form" class="meta-form" novalidate onsubmit="return false">
       <div class="field" style="margin:0">
         <label for="photo-album">Album</label>
         <select id="photo-album"></select>
       </div>
       <div class="field hidden" id="new-album-field" style="margin:0">
         <label for="photo-album-new">New album name</label>
-        <input id="photo-album-new" type="text" placeholder="e.g. morning-rituals">
+        <input id="photo-album-new" type="text" placeholder="e.g. morning-rituals" autocapitalize="none">
         <small>Saved as a clean folder slug.</small>
       </div>
       <div class="field" style="margin:0">
-        <label for="photo-caption">Caption</label>
-        <input id="photo-caption" type="text" placeholder="e.g. Blooming beautifully at sunrise">
+        <label for="photo-caption">Default caption</label>
+        <input id="photo-caption" type="text" placeholder="e.g. Blooming beautifully at sunrise" maxlength="140">
+        <small>Used for any photo without its own caption.</small>
       </div>
       <div class="field" style="margin:0">
         <label for="photo-tags">Tags <span style="text-transform:none;font-weight:400">(optional)</span></label>
-        <input id="photo-tags" type="text" placeholder="v60, ethiopia, morning">
+        <input id="photo-tags" type="text" placeholder="v60, ethiopia, morning" autocapitalize="none">
       </div>
       <div class="field-row">
         <div class="field" style="margin:0">
@@ -175,29 +215,55 @@ plain: true
       </div>
     </form>
 
-    <div id="upload-progress" class="upload-progress" aria-live="polite"></div>
-    <button id="upload-btn" class="upload-bar" type="button" disabled>Upload 0 photos</button>
-    <p class="footnote">Needs a GitHub token — set one in <a href="{{ '/journal-settings/' | relative_url }}">Settings</a>. Uploads go directly to GitHub via the Contents API.</p>
+    <div class="size-field">
+      <label id="quality-label">Size &amp; quality</label>
+      <div class="quality-options" id="quality-controls" role="group" aria-labelledby="quality-label">
+        <button class="q-btn" data-preset="high" type="button"><b>High</b><span class="q-note">2560px · 90%</span></button>
+        <button class="q-btn active" data-preset="medium" type="button"><b>Medium</b><span class="q-note">2048px · 82%</span></button>
+        <button class="q-btn" data-preset="low" type="button"><b>Low</b><span class="q-note">1440px · 72%</span></button>
+      </div>
+    </div>
+
+    <div class="up-actions" id="up-actions">
+      <div id="upload-progress" class="upload-progress" aria-live="polite">
+        <div class="up-progress-label" id="upload-progress-label"></div>
+        <div class="up-progress-track"><div class="up-progress-fill" id="upload-progress-fill"></div></div>
+      </div>
+      <button id="upload-btn" class="upload-bar" type="button" disabled>Upload 0 photos</button>
+    </div>
+    <p class="footnote">Needs a GitHub token — set one in <a href="{{ '/journal-settings/' | relative_url }}">Settings</a>. Each batch lands as one commit, so the gallery rebuilds once.</p>
   </aside>
 </div>
 
-<!-- HEIC converter -->
-<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
 <script>
-  const SITE_BASE = '{{ "/" | relative_url }}'.replace(/\/$/, '');
   const REPO_OWNER = 'truedevopsmk-lab';
   const REPO_NAME = 'coffee-claude';
   const TARGET_BRANCH = 'main';
   const GALLERY_PATH = '_data/gallery.yml';
+  const GALLERY_ROOT = 'assets/gallery';
+  const THUMB_ROOT = 'assets/gallery-thumbs';
   const SETTINGS_URL = '{{ "/journal-settings/" | relative_url }}';
   const GALLERY_URL = '{{ "/brews-and-frames/" | relative_url }}';
+  const HEIC2ANY_URL = 'https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js';
+  const LAST_ALBUM_KEY = 'cj_last_album';
   const MAX_FILE_SIZE = 10 * 1024 * 1024;
+  const MAX_PARALLEL = 2;        // photos decoded at once; iOS Safari runs out of canvas memory beyond this
+  const THUMB_SHORT_EDGE = 540;  // grid tiles are ~170px wide at 3x
+  const PRESETS = {
+    high:   { edge: 2560, quality: 0.9 },
+    medium: { edge: 2048, quality: 0.82 },
+    low:    { edge: 1440, quality: 0.72 }
+  };
   const galleryData = {{ site.data.gallery | jsonify }};
+  const diskFolders = {{ disk_folders | jsonify }};
 
-  let outputQuality = 0.7;
+  let preset = PRESETS.medium;
   let items = [];
   let isUploading = false;
   let itemCounter = 0;
+  let activeJobs = 0;
+  let heicLoader = null;
+  const queue = [];
 
   const qualityButtons = Array.from(document.querySelectorAll('.q-btn'));
   const photoInput = document.getElementById('photo-input');
@@ -206,6 +272,8 @@ plain: true
   const libraryBtn = document.getElementById('library-btn');
   const dropZone = document.getElementById('drop-zone');
   const previewGrid = document.getElementById('preview-grid');
+  const emptyState = document.getElementById('preview-empty');
+  const clearButton = document.getElementById('clear-btn');
   const metaForm = document.getElementById('meta-form');
   const albumSelect = document.getElementById('photo-album');
   const newAlbumField = document.getElementById('new-album-field');
@@ -214,8 +282,11 @@ plain: true
   const tagsInput = document.getElementById('photo-tags');
   const dateInput = document.getElementById('photo-date');
   const selectedCountInput = document.getElementById('selected-count');
+  const actions = document.getElementById('up-actions');
   const uploadButton = document.getElementById('upload-btn');
   const uploadProgress = document.getElementById('upload-progress');
+  const progressLabel = document.getElementById('upload-progress-label');
+  const progressFill = document.getElementById('upload-progress-fill');
   const pageStatus = document.getElementById('page-status');
 
   initialize();
@@ -230,9 +301,13 @@ plain: true
   function bindEvents() {
     qualityButtons.forEach((button) => {
       button.addEventListener('click', () => {
+        if (isUploading) return;
         qualityButtons.forEach((c) => c.classList.remove('active'));
         button.classList.add('active');
-        outputQuality = parseFloat(button.dataset.quality);
+        preset = PRESETS[button.dataset.preset] || PRESETS.medium;
+        // Re-encode everything not yet uploaded at the new size
+        items.filter((i) => i.uploadStatus !== 'uploaded').forEach(enqueue);
+        render();
       });
     });
 
@@ -245,273 +320,531 @@ plain: true
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
     dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); handleSelectedFiles(e.dataTransfer.files); });
     dropZone.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); photoInput.click(); } });
+    document.addEventListener('paste', (e) => {
+      const files = e.clipboardData && e.clipboardData.files;
+      if (files && files.length) { e.preventDefault(); handleSelectedFiles(files); }
+    });
 
     albumSelect.addEventListener('change', () => {
       newAlbumField.classList.toggle('hidden', albumSelect.value !== '__new__');
+      if (albumSelect.value === '__new__') newAlbumInput.focus();
     });
+    captionInput.addEventListener('input', () => items.forEach(updateCaptionPlaceholder));
 
-    uploadButton.addEventListener('click', uploadFilesSequentially);
+    uploadButton.addEventListener('click', uploadBatch);
+    clearButton.addEventListener('click', clearAll);
+    window.addEventListener('beforeunload', (e) => {
+      if (isUploading) { e.preventDefault(); e.returnValue = ''; }
+    });
   }
 
   function populateAlbumOptions() {
     const options = [];
     const seen = new Set();
-    (galleryData.sections || []).forEach((section) => {
-      const folder = getFolderFromGalleryPath(section.folder || '');
+    const add = (folder, label) => {
       if (!folder || seen.has(folder)) return;
       seen.add(folder);
-      options.push({ value: folder, label: section.title || humanizeFolder(folder) });
-    });
-    Object.keys(galleryData.captions || {}).forEach((path) => {
-      const folder = getFolderFromGalleryPath(path);
-      if (!folder || seen.has(folder)) return;
-      seen.add(folder);
-      options.push({ value: folder, label: humanizeFolder(folder) });
-    });
+      options.push({ value: folder, label: label || humanizeFolder(folder) });
+    };
+    (galleryData.sections || []).forEach((section) => add(getFolderFromGalleryPath(section.folder || ''), section.title));
+    Object.keys(galleryData.captions || {}).forEach((path) => add(getFolderFromGalleryPath(path)));
+    diskFolders.forEach((folder) => add(folder));
     options.sort((a, b) => a.label.localeCompare(b.label));
     albumSelect.innerHTML = [
       '<option value="">Select album…</option>',
       ...options.map((o) => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`),
       '<option value="__new__">➕ New album…</option>'
     ].join('');
+    let last = '';
+    try { last = localStorage.getItem(LAST_ALBUM_KEY) || ''; } catch (e) {}
+    if (last && seen.has(last)) albumSelect.value = last;
   }
 
   function handleSelectedFiles(fileList) {
     const incoming = Array.from(fileList || []).filter((f) => f && (f.type.startsWith('image/') || /\.(heic|heif)$/i.test(f.name || '')));
     if (incoming.length === 0) return;
     clearPageStatus();
-    const newItems = incoming.map((file) => {
+    incoming.forEach((file) => {
       const item = {
-        id: ++itemCounter, originalFile: file, processedFile: null, previewUrl: '',
-        status: 'queued', uploadStatus: 'idle', formatLabel: detectFormatLabel(file),
-        sizeText: formatFileSize(file.size), errorMessage: '', sizeSummary: '', isHeic: isHeicFile(file)
+        id: ++itemCounter, originalFile: file, isHeic: isHeicFile(file),
+        processedFile: null, thumbFile: null, previewUrl: '', blobs: null, repoName: '',
+        status: 'queued', uploadStatus: 'idle', version: 0, caption: '',
+        formatLabel: detectFormatLabel(file), sizeSummary: formatFileSize(file.size), dimensions: '', errorMessage: '', el: null
       };
       items.push(item);
-      return item;
+      enqueue(item);
     });
     render();
-    Promise.allSettled(newItems.map((item) => processItem(item))).then(render);
+  }
+
+  // Photos are decoded a couple at a time; decoding a 20-photo batch at once crashes iOS Safari.
+  function enqueue(item) {
+    item.version++;
+    item.status = 'queued';
+    item.uploadStatus = 'idle';
+    item.blobs = null;
+    item.errorMessage = '';
+    if (!queue.includes(item)) queue.push(item);
+    pumpQueue();
+  }
+
+  function pumpQueue() {
+    while (activeJobs < MAX_PARALLEL && queue.length) {
+      const item = queue.shift();
+      if (!items.includes(item)) continue;
+      activeJobs++;
+      processItem(item).finally(() => { activeJobs--; render(); pumpQueue(); });
+    }
   }
 
   async function processItem(item) {
+    const version = item.version;
+    const file = item.originalFile;
     item.status = item.isHeic ? 'converting' : 'processing';
-    item.sizeText = formatFileSize(item.originalFile.size);
-    render();
-    const processedFile = await processFile(item.originalFile, item);
-    if (!processedFile) { render(); return; }
-    if (processedFile.size > MAX_FILE_SIZE) {
+    renderItem(item);
+    try {
+      const result = await optimizeImage(file, item.isHeic, preset);
+      if (version !== item.version || !items.includes(item)) return; // re-queued or removed meanwhile
+      if (result.full.size > MAX_FILE_SIZE) {
+        throw new Error(`⚠ Still ${formatFileSize(result.full.size)} after compression. GitHub's limit is 10MB. Try Low.`);
+      }
+      if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+      item.processedFile = result.full;
+      item.thumbFile = result.thumb;
+      item.previewUrl = URL.createObjectURL(result.thumb);
+      const sourceFormat = detectFormatLabel(file);
+      item.formatLabel = sourceFormat === 'JPEG' ? 'JPEG' : `${sourceFormat} → JPEG`;
+      item.sizeSummary = `${formatFileSize(file.size)} → ${formatFileSize(result.full.size)}`;
+      item.dimensions = `${result.width}×${result.height}`;
+      item.status = 'ready';
+    } catch (err) {
+      if (version !== item.version) return;
       item.status = 'error';
-      item.errorMessage = `⚠ ${processedFile.name} is still ${formatFileSize(processedFile.size)} after conversion. GitHub limit is 10MB. Try Low quality.`;
-      item.processedFile = null; item.previewUrl = ''; render(); return;
+      item.processedFile = null;
+      item.errorMessage = err.message || `❌ Could not process ${file.name}.`;
     }
-    item.processedFile = processedFile;
-    item.previewUrl = URL.createObjectURL(processedFile);
-    item.status = 'ready'; item.uploadStatus = 'idle';
-    if (!item.sizeSummary) item.sizeSummary = formatFileSize(processedFile.size);
-    render();
   }
 
-  async function processFile(file, item) {
-    if (item.isHeic) {
-      if (typeof window.heic2any !== 'function') {
-        item.status = 'error'; item.errorMessage = '⚠ HEIC converter not loaded. Check your connection and refresh.'; return null;
-      }
+  // Decode → resize → re-encode as JPEG. Browsers apply the EXIF rotation while decoding,
+  // and re-encoding drops all EXIF, including the GPS location iPhones embed.
+  async function optimizeImage(file, isHeic, { edge, quality }) {
+    let source = await loadImage(file).catch(() => null);
+    if (!source && isHeic) {
+      // Safari 17+ decodes HEIC natively; other browsers need the converter
+      await loadHeicConverter();
+      let converted;
       try {
-        const convertedBlob = await window.heic2any({ blob: file, toType: 'image/jpeg', quality: outputQuality });
-        const resultBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
-        const baseName = file.name.replace(/\.(heic|heif)$/i, '');
-        const convertedFile = new File([resultBlob], `${baseName}.jpg`, { type: 'image/jpeg' });
-        const saved = file.size > 0 ? (((file.size - convertedFile.size) / file.size) * 100).toFixed(0) : '0';
-        item.formatLabel = 'HEIC → JPEG';
-        item.sizeSummary = `${formatFileSize(file.size)} → ${formatFileSize(convertedFile.size)} (−${saved}%)`;
-        return convertedFile;
+        converted = await window.heic2any({ blob: file, toType: 'image/jpeg', quality: 0.92 });
       } catch (err) {
-        item.status = 'error'; item.errorMessage = `❌ Could not convert ${file.name}.`; item.sizeSummary = ''; return null;
+        throw new Error(`❌ Could not convert ${file.name}.`);
       }
+      source = await loadImage(Array.isArray(converted) ? converted[0] : converted).catch(() => null);
     }
-    item.formatLabel = detectFormatLabel(file);
-    item.sizeSummary = formatFileSize(file.size);
-    return file;
+    if (!source) throw new Error(`❌ Could not read ${file.name}.`);
+
+    const { img, release } = source;
+    try {
+      const full = drawScaled(img, fitLongEdge(img.naturalWidth, img.naturalHeight, edge));
+      const thumb = drawScaled(full, fitShortEdge(full.width, full.height, THUMB_SHORT_EDGE));
+      const width = full.width;
+      const height = full.height;
+      const [fullBlob, thumbBlob] = await Promise.all([canvasToJpeg(full, quality), canvasToJpeg(thumb, 0.78)]);
+      releaseCanvas(full);
+      releaseCanvas(thumb);
+      const name = `${file.name.replace(/\.[^.]+$/, '') || 'photo'}.jpg`;
+      return {
+        full: new File([fullBlob], name, { type: 'image/jpeg' }),
+        thumb: new File([thumbBlob], name, { type: 'image/jpeg' }),
+        width,
+        height
+      };
+    } finally {
+      release();
+    }
+  }
+
+  function loadImage(blob) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => resolve({ img, release: () => URL.revokeObjectURL(url) });
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('decode failed')); };
+      img.src = url;
+    });
+  }
+
+  function loadHeicConverter() {
+    if (typeof window.heic2any === 'function') return Promise.resolve();
+    if (!heicLoader) {
+      heicLoader = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = HEIC2ANY_URL;
+        script.onload = () => resolve();
+        script.onerror = () => {
+          heicLoader = null;
+          reject(new Error('⚠ HEIC converter failed to load. Check your connection and retry.'));
+        };
+        document.head.appendChild(script);
+      });
+    }
+    return heicLoader;
+  }
+
+  function drawScaled(source, { width, height }) {
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff'; // flatten transparent PNGs onto white, not black
+    ctx.fillRect(0, 0, width, height);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(source, 0, 0, width, height);
+    return canvas;
+  }
+
+  function fitLongEdge(w, h, max) {
+    const scale = Math.min(1, max / Math.max(w, h));
+    return { width: Math.max(1, Math.round(w * scale)), height: Math.max(1, Math.round(h * scale)) };
+  }
+
+  function fitShortEdge(w, h, target) {
+    const scale = Math.min(1, target / Math.min(w, h));
+    return { width: Math.max(1, Math.round(w * scale)), height: Math.max(1, Math.round(h * scale)) };
+  }
+
+  function canvasToJpeg(canvas, quality) {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('❌ Could not encode JPEG.'))), 'image/jpeg', quality);
+    });
+  }
+
+  // Zero-sizing a canvas frees its backing store right away (iOS caps total canvas memory)
+  function releaseCanvas(canvas) {
+    canvas.width = 0;
+    canvas.height = 0;
   }
 
   function render() {
     renderPreviewGrid();
-    const ready = items.filter((i) => i.status === 'ready' && i.uploadStatus !== 'uploaded');
-    const busy = items.some((i) => i.status === 'converting' || i.status === 'processing') || isUploading;
+    const pending = items.filter((i) => i.uploadStatus !== 'uploaded');
+    const ready = pending.filter((i) => i.status === 'ready');
+    const working = pending.filter((i) => i.status === 'queued' || i.status === 'converting' || i.status === 'processing');
     metaForm.classList.toggle('visible', items.length > 0);
     selectedCountInput.value = `${ready.length} photo${ready.length === 1 ? '' : 's'}`;
-    uploadButton.disabled = ready.length === 0 || busy;
-    uploadButton.textContent = `Upload ${ready.length} photo${ready.length === 1 ? '' : 's'}`;
-    if (!isUploading && !uploadProgress.textContent) uploadProgress.classList.remove('visible');
+    uploadButton.disabled = ready.length === 0 || working.length > 0 || isUploading;
+    if (isUploading) uploadButton.textContent = 'Uploading…';
+    else if (working.length) uploadButton.textContent = `Optimizing ${ready.length + 1} of ${ready.length + working.length}…`;
+    else if (items.length && !pending.length) uploadButton.textContent = '✓ All uploaded';
+    else uploadButton.textContent = `Upload ${ready.length} photo${ready.length === 1 ? '' : 's'}`;
+    clearButton.hidden = items.length === 0;
+    clearButton.disabled = isUploading;
+    qualityButtons.forEach((b) => { b.disabled = isUploading; });
+    actions.classList.toggle('floating', items.length > 0);
+    document.body.classList.toggle('up-bar-on', items.length > 0);
   }
 
   function renderPreviewGrid() {
-    if (items.length === 0) {
-      previewGrid.innerHTML = '<div class="empty-state">Selected photos appear here with conversion status, size details, and upload progress.</div>';
-      return;
-    }
-    previewGrid.innerHTML = items.map((item) => {
-      const preview = item.previewUrl
-        ? `<img src="${item.previewUrl}" alt="${escapeHtml(item.originalFile.name)} preview">`
-        : `<div class="processing">Processing…</div>`;
-      return `
-        <article class="photo-card">
-          ${preview}
-          <div class="photo-body">
-            <div class="photo-header">
-              <div>
-                <div class="file-name">${escapeHtml(item.originalFile.name)}</div>
-                <div class="file-size">${escapeHtml(item.sizeSummary || item.sizeText)}</div>
-              </div>
-              <button class="remove-btn" type="button" data-remove-id="${item.id}" aria-label="Remove ${escapeHtml(item.originalFile.name)}" ${item.uploadStatus === 'uploading' ? 'disabled' : ''}>×</button>
-            </div>
-            <div class="chip-row">
-              ${renderStatusBadge(item)}
-              ${renderUploadBadge(item)}
-            </div>
-            ${item.errorMessage ? `<div class="file-error">${escapeHtml(item.errorMessage)}</div>` : ''}
-          </div>
-        </article>`;
-    }).join('');
-    previewGrid.querySelectorAll('[data-remove-id]').forEach((btn) => {
-      btn.addEventListener('click', () => removeItem(Number(btn.dataset.removeId)));
+    emptyState.hidden = items.length > 0;
+    items.forEach((item) => {
+      renderItem(item);
+      if (item.el.parentNode !== previewGrid) previewGrid.appendChild(item.el);
     });
   }
 
+  // Cards are built once and patched in place, so a caption mid-typing survives re-renders.
+  function renderItem(item) {
+    if (!item.el) {
+      const el = document.createElement('article');
+      el.className = 'photo-card';
+      el.innerHTML = `
+        <div class="photo-media"></div>
+        <div class="photo-body">
+          <div class="photo-header">
+            <div class="photo-meta"><div class="file-name"></div><div class="file-size"></div></div>
+            <button class="remove-btn" type="button">×</button>
+          </div>
+          <input class="card-caption" type="text" enterkeyhint="done" maxlength="140">
+          <div class="chip-row photo-badges"></div>
+          <div class="file-error" hidden></div>
+        </div>`;
+      const name = item.originalFile.name;
+      const removeBtn = el.querySelector('.remove-btn');
+      const captionField = el.querySelector('.card-caption');
+      el.querySelector('.file-name').textContent = name;
+      el.querySelector('.file-name').title = name;
+      removeBtn.setAttribute('aria-label', `Remove ${name}`);
+      removeBtn.addEventListener('click', () => removeItem(item.id));
+      captionField.setAttribute('aria-label', `Caption for ${name}`);
+      captionField.addEventListener('input', () => { item.caption = captionField.value; });
+      item.el = el;
+      updateCaptionPlaceholder(item);
+    }
+
+    const el = item.el;
+    const media = el.querySelector('.photo-media');
+    if (item.previewUrl) {
+      if (media.dataset.src !== item.previewUrl) {
+        media.dataset.src = item.previewUrl;
+        const img = document.createElement('img');
+        img.src = item.previewUrl;
+        img.alt = '';
+        media.replaceChildren(img);
+      }
+    } else {
+      media.dataset.src = '';
+      media.innerHTML = `<div class="processing">${processingLabel(item)}</div>`;
+    }
+    const sizeLines = [item.sizeSummary, item.dimensions].filter(Boolean);
+    el.querySelector('.file-size').innerHTML = sizeLines.map((line) => `<span>${escapeHtml(line)}</span>`).join('');
+    const statusBadge = item.uploadStatus === 'uploaded' ? '' : renderStatusBadge(item);
+    el.querySelector('.photo-badges').innerHTML = statusBadge + renderUploadBadge(item);
+    const errorEl = el.querySelector('.file-error');
+    errorEl.hidden = !item.errorMessage;
+    errorEl.textContent = item.errorMessage;
+    el.querySelector('.card-caption').disabled = isUploading || item.uploadStatus === 'uploaded';
+    el.querySelector('.remove-btn').disabled = isUploading;
+    el.classList.toggle('is-done', item.uploadStatus === 'uploaded');
+    el.classList.toggle('is-failed', item.status === 'error' || item.uploadStatus === 'failed');
+  }
+
+  function updateCaptionPlaceholder(item) {
+    if (!item.el) return;
+    const fallback = captionInput.value.trim();
+    item.el.querySelector('.card-caption').placeholder = fallback ? `Default: ${fallback}` : 'Caption for this photo';
+  }
+
+  function processingLabel(item) {
+    if (item.status === 'converting') return 'Converting HEIC…';
+    if (item.status === 'processing') return 'Optimizing…';
+    if (item.status === 'error') return 'Could not process';
+    return 'Queued…';
+  }
+
   function renderStatusBadge(item) {
-    if (item.status === 'converting') return '<span class="chip chip-method">HEIC → JPEG</span>';
-    if (item.status === 'error') return '<span class="chip" style="color:#c0392b">Conversion failed</span>';
+    if (item.status === 'queued') return '<span class="chip">Queued</span>';
+    if (item.status === 'converting' || item.status === 'processing') return '<span class="chip chip-method">Optimizing…</span>';
+    if (item.status === 'error') return '<span class="chip" style="color:#c0392b">Failed</span>';
     return `<span class="chip ${item.isHeic ? 'chip-method' : ''}">${escapeHtml(item.formatLabel)}</span>`;
   }
 
   function renderUploadBadge(item) {
     if (item.uploadStatus === 'uploading') return '<span class="chip chip-method">⏳ Uploading</span>';
-    if (item.uploadStatus === 'uploaded') return '<span class="chip chip-process">✅ Uploaded</span>';
+    if (item.uploadStatus === 'staged') return '<span class="chip chip-method">☁ Sent</span>';
+    if (item.uploadStatus === 'uploaded') return '<span class="chip chip-process">✅ In gallery</span>';
     if (item.uploadStatus === 'failed') return '<span class="chip" style="color:#c0392b">❌ Failed</span>';
     return '';
   }
 
+  function discardItem(item) {
+    if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+    item.version++;
+    if (item.el) item.el.remove();
+  }
+
   function removeItem(id) {
     const item = items.find((c) => c.id === id);
-    if (!item || item.uploadStatus === 'uploading') return;
-    if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
-    items = items.filter((c) => c.id !== id);
+    if (!item || isUploading) return;
+    discardItem(item);
+    items = items.filter((c) => c !== item);
     render();
   }
 
-  async function uploadFilesSequentially() {
+  function clearAll() {
+    if (isUploading) return;
+    items.forEach(discardItem);
+    items = [];
+    queue.length = 0;
+    clearPageStatus();
+    render();
+  }
+
+  async function uploadBatch() {
+    if (isUploading) return;
     const token = localStorage.getItem('gh_pat');
     if (!token) { showPageStatus('error', `⚠ No GitHub token saved. <a href="${SETTINGS_URL}">Go to Settings →</a>`); return; }
     if (!navigator.onLine) { showPageStatus('error', '❌ No internet connection.'); return; }
 
     const album = resolveAlbumFolder();
     if (!album) { showPageStatus('error', albumSelect.value === '__new__' ? '⚠ Enter a new album name.' : '⚠ Choose an album.'); return; }
-    const caption = captionInput.value.trim();
-    if (!caption) { showPageStatus('error', '⚠ Add a caption before uploading.'); return; }
 
-    const date = dateInput.value || getLocalToday();
-    const tags = tagsInput.value.trim();
     const ready = items.filter((i) => i.status === 'ready' && i.processedFile && i.uploadStatus !== 'uploaded');
     if (ready.length === 0) { showPageStatus('error', '⚠ Wait until at least one photo is ready.'); return; }
 
+    const defaultCaption = captionInput.value.trim();
+    const uncaptioned = ready.filter((i) => !i.caption.trim()).length;
+    if (uncaptioned && !defaultCaption) {
+      showPageStatus('error', `⚠ ${uncaptioned} photo${uncaptioned === 1 ? ' needs' : 's need'} a caption. Add one on the card, or fill in the default caption.`);
+      return;
+    }
+
+    const date = dateInput.value || getLocalToday();
+    const tags = tagsInput.value.trim();
+    const api = githubClient(token);
+    const totalSteps = ready.length + 1;
+
     isUploading = true;
-    showPageStatus('loading', `Uploading ${ready.length} photo(s) to GitHub…`);
-    uploadProgress.classList.add('visible');
-
-    const batchNames = new Set();
-    let uploaded = 0, failures = 0, fatal = '';
-
-    for (let i = 0; i < ready.length; i++) {
-      const item = ready[i];
-      item.uploadStatus = 'uploading';
-      uploadProgress.textContent = `Uploading ${i + 1} of ${ready.length}… ⏳`;
-      render();
-      try {
-        const file = item.processedFile;
-        if (file.size > MAX_FILE_SIZE) throw new Error(`⚠ ${file.name} exceeds GitHub's 10MB limit. Try Low quality.`);
-        const base64 = await fileToBase64(file);
-        const safeName = makeUniqueFileName(file.name, date, batchNames);
-        const repoPath = `assets/gallery/${album}/${safeName}`;
-        const galleryImagePath = `/${repoPath}`;
-        const itemCaption = buildCaption(caption, item, ready.length);
-        await uploadImageFile({ token, repoPath, base64, commitMessage: `photo: add ${safeName} to ${album}` });
-        const { currentSha, currentContent } = await fetchGalleryYaml(token);
-        const updatedContent = appendGalleryCaption(currentContent, galleryImagePath, itemCaption);
-        isValidYamlStart(updatedContent);
-        await commitGalleryYaml({ token, base64: safeBase64Encode(updatedContent), sha: currentSha, commitMessage: `gallery: add ${safeName} to ${album}${tags ? ` [${tags}]` : ''}` });
-        item.uploadStatus = 'uploaded'; item.errorMessage = ''; uploaded++;
-      } catch (err) {
-        item.uploadStatus = 'failed'; item.errorMessage = err.message || 'Upload failed.';
-        if ((err.message || '').startsWith('❌ Token rejected.')) { fatal = `❌ Token rejected. <a href="${SETTINGS_URL}">Update in Settings</a>.`; showPageStatus('error', fatal); }
-        else if ((err.message || '').startsWith('❌ No internet connection.')) { fatal = '❌ No internet connection.'; showPageStatus('error', fatal); }
-        failures++;
-      }
-      render();
-      if (fatal) break;
-    }
-
-    isUploading = false;
-    uploadProgress.textContent = '';
-    uploadProgress.classList.remove('visible');
+    clearPageStatus();
+    setProgress(0, totalSteps, 'Checking the album…');
     render();
+    const wakeLock = await requestWakeLock();
 
-    if (fatal && uploaded === 0) showPageStatus('error', fatal);
-    else if (uploaded > 0 && failures === 0) showPageStatus('success', `✅ Uploaded ${uploaded} photo(s). The gallery rebuilds in ~1 min. <a href="${GALLERY_URL}">View gallery →</a>`);
-    else if (uploaded > 0) showPageStatus('error', `Uploaded ${uploaded}, but ${failures} failed. Review the cards and retry.`);
-    else showPageStatus('error', 'No photos were uploaded. Review the errors and try again.');
-  }
-
-  async function uploadImageFile({ token, repoPath, base64, commitMessage }) {
-    let response;
     try {
-      response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${repoPath}`, {
-        method: 'PUT', headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: commitMessage, content: base64, branch: TARGET_BRANCH })
+      const usedNames = await listAlbumFiles(api, album);
+      ready.forEach((item) => { item.repoName = makeUniqueFileName(item.processedFile.name, date, usedNames); });
+
+      for (let i = 0; i < ready.length; i++) {
+        const item = ready[i];
+        setProgress(i, totalSteps, `Uploading ${i + 1} of ${ready.length}…`);
+        item.uploadStatus = 'uploading';
+        item.errorMessage = '';
+        renderItem(item);
+        try {
+          // Blobs survive a failed commit, so a retry skips photos that already went up
+          if (!item.blobs) {
+            const [full, thumb] = await Promise.all([createBlob(api, item.processedFile), createBlob(api, item.thumbFile)]);
+            item.blobs = { full, thumb };
+          }
+          item.uploadStatus = 'staged';
+        } catch (err) {
+          item.uploadStatus = 'failed';
+          item.errorMessage = err.message || 'Upload failed.';
+          if (err.fatal) throw err;
+        } finally {
+          renderItem(item);
+        }
+      }
+
+      const staged = ready.filter((i) => i.uploadStatus === 'staged');
+      if (staged.length === 0) throw new Error('No photos could be uploaded. Review the errors on each card and retry.');
+
+      setProgress(ready.length, totalSteps, `Saving ${staged.length} photo${staged.length === 1 ? '' : 's'} to the gallery…`);
+      const commit = await commitBatch(api, { album, staged, defaultCaption, tags });
+      staged.forEach((item) => { item.uploadStatus = 'uploaded'; });
+      setProgress(totalSteps, totalSteps, 'Done');
+      rememberAlbum(album);
+
+      const failed = ready.length - staged.length;
+      showPageStatus(failed ? 'error' : 'success',
+        `✅ Added ${staged.length} photo${staged.length === 1 ? '' : 's'} to <b>${escapeHtml(album)}</b> in one ` +
+        `<a href="${escapeHtml(commit.html_url)}" target="_blank" rel="noopener">commit</a>.` +
+        (failed ? ` ${failed} failed. Check those cards and retry.` : '') +
+        ` The gallery rebuilds in ~1 min. <a href="${galleryAnchor(album)}">View gallery →</a>`);
+    } catch (err) {
+      ready.forEach((item) => {
+        if (item.uploadStatus === 'uploading' || item.uploadStatus === 'staged') {
+          item.uploadStatus = 'failed';
+          item.errorMessage = item.errorMessage || 'Not saved. Retry the upload.';
+        }
       });
-    } catch (err) {
-      throw new Error(navigator.onLine ? '❌ Upload failed before GitHub responded. Try again.' : '❌ No internet connection.');
+      showPageStatus('error', err.html || escapeHtml(err.message || 'Upload failed.'));
+    } finally {
+      isUploading = false;
+      hideProgress();
+      releaseWakeLock(wakeLock);
+      render();
     }
-    await ensureGitHubResponse(response, repoPath);
   }
 
-  async function fetchGalleryYaml(token) {
-    let response;
-    try {
-      response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${GALLERY_PATH}`, { headers: { Authorization: `token ${token}` } });
-    } catch (err) {
-      throw new Error(navigator.onLine ? '❌ Could not load gallery.yml. Try again.' : '❌ No internet connection.');
-    }
-    await ensureGitHubResponse(response, GALLERY_PATH);
-    const payload = await response.json();
-    return { currentSha: payload.sha, currentContent: safeBase64Decode(payload.content || '') };
-  }
+  // One commit for the whole batch (images + thumbnails + gallery.yml captions) via the
+  // Git Data API, so ten photos mean one commit and one Pages rebuild.
+  async function commitBatch(api, { album, staged, defaultCaption, tags }) {
+    const message = [
+      `gallery: add ${staged.length} photo${staged.length === 1 ? '' : 's'} to ${album}${tags ? ` [${tags}]` : ''}`,
+      '',
+      ...staged.map((item) => `- ${item.repoName}`)
+    ].join('\n');
 
-  async function commitGalleryYaml({ token, base64, sha, commitMessage }) {
-    let response;
-    try {
-      response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${GALLERY_PATH}`, {
-        method: 'PUT', headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: commitMessage, content: base64, sha, branch: TARGET_BRANCH })
+    for (let attempt = 1; ; attempt++) {
+      const ref = await api(`git/ref/heads/${TARGET_BRANCH}`);
+      const headSha = ref.object.sha;
+      const head = await api(`git/commits/${headSha}`);
+      const yamlFile = await api(`contents/${GALLERY_PATH}?ref=${headSha}`);
+      const captionLines = staged.map((item) =>
+        `  "/${GALLERY_ROOT}/${album}/${item.repoName}": ${yamlQuote(item.caption.trim() || defaultCaption)}`);
+      const updatedYaml = appendGalleryCaptions(safeBase64Decode(yamlFile.content || ''), captionLines);
+      isValidYamlStart(updatedYaml);
+
+      const tree = await api('git/trees', 'POST', {
+        base_tree: head.tree.sha,
+        tree: [
+          ...staged.flatMap((item) => [
+            { path: `${GALLERY_ROOT}/${album}/${item.repoName}`, mode: '100644', type: 'blob', sha: item.blobs.full },
+            { path: `${THUMB_ROOT}/${album}/${item.repoName}`, mode: '100644', type: 'blob', sha: item.blobs.thumb }
+          ]),
+          { path: GALLERY_PATH, mode: '100644', type: 'blob', content: updatedYaml }
+        ]
       });
-    } catch (err) {
-      throw new Error(navigator.onLine ? '❌ Could not update gallery.yml. Try again.' : '❌ No internet connection.');
+      const commit = await api('git/commits', 'POST', { message, tree: tree.sha, parents: [headSha] });
+      try {
+        await api(`git/refs/heads/${TARGET_BRANCH}`, 'PATCH', { sha: commit.sha, force: false });
+        return commit;
+      } catch (err) {
+        // main moved while we worked (e.g. a brew log landed): rebuild on the new head
+        if (err.status === 422 && attempt < 3) continue;
+        throw err;
+      }
     }
-    await ensureGitHubResponse(response, GALLERY_PATH);
   }
 
-  async function ensureGitHubResponse(response, repoPath) {
-    if (response.ok) return;
-    if (response.status === 401) throw new Error('❌ Token rejected. It may have expired — update in Settings.');
-    if (response.status === 409) throw new Error('❌ File already exists with this name. Rename and retry.');
-    let msg = `GitHub request failed (${response.status})`;
-    try { const p = await response.json(); if (p && p.message) msg = p.message; } catch (e) {}
-    throw new Error(`❌ ${repoPath}: ${msg}`);
+  function githubClient(token) {
+    return async function api(path, method = 'GET', body) {
+      let response;
+      try {
+        response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/${path}`, {
+          method,
+          cache: 'no-store', // a cached ref would make the fast-forward update fail
+          headers: {
+            Authorization: `token ${token}`,
+            Accept: 'application/vnd.github+json',
+            ...(body ? { 'Content-Type': 'application/json' } : {})
+          },
+          body: body ? JSON.stringify(body) : undefined
+        });
+      } catch (err) {
+        throw uploadError(navigator.onLine ? '❌ GitHub didn’t respond. Check your connection and try again.' : '❌ No internet connection.', { fatal: true });
+      }
+      if (response.ok) return response.json();
+
+      let detail = '';
+      try { detail = (await response.json()).message || ''; } catch (e) {}
+      const suffix = detail ? `: ${detail}` : '';
+      if (response.status === 401) {
+        throw uploadError('❌ Token rejected. It may have expired.', {
+          status: 401, fatal: true,
+          html: `❌ Token rejected. It may have expired. <a href="${SETTINGS_URL}">Update it in Settings →</a>`
+        });
+      }
+      if (response.status === 403 || (response.status === 404 && method !== 'GET')) {
+        throw uploadError(`❌ GitHub refused the write (${response.status}${suffix}). Check the token has Contents: write on ${REPO_NAME}.`, { status: response.status, fatal: true });
+      }
+      throw uploadError(`❌ GitHub ${response.status}${suffix}`, { status: response.status });
+    };
   }
 
-  function appendGalleryCaption(currentContent, imagePath, caption) {
+  function uploadError(message, extra) {
+    return Object.assign(new Error(message), extra);
+  }
+
+  async function listAlbumFiles(api, album) {
+    try {
+      const entries = await api(`contents/${GALLERY_ROOT}/${encodeURIComponent(album)}?ref=${TARGET_BRANCH}`);
+      return new Set(Array.isArray(entries) ? entries.map((e) => e.name) : []);
+    } catch (err) {
+      if (err.status === 404) return new Set(); // brand-new album
+      throw err;
+    }
+  }
+
+  async function createBlob(api, file) {
+    const blob = await api('git/blobs', 'POST', { content: await fileToBase64(file), encoding: 'base64' });
+    return blob.sha;
+  }
+
+  function appendGalleryCaptions(currentContent, lines) {
     const normalized = currentContent.replace(/^\uFEFF/, '');
     const withNl = normalized.endsWith('\n') ? normalized : `${normalized}\n`;
-    return `${withNl}  "${imagePath}": ${yamlQuote(caption)}\n`;
+    return `${withNl}${lines.join('\n')}\n`;
   }
 
   function isValidYamlStart(content) {
@@ -521,10 +854,37 @@ plain: true
     return true;
   }
 
-  function buildCaption(base, item, total) {
-    if (total <= 1) return base;
-    const stem = item.processedFile.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ');
-    return `${base} (${stem})`;
+  function rememberAlbum(album) {
+    if (albumSelect.value === '__new__') {
+      albumSelect.insertBefore(new Option(humanizeFolder(album), album, true, true), albumSelect.lastElementChild);
+      newAlbumField.classList.add('hidden');
+      newAlbumInput.value = '';
+    }
+    try { localStorage.setItem(LAST_ALBUM_KEY, album); } catch (e) {}
+  }
+
+  function galleryAnchor(album) {
+    const section = (galleryData.sections || []).find((s) => getFolderFromGalleryPath(s.folder || '') === album);
+    return `${GALLERY_URL}#gallery-${encodeURIComponent(section ? section.key : album)}`;
+  }
+
+  function setProgress(done, total, label) {
+    uploadProgress.classList.add('visible');
+    progressLabel.textContent = label;
+    progressFill.style.width = `${Math.round((done / total) * 100)}%`;
+  }
+
+  function hideProgress() {
+    uploadProgress.classList.remove('visible');
+    progressFill.style.width = '0%';
+  }
+
+  // Keep the screen awake so iOS doesn't suspend the page mid-upload
+  async function requestWakeLock() {
+    try { return navigator.wakeLock ? await navigator.wakeLock.request('screen') : null; } catch (e) { return null; }
+  }
+  function releaseWakeLock(lock) {
+    if (lock) lock.release().catch(() => {});
   }
 
   function resolveAlbumFolder() {
@@ -551,13 +911,6 @@ plain: true
     used.add(candidate); return candidate;
   }
   function yamlQuote(v) { return `"${String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\r?\n/g, '\\n')}"`; }
-  function safeBase64Encode(v) {
-    const clean = v.replace(/^\uFEFF/, '');
-    const bytes = new TextEncoder().encode(clean);
-    let binary = '';
-    for (const b of bytes) binary += String.fromCharCode(b);
-    return btoa(binary);
-  }
   function safeBase64Decode(b64) {
     const binary = atob(b64.replace(/\n/g, ''));
     const bytes = new Uint8Array(binary.length);
@@ -580,7 +933,11 @@ plain: true
     const now = new Date();
     return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split('T')[0];
   }
-  function showPageStatus(type, html) { pageStatus.className = `status-msg ${type} visible`; pageStatus.innerHTML = html; }
+  function showPageStatus(type, html) {
+    pageStatus.className = `status-msg ${type} visible`;
+    pageStatus.innerHTML = html;
+    pageStatus.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
   function clearPageStatus() { pageStatus.className = 'status-msg'; pageStatus.innerHTML = ''; }
   function escapeHtml(v) { return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
 </script>

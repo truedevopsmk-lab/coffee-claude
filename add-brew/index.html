@@ -8,7 +8,7 @@ plain: true
 <style>
   .lb-grid { display: grid; grid-template-columns: 1fr; gap: 1.4rem; }
   @media (min-width: 900px) { .lb-grid { grid-template-columns: 1fr 300px; align-items: start; } }
-  .lb-aside { position: sticky; top: 78px; display: grid; gap: 1rem; }
+  .lb-aside { position: sticky; top: var(--sticky-top); display: grid; gap: 1rem; }
   .lb-readout { font-family: var(--mono); }
   .lb-readout .big { font-size: 2.2rem; color: var(--brass); font-family: var(--serif); line-height: 1; }
   .lb-readout .sub { color: var(--ink-faint); font-size: 0.85rem; margin-top: 0.3rem; }
