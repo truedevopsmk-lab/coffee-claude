@@ -16,5 +16,7 @@ exclude:
   - vendor
   - .bundle
   - README.md
+  - AGENTS.md
+  - CLAUDE.md
   - templates
   - scripts
