@@ -8,6 +8,7 @@ plain: true
 {% assign all_brews = site.pages | where_exp: "p", "p.path contains 'brews/'" | where_exp: "p", "p.name != 'index.md'" | sort: "date" | reverse %}
 {% assign all_beans = site.pages | where_exp: "p", "p.path contains 'beans/'" | where_exp: "p", "p.name != 'index.md'" %}
 {% assign all_methods = site.pages | where_exp: "p", "p.path contains 'methods/'" | where_exp: "p", "p.name != 'index.md'" %}
+{% assign my_methods = all_methods | where_exp: "p", "p.group != 'someday'" %}
 {% assign gallery_count = site.static_files | where_exp: "f", "f.path contains '/assets/gallery/'" | size %}
 
 <section class="hero">
@@ -22,7 +23,7 @@ plain: true
   <div class="stats">
     <div class="stat"><span class="stat-num">{{ all_brews | size }}</span><span class="stat-label">Brews logged</span></div>
     <div class="stat"><span class="stat-num">{{ all_beans | size }}</span><span class="stat-label">Beans profiled</span></div>
-    <div class="stat"><span class="stat-num">{{ all_methods | size }}</span><span class="stat-label">Methods</span></div>
+    <div class="stat"><span class="stat-num">{{ my_methods | size }}</span><span class="stat-label">Methods</span></div>
     <div class="stat"><span class="stat-num">{{ gallery_count }}</span><span class="stat-label">Frames</span></div>
   </div>
 </section>
@@ -104,11 +105,10 @@ plain: true
     <h2 class="section-title"><span class="ico">⚙</span> Brewing methods</h2>
     <a class="section-link" href="{{ '/methods/' | relative_url }}">All methods →</a>
   </div>
-  <div class="card-grid">
-    {% assign method_icons = "v60:🌀,aeropress:🛢,chemex:⏳,french:🪵,espresso:☕,cold:🧊,moka:🫖,b75:🟤" | split: "," %}
-    {% for method in all_methods %}
+  <div class="card-grid methods-grid">
+    {% for method in my_methods %}
       <a class="card method-card" href="{{ method.url | relative_url }}" style="text-decoration:none">
-        <span class="method-ico">⚙️</span>
+        <span class="method-ico">{{ method.icon | default: "⚙️" }}</span>
         <h3>{{ method.title | split: ' — ' | first | split: ' –' | first }}</h3>
         <p>Personal recipes &amp; dialed-in parameters.</p>
       </a>

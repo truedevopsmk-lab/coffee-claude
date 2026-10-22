@@ -635,6 +635,50 @@ h1, h2, h3, h4 {
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
 
+/* ---------- Recipe library (method pages) ---------- */
+.recipe-library { margin-top: 2.4rem; }
+.recipe-library .lib-intro { color: var(--ink-soft); font-size: 0.95rem; }
+.lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.9rem; margin-top: 1rem; }
+.lib-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem;
+}
+.prose .lib-card h3 { margin: 0; font-size: 1.05rem; }
+.lib-card p { margin: 0; }
+.lib-by { font-size: 0.82rem; color: var(--ink-faint); }
+.lib-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem 0.8rem; margin: 0.2rem 0; font-size: 0.86rem; }
+.lib-specs div { min-width: 0; }
+.lib-specs dt { font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; }
+.lib-specs dd { margin: 0; font-family: var(--mono); font-size: 0.82rem; color: var(--ink); }
+.lib-warn { font-size: 0.82rem; color: var(--ink-soft); background: color-mix(in srgb, var(--gold) 12%, transparent); border-radius: 8px; padding: 0.4rem 0.55rem; }
+.lib-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.8rem; margin-top: auto !important; padding-top: 0.3rem; }
+.lib-src, .lib-conf { font-size: 0.78rem; }
+.lib-conf { color: var(--ink-faint); margin-left: auto; }
+.lib-conf.conf-high { color: var(--sage-deep); }
+.lib-conf.conf-low { color: #b3382a; }
+.prose table.wac { font-size: 0.85rem; }
+.prose table.wac td:nth-child(1), .prose table.wac td:nth-child(2) { font-family: var(--mono); white-space: nowrap; }
+/* Phones: method cards go two-up; the WAC table stacks each row into a compact block */
+@media (max-width: 640px) {
+  .card-grid.methods-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; }
+  .methods-grid .method-card { padding: 1rem; }
+  .methods-grid .method-card h3 { font-size: 1.02rem; }
+  .methods-grid .method-card p { font-size: 0.8rem; }
+  .prose table.wac thead { display: none; }
+  .prose table.wac, .prose table.wac tbody { display: block; }
+  .prose table.wac tr {
+    display: grid; grid-template-columns: auto auto 1fr; gap: 0.15rem 0.5rem; align-items: baseline;
+    padding: 0.55rem 0.2rem; border-bottom: 1px solid var(--border);
+  }
+  .prose table.wac td { border: 0; padding: 0; }
+  .prose table.wac td:nth-child(4), .prose table.wac td:nth-child(5), .prose table.wac td:nth-child(6) {
+    grid-column: 3; font-family: var(--mono); font-size: 0.78rem; color: var(--ink-soft);
+  }
+  .prose table.wac td:nth-child(4)::before { content: "Coffee "; color: var(--ink-faint); }
+  .prose table.wac td:nth-child(5)::before { content: "Water "; color: var(--ink-faint); }
+  .prose table.wac td:nth-child(6)::before { content: "Temp "; color: var(--ink-faint); }
+}
+
 /* ---------- Gallery ---------- */
 .gallery-nav { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0 0 2rem; }
 .gallery-section { margin-top: 2.6rem; scroll-margin-top: calc(var(--topbar-h) + var(--safe-top) + 1.2rem); }

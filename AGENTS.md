@@ -40,6 +40,7 @@ subsystem.
 - `sw.js`: the cache name is versioned per build (`site.time`) and pages/CSS/JS are network-first.
   Never go back to cache-first for CSS/JS: installed apps would be stuck on stale styles.
 - Liquid division: coerce to a float first (`| plus: 0.0`) or `divided_by` truncates.
+- `_data/recipes.yml`: every recipe needs a `source` and `confidence`, and pours are cumulative `to:` fractions ending at `1.0`. **Never invent numbers.** Leave unpublished values out and note it.
 - File names for pages and images: lowercase, hyphens, **no spaces**.
 
 ## Where things live
@@ -54,7 +55,7 @@ subsystem.
 | Photo uploader | `upload-photo/index.html` (presets, pipeline, Git Data API) |
 | Photo manager (edit / move / delete) | `manage-photos/index.html` (Git Data API; README §9.3) |
 | Brew logger | `add-brew/index.html` (Contents API) |
-| Calculator recipes | `tools/brew-calculator/calculator.js` |
+| Brew recipes (calculator + method pages) | `_data/recipes.yml` (data; README §6.6), rendered by `tools/brew-calculator/calculator.js` and `_includes/recipe-library.html` |
 | PWA / offline | `manifest.json`, `sw.js`, `offline.html` |
 | Push reminders | OneSignal in `_layouts/default.html`, `notifications/index.html` |
 

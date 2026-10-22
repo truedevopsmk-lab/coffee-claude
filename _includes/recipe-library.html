@@ -1,0 +1,41 @@
+{%- comment -%}
+  Recipe cards for one method, from _data/recipes.yml. Params: method (method id).
+  Each card links to the calculator pre-set to that recipe.
+{%- endcomment -%}
+{%- assign lib_method = site.data.recipes.methods | where: "id", include.method | first -%}
+{%- if lib_method -%}
+<section class="recipe-library" aria-labelledby="lib-{{ lib_method.id }}">
+  <h2 id="lib-{{ lib_method.id }}">📚 Recipe library</h2>
+  <p class="lib-intro">{% if lib_method.gear %}For: {{ lib_method.gear }}. {% endif %}{% if lib_method.clicks %}{{ site.data.recipes.grinder.name }}: {% if lib_method.clicks contains '–' %}start at <b>{{ lib_method.clicks }} clicks</b>.{% else %}<b>{{ lib_method.clicks }}</b>.{% endif %} {% endif %}{{ lib_method.note }} Tap <b>Scale it</b> to brew any recipe at your own dose.</p>
+  <div class="lib-grid">
+    {%- for r in lib_method.recipes %}
+    <article class="lib-card">
+      <h3>{% if r.event contains 'champion' %}🏆 {% endif %}{{ r.name }}</h3>
+      <p class="lib-by">{{ r.author }}{% if r.event %} · {{ r.event }}{% endif %}</p>
+      <dl class="lib-specs">
+        {%- if r.fixed -%}
+          {%- if r.dose > 0 %}<div><dt>Coffee</dt><dd>{{ r.dose }} g</dd></div>{% endif -%}
+          {%- if r.water > 0 %}<div><dt>Water</dt><dd>{{ r.water }} ml</dd></div>{% endif -%}
+        {%- else -%}
+          {%- assign dose_f = r.dose | plus: 0.0 -%}
+          {%- assign ratio = r.water | divided_by: dose_f | round: 1 | append: "" -%}
+          {%- assign ratio_tail = ratio | slice: -2, 2 -%}
+          {%- if ratio_tail == ".0" %}{% assign ratio = ratio | split: "." | first %}{% endif -%}
+          <div><dt>Coffee</dt><dd>{{ r.dose }} g</dd></div>
+          <div><dt>{% if r.output %}Yield{% else %}Water{% endif %}</dt><dd>{{ r.water }} g</dd></div>
+          <div><dt>Ratio</dt><dd>1:{{ ratio }}</dd></div>
+        {%- endif -%}
+        {%- if r.temp %}<div><dt>Temp</dt><dd>{{ r.temp }}</dd></div>{% endif -%}
+        {%- if r.time %}<div><dt>Time</dt><dd>{{ r.time }}</dd></div>{% endif -%}
+      </dl>
+      {%- if r.warn %}<p class="lib-warn">⚠ {{ r.warn }}</p>{% endif %}
+      <p class="lib-actions">
+        <a class="btn btn-ghost btn-sm" href="{{ '/tools/brew-calculator/' | relative_url }}?method={{ lib_method.id }}&amp;recipe={{ r.id }}">⚖ Scale it</a>
+        <a class="lib-src" href="{{ r.source }}" target="_blank" rel="noopener">Source ↗</a>
+        <span class="lib-conf conf-{{ r.confidence }}">{% case r.confidence %}{% when 'high' %}✓ Well sourced{% when 'medium' %}≈ Partly sourced{% else %}⚠ Loosely sourced{% endcase %}</span>
+      </p>
+    </article>
+    {%- endfor %}
+  </div>
+</section>
+{%- endif -%}

@@ -48,9 +48,9 @@ commit straight to this repo through the GitHub API.
 | **Home** | Hero, live stats (brews / beans / methods / frames), latest 6 brews, 4 beans, client-side search, method cards | `index.md` |
 | **Logbook** | All brews newest-first, filter chips by method, ratio/temp/rating on each card | `brews/index.md`, `_layouts/brew.html` |
 | **Bean shelf** | All beans, filter chips by process, origin/process/variety chips | `beans/index.md`, `_layouts/bean.html` |
-| **Methods** | One page of personal recipes per brewer | `methods/*.md` |
+| **Methods** | One page per brewer: my notes + a "Recipe library" rendered from `_data/recipes.yml`; split into **My gear** and **Someday**; AeroPress page has the World AeroPress Championship archive | `methods/*.md`, `_includes/recipe-library.html` |
 | **Brews & Frames** | Photo gallery grouped into albums, thumbnails, lightbox with swipe | `brews-and-frames/index.md`, `_data/gallery.yml` |
-| **Brew calculator** | Scales a recipe from a dose (V60 4:6 with cumulative pour targets, Hoffmann, AeroPress, …), generates a markdown brew log | `tools/brew-calculator/` |
+| **Brew calculator** | 41 sourced recipes (World Brewers Cup / AeroPress champions, Hoffmann, Blue Tokai, TIMEMORE, Bialetti…) for my gear plus a "Someday" group; every pour scales to the dose as cumulative scale targets; C3S Pro grind guide; deep links `?method=&recipe=`; generates a markdown brew log | `tools/brew-calculator/`, `_data/recipes.yml` |
 | **Log a brew** | Form (or paste markdown) → commits a brew file to the repo | `add-brew/index.html` |
 | **Upload photos** | Batch photo upload: resize, strip GPS/EXIF, thumbnails, per-photo captions → **one commit** | `upload-photo/index.html` |
 | **Manage photos** | Edit captions, move photos between albums, delete; search + album filter; batched → **one commit** | `manage-photos/index.html` |
@@ -116,12 +116,14 @@ coffee-claude/
 ├── _config.yml                 # title, baseurl (/coffee-claude), plugins, build excludes
 ├── Gemfile / Gemfile.lock      # github-pages gem (mirrors production) + webrick
 ├── _data/
-│   └── gallery.yml             # gallery albums (order, titles) + per-image captions
+│   ├── gallery.yml             # gallery albums (order, titles) + per-image captions
+│   └── recipes.yml             # brew recipe library: calculator + method-page libraries + WAC archive
 ├── _includes/
 │   ├── head.html               # meta, viewport-fit=cover, PWA/Apple tags, versioned CSS, pre-paint theme
 │   ├── nav.html                # sticky topbar + primary nav (collapses to a dropdown ≤860px)
 │   ├── footer.html             # footer links, menu + theme-toggle JS, service-worker registration
-│   └── gallery-card.html       # one gallery tile (thumbnail if present, full image for the lightbox)
+│   ├── gallery-card.html       # one gallery tile (thumbnail if present, full image for the lightbox)
+│   └── recipe-library.html     # recipe cards for one method (param: method id from recipes.yml)
 ├── _layouts/
 │   ├── default.html            # generic page shell (+ OneSignal init); honours page flags (§7)
 │   ├── brew.html               # structured brew page: title, spec/rating/cup-profile rail, notes
@@ -131,7 +133,7 @@ coffee-claude/
 ├── beans/                      # one .md per bean  + index.md (the shelf)
 ├── methods/                    # one .md per brewer + index.md
 ├── brews-and-frames/index.md   # gallery page
-├── tools/brew-calculator/      # index.md (UI) + calculator.js (recipes & log builder)
+├── tools/brew-calculator/      # index.md (UI, inlines recipes.yml) + calculator.js (renderer & log builder)
 ├── add-brew/index.html         # "Log a brew" (form + paste markdown) → GitHub Contents API
 ├── upload-photo/index.html     # batch photo uploader → GitHub Git Data API (single commit)
 ├── manage-photos/index.html    # edit captions / move / delete photos → Git Data API (single commit)
@@ -169,7 +171,7 @@ coffee-claude/
 | `/beans/` · `/beans/<file>/` | `beans/` | Sorted by `title`. |
 | `/methods/` · `/methods/<file>/` | `methods/` | Card title = the part of `title` before ` — `. |
 | `/brews-and-frames/` | `brews-and-frames/index.md` | Gallery. |
-| `/tools/brew-calculator/` | `tools/brew-calculator/index.md` | |
+| `/tools/brew-calculator/` | `tools/brew-calculator/index.md` | `?method=<id>&recipe=<id>` opens a recipe (the "Scale it" links). |
 | `/add-brew/` | `add-brew/index.html` | Needs token. |
 | `/upload-photo/` | `upload-photo/index.html` | Needs token. |
 | `/manage-photos/` | `manage-photos/index.html` | Needs token to save. `?photo=/assets/gallery/<album>/<file>` opens on one photo (the lightbox's ✎ Edit link). |
@@ -284,6 +286,39 @@ Current albums: `Crema-Chronicles`, `brewers`, `beans`, `experiments`, `Infograp
 page in `brews/`, `beans/`, `methods/` and `tools/`. `assets/search.js` matches pages where the
 title or text contains **all** the typed terms (case-insensitive) and shows the top 20. It updates
 on each keystroke and is built fresh with every deploy.
+
+
+### 6.6 Recipes — `_data/recipes.yml`
+
+One file drives the calculator, every method page's "Recipe library" and the AeroPress WAC archive.
+
+```yaml
+methods:
+  - id: v60                    # calculator ?method= and include param
+    name: "V60"
+    icon: "🌀"
+    page: "/methods/v60/"      # method page URL ("All V60 recipes" link)
+    group: mine                # mine | someday (calculator + methods index grouping)
+    clicks: "13–16"            # default C3S Pro range for the method
+    recipes:
+      - id: kasuya-46          # calculator ?recipe=
+        name: "Tetsu Kasuya 4:6"
+        author: "Tetsu Kasuya"
+        event: "World Brewers Cup 2016 champion"   # "champion" → 🏆
+        dose: 20               # reference recipe, grams
+        water: 300             # total water, grams (yield for output: true espresso)
+        temp: "93 °C light · 88 °C medium"
+        steps:
+          - { at: "0:00", to: 0.2, note: "Pour 1" }    # `to` = cumulative fraction of total water
+          - { at: "3:30", note: "Remove the dripper" } # no `to` = an action row
+        confidence: high       # high | medium | low — shown as a badge
+        source: "https://…"    # required
+```
+
+- **Scaling:** total = `water × dose / reference dose`; each scale target = `round(total × to)`, so the "Add" column always sums to the total.
+- **Optional:** `fixed: true` (not scalable: Brikka, drip bags; hides the dose field), `bypass` / `ice` (grams, scaled), `yield`, `time`, `grind`, `clicks`, `tips`, `serve`, `warn`, `output: true` (espresso: `water` is the yield).
+- **Rules:** no estimated numbers. If a source doesn't publish a value, leave it out and say so in `tips`/`warn`. Where official sources conflict, show both.
+- `grinder:` holds TIMEMORE's official C3S Pro click table (the calculator's grind guide). `wac:` is the World AeroPress Championship table.
 
 ---
 
@@ -612,7 +647,8 @@ There's no automated test suite. Before pushing:
 | **Add a brew by hand** | Create `brews/YYYY-MM-DD-bean-method.md` with the §6.1 front matter (`layout: brew`, always include `date`). File names: lowercase, hyphens, **no spaces**. |
 | **Add a bean** | Create `beans/<roaster>-<origin>-<name>.md` with the §6.2 front matter; body from `templates/beans.md`. |
 | **Add a method** | Create `methods/<brewer>.md` with `title: "<Brewer> — Personal Recipes"`. |
-| **Add a calculator recipe** | In `tools/brew-calculator/calculator.js`, push `{ id, name, render: (coffee) => html }` into a method's `recipes`, or add a new method object. `render` returns HTML with a `<ul>` of params; an optional `<table class="pour-schedule">` is copied into generated logs. Grinder, scale and server options are hard-coded in `tools/brew-calculator/index.md`. |
+| **Add a recipe** | Add an entry under a method's `recipes:` in `_data/recipes.yml` (schema in §6.6). It appears in the calculator **and** on that method's page — no JS to touch. Give pours as `to:` fractions of total water and always include `source` + `confidence`. Grinder, scale and server options are hard-coded in `tools/brew-calculator/index.md`. |
+| **Add a method** | Add a method to `recipes.yml` (`group: mine` or `someday`, `page:`), and a `methods/<slug>.md` with `group`, `icon` front matter and `{% include recipe-library.html method="<id>" %}`. |
 | **New gallery album** | Upload with "➕ New album…" (it auto-appears at the bottom). For a custom title or position, add a `sections:` entry whose `folder` matches the real path exactly (case-sensitive). |
 | **Add photos via git** | Put URL-safe files (no spaces) in `assets/gallery/<Album>/`, add `captions:` lines, run `python3 scripts/make-thumbs.py`, commit everything. |
 | **Edit, move or remove a photo** | From the phone: `/manage-photos/` (or ✎ Edit in the lightbox). By git: change or delete the file in `assets/gallery/…`, its caption key, then run `make-thumbs.py` (it removes orphaned thumbnails). |
@@ -676,7 +712,7 @@ to another stack.
    plus nav chips. `gallery-card.html` uses thumbnails with a full-image fallback; `gallery.js`
    lightbox (keyboard, swipe, counter, preload, focus trap).
    - ✅ Dropping a file into a new folder creates an album.
-7. **Calculator.** A method/recipe registry in `calculator.js`; `render(dose)` returns HTML; the
+7. **Calculator.** Recipes as data in `_data/recipes.yml` (inlined with `jsonify`); `calculator.js` renders and scales them; the
    log builder turns the output into markdown (copy/download).
 8. **PWA.** `manifest.json`, icons, Apple meta, `sw.js` (per-build cache name, network-first for
    pages/CSS/JS, offline page), registration in the footer.
@@ -700,7 +736,7 @@ to another stack.
 | 6 | `/add-brew/` defaults the date with `toISOString()` (UTC), so between midnight and 05:30 IST it pre-fills **yesterday**. | Use the local-date helper from the upload page. |
 | 7 | `/add-brew/` never overwrites, but a second brew with the same date + bean + method fails with a GitHub 422 (the file already exists). | Add a `-2` suffix like the uploader does. |
 | 8 | The search index skips `tools/brew-calculator/index.md` (its `name` is `index.md`), so the "Tool" kind never appears. | Special-case it. |
-| 9 | The home page's method cards all show ⚙️; `method_icons` is defined but unused. | Map the icons by title. |
+| 9 | ~~The home page's method cards all show ⚙️.~~ Fixed 2026-10-22: each method page sets `icon:` in its front matter. | — |
 | 10 | Uploaded photos use one date field for the whole batch. | Read each photo's capture date (EXIF `DateTimeOriginal`) before stripping. |
 | 11 | Ideas | A bottom tab bar in standalone mode; per-album cover images; a "brewed with this bean" list on bean pages. |
 
@@ -718,6 +754,7 @@ to another stack.
 | 2026-09-27 | iPhone safe-area fix (header under the Dynamic Island); service-worker cache versioning; single-commit batch uploads with per-photo captions, resizing and EXIF/GPS stripping; gallery thumbnails; full-screen mobile lightbox; brew layout mobile order; Cup Profile bars fix |
 | 2026-09-28 | This documentation, `AGENTS.md`, `CLAUDE.md` |
 | 2026-10-22 | `/manage-photos/`: edit captions, move between albums, delete; ✎ Edit link in the lightbox |
+| 2026-10-22 | Recipe library: `_data/recipes.yml` (41 sourced recipes) drives the calculator and method pages; My gear / Someday split; new South Indian filter, drip bag, Switch, Clever, cezve and phin pages; WAC archive; Kasuya 4:6 corrected to his published 1:15 / 93 °C / 0:00-0:45-1:30-2:10-2:40 |
 
 ---
 

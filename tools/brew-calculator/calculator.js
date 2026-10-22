@@ -1,329 +1,22 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const methods = [
-    {
-      id: "v60",
-      name: "V60",
-      recipes: [
-        {
-          id: "tetsu",
-          name: "Tetsu Kasuya 4:6",
-          render: (coffee) => {
-            const ratio = "1:16.6";
-            const temp = "90–92°C";
-            const total = Math.round(coffee * 16.6);
-            const first = Math.round(total * 0.4);
-            const second = total - first;
-
-            // Cumulative scale targets — the number your scale should read
-            // after each pour, so you never have to add in your head.
-            const targets = [
-              Math.round(first * 0.25),
-              first,
-              first + Math.round(second / 3),
-              first + Math.round((second * 2) / 3),
-              total
-            ];
-            const times = ["0:00", "0:45", "1:30", "2:15", "3:00"];
-
-            let prev = 0;
-            const rows = targets
-              .map((target, index) => {
-                const add = target - prev;
-                prev = target;
-                const addLabel = index === 0 ? `${add} g` : `+${add} g`;
-                return `
-                <tr>
-                  <td>Pour ${index + 1}</td>
-                  <td>${times[index]}</td>
-                  <td>${addLabel}</td>
-                  <td><strong>${target} g</strong></td>
-                </tr>`;
-              })
-              .join("");
-
-            const flow = targets.map((target) => `${target}`).join(" → ");
-
-            return `
-              <h3>Tetsu Kasuya 4:6 (V60)</h3>
-              <ul>
-                <li>Coffee: ${coffee} g</li>
-                <li>Total water: ${total} g</li>
-                <li>Ratio: ${ratio}</li>
-                <li>Water temp: ${temp}</li>
-              </ul>
-              <p class="pour-caption"><strong>Scale targets (cumulative)</strong> —
-              pour up to each number, don't add in your head:</p>
-              <table class="pour-schedule">
-                <thead>
-                  <tr><th>Pour</th><th>Time</th><th>Add</th><th>Scale reads</th></tr>
-                </thead>
-                <tbody>${rows}</tbody>
-              </table>
-              <p class="pour-flow">${flow} g</p>
-              <p><strong>Why this works:</strong><br>
-              The first 40% controls sweetness vs acidity, while the final pours
-              tune strength. Lower temperatures preserve clarity.</p>
-            `;
-          }
-        },
-        {
-          id: "hoffmann",
-          name: "Hoffmann V60",
-          render: (coffee) => {
-            const ratio = "1:16.7";
-            const temp = "96–98°C";
-            const total = Math.round(coffee * 16.67);
-            const bloom = Math.round(coffee * 2);
-
-            return `
-              <h3>Hoffmann V60</h3>
-              <ul>
-                <li>Coffee: ${coffee} g</li>
-                <li>Total water: ${total} g</li>
-                <li>Ratio: ${ratio}</li>
-                <li>Water temp: ${temp}</li>
-                <li>Bloom: ${bloom} g (30–45 sec)</li>
-                <li>Single continuous pour</li>
-              </ul>
-              <p><strong>Why this works:</strong><br>
-              High temperature and a single pour maximize extraction
-              uniformity and clarity.</p>
-            `;
-          }
-        }
-      ]
-    },
-    {
-      id: "aeropress",
-      name: "AeroPress",
-      recipes: [
-        {
-          id: "ap-standard",
-          name: "AeroPress (Inverted)",
-          render: (coffee) => {
-            const ratio = "1:15";
-            const temp = "85–90°C";
-            const water = Math.round(coffee * 15);
-
-            return `
-              <h3>AeroPress (Inverted)</h3>
-              <ul>
-                <li>Coffee: ${coffee} g</li>
-                <li>Water: ${water} g</li>
-                <li>Ratio: ${ratio}</li>
-                <li>Water temp: ${temp}</li>
-                <li>Grind: Medium-fine</li>
-                <li>Brew time: 2:00</li>
-              </ul>
-              <p><strong>Why this works:</strong><br>
-              Immersion brewing allows even extraction with lower bitterness,
-              producing a rich, balanced cup.</p>
-            `;
-          }
-        },
-        {
-          id: "ap-concentrate",
-          name: "AeroPress Concentrate",
-          render: (coffee) => {
-            const ratio = "1:4 (brew) + dilution";
-            const temp = "85–90°C";
-            const brewWater = Math.round(coffee * 4);
-            const dilution = Math.round(coffee * 8);
-
-            return `
-              <h3>AeroPress Concentrate</h3>
-              <ul>
-                <li>Coffee: ${coffee} g</li>
-                <li>Brew water: ${brewWater} g</li>
-                <li>Dilution water: ${dilution} g</li>
-                <li>Effective ratio: ${ratio}</li>
-                <li>Water temp: ${temp}</li>
-              </ul>
-              <p><strong>Why this works:</strong><br>
-              Strong extraction followed by dilution gives body
-              without over-extracting.</p>
-            `;
-          }
-        }
-      ]
-    },
-    {
-      id: "mokapot",
-      name: "Moka Pot",
-      recipes: [
-        {
-          id: "moka-classic",
-          name: "Moka Pot (Classic)",
-          render: (coffee) => {
-            const ratio = "≈1:10–1:15 (by yield)";
-            const temp = "Boiling water in base";
-            const water = Math.round(coffee * 15);
-
-            return `
-              <h3>Moka Pot (Classic)</h3>
-              <ul>
-                <li>Coffee: ${coffee} g</li>
-                <li>Water (boiler): ${water} g</li>
-                <li>Ratio: ${ratio}</li>
-                <li>Water temp: ${temp}</li>
-                <li>Grind: Medium-fine (coarser than espresso)</li>
-                <li>Heat: Medium–low</li>
-              </ul>
-              <p><strong>Why this works:</strong><br>
-              Starting with hot water and gentle heat reduces bitterness
-              and produces a sweeter, fuller-bodied cup.</p>
-            `;
-          }
-        }
-      ]
-    },
-    {
-      id: "frenchpress",
-      name: "French Press",
-      recipes: [
-        {
-          id: "fp-classic",
-          name: "French Press (Classic)",
-          render: (coffee) => {
-            const ratio = "1:15";
-            const temp = "93–96°C";
-            const water = Math.round(coffee * 15);
-
-            return `
-              <h3>French Press (Classic)</h3>
-              <ul>
-                <li>Coffee: ${coffee} g</li>
-                <li>Water: ${water} g</li>
-                <li>Ratio: ${ratio}</li>
-                <li>Water temp: ${temp}</li>
-                <li>Grind: Coarse</li>
-                <li>Steep time: 4:00</li>
-              </ul>
-              <p><strong>Why this works:</strong><br>
-              Full-immersion with coarse grind yields rich body and low astringency.</p>
-            `;
-          }
-        }
-      ]
-    },
-    {
-      id: "chemex",
-      name: "Chemex",
-      recipes: [
-        {
-          id: "chemex-classic",
-          name: "Chemex (Classic 1:15)",
-          render: (coffee) => {
-            const ratio = "1:15";
-            const total = Math.round(coffee * 15);
-
-            return `
-              <h3>Chemex (Classic)</h3>
-              <ul>
-                <li>Coffee: ${coffee} g</li>
-                <li>Total water: ${total} g</li>
-                <li>Ratio: ${ratio}</li>
-                <li>Water temp: 94–96°C</li>
-                <li>Bloom: ${Math.round(coffee * 2.5)} g (45 sec)</li>
-                <li>Brew time: 4:00–5:00</li>
-              </ul>
-              <p><strong>Why this works:</strong><br>
-              Thicker filters reduce oils and fines for a clean, tea-like cup.</p>
-            `;
-          }
-        }
-      ]
-    },
-    {
-      id: "b75",
-      name: "B75",
-      recipes: [
-        {
-          id: "b75-fast-flatbed",
-          name: "B75 (Fast Flat-bed)",
-          render: (coffee) => {
-            const ratio = "1:15.5";
-            const total = Math.round(coffee * 15.5);
-
-            return `
-              <h3>B75 (Fast Flat-bed)</h3>
-              <ul>
-                <li>Coffee: ${coffee} g</li>
-                <li>Total water: ${total} g</li>
-                <li>Ratio: ${ratio}</li>
-                <li>Water temp: 90–94°C</li>
-                <li>Pour pattern: 4 pulses</li>
-                <li>Brew time: 2:00–2:45</li>
-              </ul>
-              <p><strong>Why this works:</strong><br>
-              The B75 flat-bed geometry and fast flow favor high clarity with sweetness.</p>
-            `;
-          }
-        }
-      ]
-    },
-    {
-      id: "espresso",
-      name: "Espresso",
-      recipes: [
-        {
-          id: "espresso-standard",
-          name: "Espresso (1:2)",
-          render: (coffee) => {
-            const ratio = "1:2";
-            const yieldGrams = Math.round(coffee * 2);
-
-            return `
-              <h3>Espresso (Standard)</h3>
-              <ul>
-                <li>Dose: ${coffee} g</li>
-                <li>Target yield: ${yieldGrams} g</li>
-                <li>Ratio: ${ratio}</li>
-                <li>Water temp: 92–94°C</li>
-                <li>Pressure: 9 bar</li>
-                <li>Shot time: 25–32 sec</li>
-              </ul>
-              <p><strong>Why this works:</strong><br>
-              Balanced ratio and shot time target sweetness and structure.</p>
-            `;
-          }
-        }
-      ]
-    },
-    {
-      id: "coldbrew",
-      name: "Cold Brew",
-      recipes: [
-        {
-          id: "cb-immersion",
-          name: "Cold Brew (Immersion)",
-          render: (coffee) => {
-            const ratio = "1:8 concentrate";
-            const water = Math.round(coffee * 8);
-
-            return `
-              <h3>Cold Brew (Immersion)</h3>
-              <ul>
-                <li>Coffee: ${coffee} g</li>
-                <li>Water: ${water} g</li>
-                <li>Ratio: ${ratio}</li>
-                <li>Water temp: Room temp / cold</li>
-                <li>Grind: Coarse</li>
-                <li>Steep time: 12–16 hours</li>
-              </ul>
-              <p><strong>Why this works:</strong><br>
-              Long cool extraction emphasizes chocolatey sweetness and low acidity.</p>
-            `;
-          }
-        }
-      ]
-    }
+  // Recipes live in _data/recipes.yml; index.md inlines them as window.recipeData.
+  const data = window.recipeData || { methods: [] };
+  const methods = data.methods || [];
+  const grinder = data.grinder || {};
+  const baseUrl = window.siteBaseUrl || "";
+  const pageUrl = (path) => (path ? baseUrl + path : "");
+  const GROUPS = [
+    { id: "mine", label: "My gear" },
+    { id: "someday", label: "Someday" }
   ];
 
-  let currentMethod = methods[0].id;
+  const params = new URLSearchParams(location.search);
+  let currentMethod = (methods.find((m) => m.id === params.get("method")) || methods[0] || {}).id;
 
   const methodsContainer = document.getElementById("methods");
   const recipeSelect = document.getElementById("recipe");
+  const coffeeInput = document.getElementById("coffee");
+  const doseField = document.getElementById("dose-field");
   const output = document.getElementById("output");
   const brewLogActions = document.getElementById("brew-log-actions");
   const markdownOutput = document.getElementById("brew-markdown-output");
@@ -340,35 +33,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const acidityValue = document.getElementById("acidityVal");
   const sweetnessValue = document.getElementById("sweetnessVal");
 
-  if (
-    !methodsContainer ||
-    !recipeSelect ||
-    !output ||
-    !brewLogActions ||
-    !markdownOutput ||
-    !copyButton ||
-    !downloadButton ||
-    !brewerValue ||
-    !grinderSelect ||
-    !scaleSelect ||
-    !serverSelect ||
-    !strengthInput ||
-    !acidityInput ||
-    !sweetnessInput ||
-    !strengthValue ||
-    !acidityValue ||
-    !sweetnessValue
-  ) {
+  if (!methodsContainer || !recipeSelect || !coffeeInput || !output || !brewerValue) {
     return;
-  }
-
-  function getCurrentBrewerName() {
-    const selectedMethod = getMethodById(currentMethod);
-    return selectedMethod ? selectedMethod.name : "";
   }
 
   function getMethodById(methodId) {
     return methods.find((method) => method.id === methodId);
+  }
+
+  function getCurrentRecipe() {
+    const method = getMethodById(currentMethod);
+    return method ? method.recipes.find((r) => r.id === recipeSelect.value) : null;
+  }
+
+  function getCurrentBrewerName() {
+    const method = getMethodById(currentMethod);
+    return method ? method.gear || method.name : "";
   }
 
   function resetGeneratedLog() {
@@ -380,44 +60,60 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderMethodButtons() {
     methodsContainer.innerHTML = "";
-
-    methods.forEach((method) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "method";
-      button.dataset.method = method.id;
-      button.textContent = method.name;
-
-      if (method.id === currentMethod) {
-        button.classList.add("active");
-      }
-
-      button.addEventListener("click", () => {
-        currentMethod = method.id;
-        renderMethodButtons();
-        loadRecipes();
-        output.innerHTML = "<em>Select a method, recipe, and dose.</em>";
-        brewLogActions.style.display = "none";
-        brewerValue.value = getCurrentBrewerName();
-        resetGeneratedLog();
+    GROUPS.forEach((group) => {
+      const groupMethods = methods.filter((m) => (m.group || "mine") === group.id);
+      if (!groupMethods.length) return;
+      const label = document.createElement("span");
+      label.className = "method-group";
+      label.textContent = group.label;
+      methodsContainer.appendChild(label);
+      const row = document.createElement("div");
+      row.className = "method-row";
+      methodsContainer.appendChild(row);
+      groupMethods.forEach((method) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `method${method.id === currentMethod ? " active" : ""}${group.id === "someday" ? " someday" : ""}`;
+        button.dataset.method = method.id;
+        button.textContent = `${method.icon || ""} ${method.name}`.trim();
+        button.setAttribute("aria-pressed", method.id === currentMethod ? "true" : "false");
+        button.addEventListener("click", () => {
+          currentMethod = method.id;
+          renderMethodButtons();
+          loadRecipes();
+          brewerValue.value = getCurrentBrewerName();
+          calculate();
+        });
+        row.appendChild(button);
       });
-
-      methodsContainer.appendChild(button);
     });
+    // Scroll only the chip row (not the page) so the active chip is visible on phones
+    const active = methodsContainer.querySelector(".method.active");
+    if (active) {
+      const row = active.parentElement;
+      row.scrollLeft = Math.max(0, active.offsetLeft - row.offsetLeft - 16);
+    }
   }
 
-  function loadRecipes() {
-    const selectedMethod = getMethodById(currentMethod);
-    const methodRecipes = selectedMethod ? selectedMethod.recipes : [];
-
+  function loadRecipes(selectedId) {
+    const method = getMethodById(currentMethod);
     recipeSelect.innerHTML = "";
-
-    methodRecipes.forEach((recipe) => {
+    (method ? method.recipes : []).forEach((recipe) => {
       const option = document.createElement("option");
       option.value = recipe.id;
-      option.textContent = recipe.name;
+      option.textContent = recipe.event && /champion/i.test(recipe.event) ? `🏆 ${recipe.name}` : recipe.name;
       recipeSelect.appendChild(option);
     });
+    if (selectedId && method && method.recipes.some((r) => r.id === selectedId)) recipeSelect.value = selectedId;
+    applyRecipeDefaults();
+  }
+
+  // Each recipe's reference dose becomes the starting dose; fixed recipes hide the dose field.
+  function applyRecipeDefaults() {
+    const recipe = getCurrentRecipe();
+    if (!recipe) return;
+    doseField.hidden = Boolean(recipe.fixed);
+    if (!recipe.fixed) coffeeInput.value = recipe.dose;
   }
 
   function syncSliderLabels() {
@@ -426,50 +122,103 @@ document.addEventListener("DOMContentLoaded", () => {
     sweetnessValue.textContent = sweetnessInput.value;
   }
 
-  renderMethodButtons();
-  loadRecipes();
-  brewerValue.value = getCurrentBrewerName();
-  syncSliderLabels();
+  const round = (n) => Math.round(n);
+  const ratioLabel = (dose, water) => `1:${(water / dose).toFixed(1).replace(/\.0$/, "")}`;
+  const esc = (v) => String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-  strengthInput.addEventListener("input", syncSliderLabels);
-  acidityInput.addEventListener("input", syncSliderLabels);
-  sweetnessInput.addEventListener("input", syncSliderLabels);
+  // Cumulative scale targets are rounded from the published fractions, so each target is
+  // exact for the chosen dose and the "add" column always sums to the total.
+  function renderRecipe(method, recipe, coffee) {
+    const scale = recipe.fixed ? 1 : coffee / recipe.dose;
+    const total = recipe.fixed ? recipe.water : round(recipe.water * scale);
+    const items = [];
+    if (recipe.fixed) {
+      if (recipe.dose) items.push(`Coffee: ${recipe.dose} g`);
+      if (recipe.water) items.push(`Water: ${recipe.water} ml`);
+    } else {
+      items.push(`Coffee: ${coffee} g`);
+      items.push(`${recipe.output ? "Yield (in the cup)" : "Total water"}: ${total} g`);
+      items.push(`Ratio: ${ratioLabel(coffee, total)}`);
+    }
+    if (recipe.bypass) items.push(`Bypass water: ${round(recipe.bypass * scale)} g (in the server, not the brewer)`);
+    if (recipe.ice) items.push(`Ice: ${round(recipe.ice * scale)} g (in the server)`);
+    if (recipe.yield) items.push(`Yield: ${recipe.yield}`);
+    if (recipe.temp) items.push(`Water temp: ${recipe.temp}`);
+    if (recipe.grind) items.push(`Grind: ${recipe.grind}`);
+    const clicks = recipe.clicks || method.clicks;
+    if (clicks) items.push(`${grinder.name || "Grinder"}: ${clicks}${/^\d/.test(clicks) ? " clicks" : ""}`);
+    if (recipe.time) items.push(`Brew time: ${recipe.time}`);
 
-  window.calculate = function () {
-    const selectedMethod = getMethodById(currentMethod);
-    const recipeId = recipeSelect.value;
-    const coffeeInput = document.getElementById("coffee").value;
-    const coffee = Number.parseFloat(coffeeInput);
+    let prev = 0;
+    let pourNo = 0;
+    const rows = (recipe.steps || []).map((step) => {
+      const at = step.at || "";
+      if (step.to === undefined || recipe.fixed) {
+        return `<tr class="step-action"><td>${esc(at)}</td><td colspan="2">${esc(step.note || "")}</td><td></td></tr>`;
+      }
+      pourNo++;
+      const target = round(total * step.to);
+      const add = target - prev;
+      prev = target;
+      return `<tr><td>${esc(at)}</td><td>${esc(step.note || `Pour ${pourNo}`)}</td><td>${pourNo === 1 ? add : `+${add}`} g</td><td><strong>${target} g</strong></td></tr>`;
+    }).join("");
+    const pours = (recipe.steps || []).filter((s) => s.to !== undefined && !recipe.fixed).length;
 
-    if (!Number.isFinite(coffee) || coffee <= 0) {
+    const chips = [
+      recipe.event ? `<span class="chip chip-method">${esc(recipe.event)}</span>` : "",
+      `<span class="chip conf-${esc(recipe.confidence)}" title="How well the numbers are sourced">${recipe.confidence === "high" ? "✓ Well sourced" : recipe.confidence === "medium" ? "≈ Partly sourced" : "⚠ Loosely sourced"}</span>`
+    ].join("");
+
+    return `
+      <h3>${esc(recipe.name)}</h3>
+      <p class="recipe-meta">${recipe.author ? `<span>${esc(recipe.author)}</span>` : ""}<span class="chip-row">${chips}</span></p>
+      ${recipe.warn ? `<p class="recipe-warn">⚠ ${esc(recipe.warn)}</p>` : ""}
+      <ul>${items.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>
+      ${rows ? `
+      <p class="pour-caption"><strong>${pours > 1 ? "Scale targets (cumulative)" : "Steps"}</strong>${pours > 1 ? " — pour up to each number, don't add in your head:" : ""}</p>
+      <table class="pour-schedule">
+        <thead><tr><th>Time</th><th>Step</th><th>Add</th><th>Scale reads</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>` : ""}
+      ${recipe.serve ? `<p><strong>Serve:</strong> ${esc(recipe.serve)}</p>` : ""}
+      ${recipe.tips ? `<p><strong>Tips:</strong> ${esc(recipe.tips)}</p>` : ""}
+      <p class="recipe-source"><a href="${esc(recipe.source)}" target="_blank" rel="noopener">Source ↗</a>${method.page ? ` · <a href="${esc(pageUrl(method.page))}">All ${esc(method.name)} recipes</a>` : ""}</p>
+    `;
+  }
+
+  function calculate() {
+    const method = getMethodById(currentMethod);
+    const recipe = getCurrentRecipe();
+    if (!method || !recipe) {
+      output.innerHTML = "<strong>Pick a method and recipe.</strong>";
+      brewLogActions.style.display = "none";
+      return;
+    }
+    const coffee = Number.parseFloat(coffeeInput.value);
+    if (!recipe.fixed && (!Number.isFinite(coffee) || coffee <= 0)) {
       output.innerHTML = "<strong>Please enter a valid coffee dose.</strong>";
       brewLogActions.style.display = "none";
       resetGeneratedLog();
       return;
     }
-
-    if (!selectedMethod) {
-      output.innerHTML = "<strong>Please select a valid brewing method.</strong>";
-      brewLogActions.style.display = "none";
-      resetGeneratedLog();
-      return;
-    }
-
-    const selectedRecipe = selectedMethod.recipes.find(
-      (recipe) => recipe.id === recipeId
-    );
-
-    if (!selectedRecipe) {
-      output.innerHTML = "<strong>Please select a valid recipe.</strong>";
-      brewLogActions.style.display = "none";
-      resetGeneratedLog();
-      return;
-    }
-
-    output.innerHTML = selectedRecipe.render(coffee);
+    output.innerHTML = renderRecipe(method, recipe, coffee);
     brewLogActions.style.display = "block";
     resetGeneratedLog();
-  };
+    history.replaceState(null, "", `?method=${encodeURIComponent(method.id)}&recipe=${encodeURIComponent(recipe.id)}`);
+  }
+  window.calculate = calculate;
+
+  renderMethodButtons();
+  loadRecipes(params.get("recipe"));
+  brewerValue.value = getCurrentBrewerName();
+  syncSliderLabels();
+  calculate();
+
+  recipeSelect.addEventListener("change", () => { applyRecipeDefaults(); calculate(); });
+  coffeeInput.addEventListener("input", calculate);
+  strengthInput.addEventListener("input", syncSliderLabels);
+  acidityInput.addEventListener("input", syncSliderLabels);
+  sweetnessInput.addEventListener("input", syncSliderLabels);
 
   window.openBrewLogBuilder = function () {
     const builder = document.getElementById("brew-log-builder");
@@ -497,33 +246,31 @@ document.addEventListener("DOMContentLoaded", () => {
     const sweetness = document.getElementById("sweetness").value;
     const notes = document.getElementById("notes").value;
     const brewer = brewerValue.value || getCurrentBrewerName();
-    const grinder = grinderSelect.value;
+    const grinderName = grinderSelect.value;
     const scale = scaleSelect.value;
     const server = serverSelect.value;
 
-    const today = new Date().toISOString().split("T")[0];
-    const recipeName = recipeSelect.options[recipeSelect.selectedIndex].text;
+    const now = new Date();
+    const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split("T")[0];
+    const recipe = getCurrentRecipe();
+    const recipeName = recipe ? recipe.name : recipeSelect.options[recipeSelect.selectedIndex].text;
 
     const brewParams = Array.from(output.querySelectorAll("li"))
       .map((item) => `- ${item.textContent}`)
       .join("\n");
 
-    // If a cumulative pour schedule is present (e.g. Tetsu Kasuya 4:6),
-    // append it as a Markdown table so the brew log keeps the targets.
+    // Keep the cumulative pour schedule in the log as a Markdown table.
     const scheduleTable = output.querySelector("table.pour-schedule");
     let pourSchedule = "";
     if (scheduleTable) {
       const headers = Array.from(scheduleTable.querySelectorAll("thead th")).map(
         (cell) => cell.textContent.trim()
       );
-      const bodyRows = Array.from(scheduleTable.querySelectorAll("tbody tr")).map(
-        (row) =>
-          "| " +
-          Array.from(row.querySelectorAll("td"))
-            .map((cell) => cell.textContent.trim())
-            .join(" | ") +
-          " |"
-      );
+      const bodyRows = Array.from(scheduleTable.querySelectorAll("tbody tr")).map((row) => {
+        const cells = Array.from(row.querySelectorAll("td")).map((cell) => cell.textContent.trim());
+        while (cells.length < headers.length) cells.splice(2, 0, "");
+        return "| " + cells.join(" | ") + " |";
+      });
       pourSchedule = [
         "",
         "**Pour schedule (cumulative scale targets)**",
@@ -553,12 +300,12 @@ This entry documents my **${recipeName}** brew and tasting notes for **${bean}**
 ## ⚖️ Brew Recipe
 ${brewParams}
 ${pourSchedule}
-
+${recipe && recipe.source ? `\nRecipe source: ${recipe.source}\n` : ""}
 ---
 
 ## 🧰 Brewing Equipment
 - **Brewer**: ${brewer}
-- **Grinder**: ${grinder}
+- **Grinder**: ${grinderName}
 - **Scale**: ${scale}
 - **Server / Cup**: ${server}
 

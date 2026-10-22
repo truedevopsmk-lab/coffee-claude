@@ -1,0 +1,818 @@
+# Brew recipe library — drives the calculator (/tools/brew-calculator/) and the
+# "Recipe library" section on each method page. Researched 2026-10-22 from the
+# sources linked on each recipe; nothing estimated. See README §6.6 for the schema.
+#
+# Per recipe:
+#   dose / water   reference recipe in grams; the calculator scales to the user's dose
+#   fixed: true    not scalable (drip bags, Brikka) — shows the reference recipe as-is
+#   steps          `at` (mm:ss, optional), `to` (fraction 0–1 of total water, cumulative),
+#                  `note`. Steps without `to` are actions (stir, press, flip…).
+#   bypass         grams of water added after brewing (scaled with the dose)
+#   temp, grind    shown as-is; `clicks` is the TIMEMORE C3S Pro starting range
+#   confidence     high | medium | low (how well the numbers are sourced)
+#   warn           shown highlighted (inverted brewing, conflicts, gear limits)
+
+grinder:
+  name: "Timemore C3S Pro"
+  # TIMEMORE C3 Pro manual ("How to Adjust"); also printed on the C3S Pro dial
+  official:
+    - { method: "Espresso", clicks: "7–8" }
+    - { method: "Pour over", clicks: "13–16" }
+    - { method: "French press", clicks: "17–20" }
+  avoid: "0–6 clicks (TIMEMORE: protects the burrs)"
+  capacity: "20–25 g per grind — bigger doses need two runs"
+  source: "https://www.timemore.com/pages/download-center"
+
+methods:
+  # ───────────────────────── My gear ─────────────────────────
+  - id: v60
+    name: "V60"
+    icon: "🌀"
+    page: "/methods/v60/"
+    group: mine
+    gear: "Hario V60 (plastic) · Daiso porcelain V60-style"
+    clicks: "13–16"
+    recipes:
+      - id: kasuya-46
+        name: "Tetsu Kasuya 4:6"
+        author: "Tetsu Kasuya"
+        event: "World Brewers Cup 2016 champion"
+        dose: 20
+        water: 300
+        temp: "93 °C light · 88 °C medium · 83 °C dark"
+        grind: "Coarse (medium-coarse to coarse)"
+        clicks: "16+ (coarse end)"
+        time: "3:30"
+        steps:
+          - { at: "0:00", to: 0.2, note: "Pour 1" }
+          - { at: "0:45", to: 0.4, note: "Pour 2" }
+          - { at: "1:30", to: 0.6, note: "Pour 3" }
+          - { at: "2:10", to: 0.8, note: "Pour 4" }
+          - { at: "2:40", to: 1.0, note: "Pour 5" }
+          - { at: "3:30", note: "Remove the dripper" }
+        tips: "First 40% sets taste: a smaller 1st pour is sweeter, a bigger one brighter. Last 60% sets strength: 1 pour lighter, 3 pours stronger. Pour the next once the last has almost drained."
+        confidence: high
+        source: "https://philocoffea.com/pages/how-to-brew"
+      - id: hoffmann-1cup
+        name: "Hoffmann 1-cup V60"
+        author: "James Hoffmann"
+        event: "A Better 1-Cup V60 Technique (2022)"
+        dose: 15
+        water: 250
+        temp: "Freshly boiled (light roasts)"
+        grind: "Medium-fine"
+        time: "~3:00"
+        steps:
+          - { at: "0:00", to: 0.2, note: "Bloom; gentle swirl at 0:10" }
+          - { at: "0:45", to: 0.4, note: "Pour" }
+          - { at: "1:10", to: 0.6, note: "Pour" }
+          - { at: "1:30", to: 0.8, note: "Pour" }
+          - { at: "1:50", to: 1.0, note: "Pour" }
+          - { at: "2:00", note: "Gentle swirl, let it drain" }
+        confidence: high
+        source: "https://www.youtube.com/watch?v=1oB1oDrDkHM"
+      - id: hoffmann-ultimate
+        name: "Hoffmann Ultimate V60 (2-cup)"
+        author: "James Hoffmann"
+        event: "The Ultimate V60 Technique (2019)"
+        dose: 30
+        water: 500
+        temp: "As hot as possible (light roasts)"
+        grind: "Medium-fine"
+        time: "~3:30"
+        steps:
+          - { at: "0:00", to: 0.12, note: "Bloom 2× dose; swirl until even" }
+          - { at: "0:45", to: 0.6, note: "Pour to 60% by 1:15" }
+          - { at: "1:15", to: 1.0, note: "Pour the rest by 1:45, a little slower" }
+          - { at: "1:45", note: "Stir once each way; gentle swirl" }
+        warn: "30 g is more than one C3S Pro load (20–25 g) — grind twice."
+        confidence: high
+        source: "https://www.hario-usa.com/blogs/recipes-and-more-from-friends/james-hoffmann-uitimate-v60-technique"
+      - id: peng-309090
+        name: "George Peng 30-90-90"
+        author: "George Jinyang Peng"
+        event: "World Brewers Cup 2025 champion"
+        dose: 15
+        water: 210
+        temp: "96 °C for pours 1–2 · 80 °C for pour 3"
+        grind: "Medium (FM grinder 11 · ~800 µm)"
+        time: "1:45"
+        steps:
+          - { at: "0:00", to: 0.143, note: "30 g in three circles at 96 °C" }
+          - { at: "0:30", to: 0.571, note: "90 g in ~10 s at 96 °C" }
+          - { at: "1:10", to: 1.0, note: "90 g at 80 °C, slow and gentle" }
+          - { at: "1:45", note: "Done — let it cool a little before drinking" }
+        tips: "Competed on a SOLO dripper with a Melodrip for the last pour; a slow, low pour on the V60 is the home version."
+        confidence: high
+        source: "https://www.slowpoursupply.co/blogs/journal/2025-world-brewers-cup-champion-george-pengs-solo-dripper-recipe"
+      - id: winton-5pour
+        name: "Matt Winton five-pour"
+        author: "Matt Winton"
+        event: "World Brewers Cup 2021 champion"
+        dose: 20
+        water: 300
+        temp: "93 °C, then a few degrees cooler (≈88 °C)"
+        grind: "Quite coarse (Comandante ~30)"
+        clicks: "16+ (coarse end)"
+        steps:
+          - { at: "0:00", to: 0.167, note: "Bloom, no stirring" }
+          - { at: "0:35", to: 0.4, note: "Pour 2" }
+          - { to: 0.6, note: "Pour 3 — don't let the bed run dry" }
+          - { to: 0.8, note: "Pour 4" }
+          - { to: 1.0, note: "Pour 5" }
+        tips: "Flood the bed from the centre, circle, finish in the centre. Pour times after 0:35 aren't published — pour as each one drops."
+        confidence: medium
+        source: "https://www.baristahustle.com/lesson/p-1-07-1-no-stir-an-interview-with-world-brewers-cup-champion-matt-winton/"
+      - id: hedrick-easy
+        name: "Lance Hedrick easy V60"
+        author: "Lance Hedrick"
+        event: "V60 \"Easy and Effective\" (2021)"
+        dose: 20
+        water: 340
+        temp: "Boiling"
+        grind: "~720 µm"
+        time: "2:30–3:30"
+        steps:
+          - { at: "0:00", to: 0.147, note: "Pour, spin" }
+          - { at: "0:30", to: 0.294, note: "Pour, spin" }
+          - { at: "1:00", to: 0.647, note: "Pour aggressively just behind centre, spin" }
+          - { at: "1:30", to: 1.0, note: "Pour, spin" }
+        confidence: high
+        source: "https://www.youtube.com/watch?v=Ji4lZTtRAoo"
+      - id: april-v60
+        name: "April V60"
+        author: "Patrik Rolf · April Coffee"
+        event: "Coffee with April #113 (2020)"
+        dose: 13
+        water: 200
+        temp: "90 °C"
+        grind: "Relatively coarse"
+        time: "2:30"
+        steps:
+          - { at: "0:00", to: 0.25, note: "Bloom" }
+          - { at: "0:30", to: 0.5, note: "Pour" }
+          - { at: "1:00", to: 0.75, note: "Pour" }
+          - { at: "1:30", to: 1.0, note: "Pour" }
+        confidence: high
+        source: "https://www.youtube.com/watch?v=otk2jFRCcmE"
+      - id: chad-wang
+        name: "Chad Wang centre pour"
+        author: "Chad Wang"
+        event: "World Brewers Cup 2017 champion"
+        dose: 15
+        water: 250
+        temp: "92 °C"
+        time: "2:00"
+        steps:
+          - { at: "0:00", note: "Bloom 30 s (amount not published — ~2× dose works)" }
+          - { at: "0:30", to: 1.0, note: "Pour the rest straight into the centre. No circles." }
+        confidence: medium
+        source: "https://sprudge.com/6-recipes-from-the-2017-world-brewers-cup-123165.html"
+      - id: kasuya-mugen
+        name: "Kasuya one-pour (Mugen)"
+        author: "Tetsu Kasuya"
+        event: "Hario V60 Mugen recipe"
+        dose: 25
+        water: 300
+        grind: "Fine"
+        time: "1:30"
+        steps:
+          - { at: "0:00", to: 1.0, note: "One pour" }
+        warn: "Designed for the ridgeless V60 Mugen; on a regular V60 it drains faster. 25 g needs two grinder runs."
+        confidence: high
+        source: "https://www.hario-usa.com/blogs/recipes-and-more-from-friends/tetsu-kasuya-v60-mugen-recipe"
+
+  - id: b75
+    name: "B75"
+    icon: "🟤"
+    page: "/methods/b75/"
+    group: mine
+    gear: "TIMEMORE Crystal Eye B75 (flat-bed)"
+    clicks: "13–16"
+    note: "TIMEMORE rates the B75 best up to ~15 g."
+    recipes:
+      - id: timemore-official
+        name: "TIMEMORE official"
+        author: "TIMEMORE"
+        event: "Official B75 starter recipe (2026)"
+        dose: 15
+        water: 225
+        temp: "90–94 °C"
+        steps:
+          - { at: "0:00", to: 0.133, note: "Bloom 2× dose for 30 s" }
+          - { at: "0:30", to: 1.0, note: "Pour in stages to the total" }
+        tips: "TIMEMORE: too bitter or harsh → grind coarser. Weak and watery → grind finer, or pour a little slower."
+        confidence: high
+        source: "https://www.timemore.com/blogs/read-our-blog/a-simple-coffee-setup-for-beginners"
+      - id: chemicoffea-b75
+        name: "Chemicoffea B75"
+        author: "Chemicoffea"
+        event: "B75 \"Perfect Recipe\" (2025)"
+        dose: 15
+        water: 230
+        temp: "90 °C"
+        grind: "Medium (Comandante ~23 · 750–850 µm)"
+        time: "2:30–3:00"
+        steps:
+          - { at: "0:00", to: 0.174, note: "Circular pour, low agitation" }
+          - { at: "0:30", to: 0.391, note: "Circular" }
+          - { at: "1:00", to: 0.652, note: "Circular" }
+          - { at: "1:30", to: 1.0, note: "Circular; swirl the server at the end" }
+        confidence: high
+        source: "https://www.youtube.com/watch?v=PjpnPls6GWo"
+      - id: hsu-b75
+        name: "Sherry Hsu (B75 version)"
+        author: "Sherry Hsu"
+        event: "World Brewers Cup 2022 champion · B75 adaptation by Chemicoffea"
+        dose: 14
+        water: 200
+        temp: "70 °C first pour · 95 °C after"
+        grind: "Medium-coarse (Comandante ~26 · 800–1000 µm)"
+        time: "2:30–3:00"
+        steps:
+          - { at: "0:00", to: 0.25, note: "70 °C, circular" }
+          - { at: "0:30", to: 0.5, note: "95 °C, circular" }
+          - { at: "1:00", to: 0.75, note: "95 °C, centre" }
+          - { at: "1:30", to: 1.0, note: "95 °C, centre" }
+        confidence: medium
+        source: "https://www.youtube.com/watch?v=04N0Jwwctqo"
+      - id: brew-coffee-home
+        name: "Brew Coffee Home B75"
+        author: "Brew Coffee Home"
+        event: "B75 recipe (2024)"
+        dose: 13
+        water: 200
+        temp: "92 °C"
+        time: "2:10"
+        steps:
+          - { at: "0:00", to: 0.2, note: "Bloom 30 s" }
+          - { to: 0.6, note: "Second pour" }
+          - { to: 1.0, note: "Final pour" }
+        confidence: medium
+        source: "https://www.youtube.com/watch?v=zepwZQ8hvgs"
+      - id: april-13-200
+        name: "April Brewer 13/200"
+        author: "April Coffee"
+        event: "April Brewing Kit (2020) — flat-bed"
+        dose: 13
+        water: 200
+        temp: "94 °C"
+        time: "2:40–3:00"
+        steps:
+          - { at: "0:00", to: 0.5, note: "30 g in a circle, then the rest in the centre (by 0:10)" }
+          - { at: "0:35", to: 1.0, note: "Same again (by 0:45)" }
+        confidence: high
+        source: "https://www.youtube.com/watch?v=X-fXQKqkYxI"
+      - id: wolfl-2024
+        name: "Martin Wölfl"
+        author: "Martin Wölfl"
+        event: "World Brewers Cup 2024 champion"
+        dose: 17
+        water: 270
+        temp: "93 °C"
+        grind: "Medium (Comandante 21–25)"
+        time: "2:20–2:25"
+        steps:
+          - { at: "0:00", to: 0.222, note: "Bloom" }
+          - { at: "0:40", to: 0.444, note: "Pour" }
+          - { at: "1:20", to: 0.63, note: "Pour" }
+          - { at: "2:00", to: 1.0, note: "Pour" }
+        warn: "Brewed on an Orea V4 flat-bed. 17 g is above TIMEMORE's ~15 g guidance for the B75 — try 15 g."
+        confidence: high
+        source: "https://www.youtube.com/watch?v=3SIFFaT1MFU"
+      - id: kalita-official
+        name: "Kalita Wave formula"
+        author: "Kalita USA"
+        event: "Recommended pour-over formula"
+        dose: 20
+        water: 320
+        temp: "91–96 °C"
+        grind: "Like medium-coarse sea salt"
+        time: "2:00–3:00"
+        steps:
+          - { at: "0:00", to: 0.188, note: "Bloom 30–45 s" }
+          - { to: 1.0, note: "Circle the rest in small pulses" }
+        warn: "Kalita's 20 g is over the B75's ~15 g; keep its 1:16 ratio and scale down."
+        confidence: high
+        source: "https://kalitausa.com/blogs/news/brew-like-a-pro-the-kalita-pour-over-method-for-exceptional-coffee"
+
+  - id: aeropress
+    name: "AeroPress Go Plus"
+    icon: "🛢"
+    page: "/methods/aeropress/"
+    group: mine
+    gear: "AeroPress Go Plus (≈296 ml chamber, standard filters)"
+    clicks: "Not published by TIMEMORE"
+    note: "AeroPress strongly discourages inverted brewing on every model. Recipes here are upright unless flagged."
+    recipes:
+      - id: hoffmann-ap
+        name: "Hoffmann Ultimate AeroPress"
+        author: "James Hoffmann"
+        event: "The Ultimate AeroPress Technique (2021)"
+        dose: 11
+        water: 200
+        temp: "Just boiled"
+        grind: "Finer end of medium (light roasts)"
+        time: "2:30"
+        steps:
+          - { at: "0:00", to: 1.0, note: "All the water, wetting all the coffee. Plunger in ~1 cm right away." }
+          - { at: "2:00", note: "Swirl gently, holding brewer and plunger" }
+          - { at: "2:30", note: "Press gently all the way" }
+        tips: "No need to rinse the filter or preheat."
+        confidence: high
+        source: "https://www.youtube.com/watch?v=j6VlT_jUVPc"
+      - id: wendelboe-ap
+        name: "Tim Wendelboe"
+        author: "Tim Wendelboe"
+        event: "WAC co-founder's home recipe"
+        dose: 14
+        water: 200
+        temp: "Boiling"
+        grind: "Fine filter grind"
+        steps:
+          - { at: "0:00", to: 1.0, note: "Pour; stir 3×; plunger on to stop dripping" }
+          - { at: "1:00", note: "Plunger off; stir 3× back to front" }
+          - { note: "Plunger back on; press with body weight (don't over-press)" }
+        confidence: high
+        source: "https://timwendelboe.no/pages/how-to-brew-with-an-aeropress"
+      - id: sasaki-2014
+        name: "Shuichi Sasaki"
+        author: "Shuichi Sasaki"
+        event: "World AeroPress Champion 2014 (upright)"
+        dose: 16.5
+        water: 250
+        temp: "78 °C"
+        grind: "Coarse (EK43 9.5)"
+        time: "1:40"
+        steps:
+          - { at: "0:00", to: 0.16, note: "Bloom 25 s; stir 5×" }
+          - { at: "0:25", to: 1.0, note: "Add the rest; stir once" }
+          - { note: "Press very slowly, ~75 s; leave ~45 g in the brewer" }
+        warn: "250 g is close to the Go Plus's ~296 ml limit."
+        confidence: high
+        source: "https://worldaeropresschampionship.com/pages/recipes"
+      - id: pop-2025
+        name: "Némo Pop (bypass)"
+        author: "Némo Pop"
+        event: "World AeroPress Champion 2025 (upright)"
+        dose: 18
+        water: 170
+        bypass: 70
+        temp: "84 °C brew · bypass 50 °C"
+        grind: "Medium (Comandante X25 31, fines sifted at 200 µm)"
+        steps:
+          - { note: "Put the bypass water in the server first" }
+          - { at: "0:00", to: 1.0, note: "Brew water, wetting all the grounds" }
+          - { at: "0:25", note: "Stir N-S-N-S, W-E-W-E" }
+          - { at: "0:50", note: "Press gently, ~20 s" }
+        warn: "Uses the Flow Control cap (you don't have one) and 2 papers. Without the cap it drips through early — press sooner."
+        confidence: high
+        source: "https://aeropress.com/blogs/w-a-c-aeropress-recipes/1st-nemo-pop-australia-2025"
+      - id: karabinos-2014
+        name: "Martin Karabinos (cool steep)"
+        author: "Martin Karabinos"
+        event: "World AeroPress 2014 · 2nd (upright)"
+        dose: 18.5
+        water: 215
+        temp: "35 °C first · 92 °C second"
+        grind: "Medium (EK43 6.2)"
+        time: "3:30"
+        steps:
+          - { at: "0:00", to: 0.372, note: "35 °C water; stir well; plunger on" }
+          - { at: "3:00", to: 1.0, note: "92 °C water; stir once" }
+          - { note: "Press slowly, 30 s" }
+        confidence: high
+        source: "https://worldaeropresschampionship.com/pages/recipes"
+      - id: zhang-2023
+        name: "Leon Zhang (two-stage)"
+        author: "Leon Zhang"
+        event: "World AeroPress 2023 · 3rd (upright)"
+        dose: 18
+        water: 235
+        temp: "93 °C stage 1 · 75 °C stage 2"
+        grind: "Medium (Comandante 27)"
+        steps:
+          - { to: 0.426, note: "93 °C; stir 15×; plunger in, soak 45 s, press ~5 s" }
+          - { to: 1.0, note: "Plunger out; 75 °C water; stir 5; plunger in" }
+          - { at: "1:40", note: "Press down cleanly" }
+        warn: "Competed with stacked cotton + linen filters; paper works but tastes different."
+        confidence: high
+        source: "https://worldaeropresschampionship.com/pages/recipes"
+      - id: adler-official
+        name: "Inventor's recipe (Adler)"
+        author: "Alan Adler · AeroPress"
+        event: "Official AeroPress method"
+        dose: 14
+        water: 0
+        fixed: true
+        temp: "80 °C"
+        grind: "Fine drip grind"
+        steps:
+          - { at: "0:00", note: "Water to the \"1\" mark" }
+          - { note: "Stir ~10 s" }
+          - { note: "Press gently until the plunger meets the grounds" }
+          - { note: "Top up with hot water to taste (Americano) or milk (latte)" }
+        tips: "One rounded AeroPress scoop ≈ 14 g (Adler)."
+        confidence: medium
+        source: "http://web.archive.org/web/20191029232245/https://aeropress.com/use-it-now/getting-started/"
+
+  - id: brikka
+    name: "Brikka"
+    icon: "🫖"
+    page: "/methods/moka-pot/"
+    group: mine
+    gear: "Bialetti Brikka, 2-cup"
+    clicks: "Not published — moka grind, never espresso-fine"
+    recipes:
+      - id: bialetti-brikka-2
+        name: "Bialetti Brikka 2-cup (official)"
+        author: "Bialetti"
+        event: "New Brikka manual (2021)"
+        fixed: true
+        dose: 0
+        water: 120
+        yield: "~100 ml coffee"
+        temp: "Cold water in the heater"
+        grind: "Moka grind — never fine"
+        steps:
+          - { note: "120 ml cold water into the heater (use the measuring cup)" }
+          - { note: "Fill the funnel with coffee — level, don't press" }
+          - { note: "Screw tight without forcing the handle; lid closed" }
+          - { note: "Medium heat (gas flame no wider than the base)" }
+          - { note: "Take it off the heat as soon as the froth has formed" }
+        warn: "Never unscrew the valve. Too much water, too-fine coffee or pressing it down can make the safety valve vent."
+        tips: "Hoffmann measured the Brikka valve opening just above 1 bar and found it runs hotter than a classic moka; cool the base under the tap the moment it's done to cut bitterness."
+        confidence: high
+        source: "https://www.bialetti.com/media/manual/caffettiere/NEW_BRIKKA_0007312-manual.pdf"
+
+  - id: dripbag
+    name: "Drip bags"
+    icon: "🛍"
+    page: "/methods/drip-bags/"
+    group: mine
+    gear: "Blue Tokai Easypour"
+    recipes:
+      - id: easypour
+        name: "Blue Tokai Easypour"
+        author: "Blue Tokai"
+        event: "Official Easypour instructions"
+        fixed: true
+        dose: 11
+        water: 190
+        yield: "180–200 ml cup"
+        temp: "90–92 °C dark roasts · 94–96 °C light roasts"
+        steps:
+          - { note: "Tear the top; hook the filter firmly over a 180–200 ml cup" }
+          - { at: "0:00", note: "Pour slowly; wait 20 s" }
+          - { note: "Repeat 2–3 more times until the cup is full" }
+          - { note: "Bag at least half-submerged: steep 2 more minutes" }
+          - { note: "Discard the bag" }
+        tips: "Stronger: steep 2–3 min longer. Sour: less water or steep 1 min longer. Bitter: more water or steep 30–60 s less. Never pour milk through the bag."
+        confidence: high
+        source: "https://bluetokaicoffee.com/pages/easypour"
+
+  - id: filter
+    name: "South Indian filter"
+    icon: "🥛"
+    page: "/methods/south-indian-filter/"
+    group: mine
+    gear: "Traditional two-chamber filter"
+    clicks: "Not published — between espresso and moka"
+    recipes:
+      - id: bluetokai-filter
+        name: "Blue Tokai decoction"
+        author: "Blue Tokai"
+        event: "South Indian Filter guide"
+        dose: 18
+        water: 100
+        temp: "95 °C (1:30 off the boil)"
+        grind: "South Indian filter grind"
+        time: "9:30–10:00"
+        steps:
+          - { note: "Coffee in the top chamber; level it with the plunger (no pressure); leave the plunger on" }
+          - { at: "0:00", to: 1.0, note: "Pour the hot water; lid on" }
+          - { at: "9:30", note: "Decoction is ready" }
+        serve: "50 ml decoction + 60 ml hot milk (or 50 ml hot water). Sugar to taste; pour between vessels from a height for froth."
+        tips: "One batch makes 2–3 cups; keeps 3 days in the fridge."
+        confidence: high
+        source: "https://bluetokaicoffee.com/pages/how-to-make-coffee-from-south-indian-filter"
+      - id: aramse-filter
+        name: "ARAMSE decoction (no tamper)"
+        author: "ARAMSE"
+        event: "SOFI 72 method"
+        dose: 20
+        water: 120
+        temp: "94 °C (medium-light roast)"
+        grind: "Fine (between espresso and moka)"
+        time: "6–15 min"
+        steps:
+          - { note: "Level the bed by stirring — no tamper or umbrella" }
+          - { at: "0:00", to: 0.333, note: "Pour over a spoon in ~10 s; swirl 5–7×" }
+          - { at: "1:00", to: 1.0, note: "Pour slowly in ~20 s; swirl 2–4×; cover loosely" }
+        serve: "Boiled milk + decoction to taste; froth by pouring between dabarah and tumbler."
+        tips: "Stalling → grind coarser and don't seal the chambers tight. Weak → finer or more coffee. Bitter → coarser or less coffee."
+        confidence: high
+        source: "https://aramse.coffee/blogs/education/the-ultimate-south-indian-filter-coffee-guide"
+
+  - id: cold
+    name: "Iced & cold brew"
+    icon: "🧊"
+    page: "/methods/cold-brew/"
+    group: mine
+    gear: "V60 for flash brew · jar or server for cold brew"
+    recipes:
+      - id: hoffmann-iced-immersion
+        name: "Hoffmann iced (hot onto ice)"
+        author: "James Hoffmann"
+        event: "Immersion Iced Coffee"
+        dose: 19
+        water: 165
+        ice: 85
+        temp: "Freshly boiled"
+        grind: "Finer than pour-over"
+        steps:
+          - { at: "0:00", to: 1.0, note: "Hot water over the coffee; no dry pockets" }
+          - { at: "5:00", note: "Strain onto the ice (4:00 for darker roasts); stir" }
+        tips: "Ice is about half the hot water — the calculator scales it. Works in an AeroPress or any jar + filter."
+        confidence: high
+        source: "https://www.youtube.com/watch?v=8uGGeV8A-BM"
+      - id: hoffmann-japanese-iced
+        name: "Japanese iced V60"
+        author: "James Hoffmann (as transcribed)"
+        event: "Better than cold brew (2018)"
+        dose: 25
+        water: 250
+        ice: 165
+        temp: "Just boiled"
+        grind: "Finer than a hot V60"
+        time: "2:45"
+        steps:
+          - { note: "Ice in the server" }
+          - { at: "0:00", to: 0.2, note: "Spiral; bloom" }
+          - { at: "0:45", to: 0.6, note: "Spiral" }
+          - { at: "1:30", to: 1.0, note: "Spiral; swirl until chilled" }
+        warn: "Numbers come from a third-party transcription of the video; another version uses 35 g / 300 g / 200 g ice."
+        confidence: low
+        source: "https://gota.cafe/en/recipes/v60-02/v60-hoffmann-iced"
+      - id: hoffmann-cold-brew
+        name: "Hoffmann cold brew (ready to drink)"
+        author: "James Hoffmann"
+        event: "Everything I Learned About Cold Brew"
+        dose: 37.5
+        water: 500
+        temp: "Room-temperature water, then fridge"
+        grind: "Fine (moka / AeroPress fine)"
+        time: "12 h in the fridge"
+        steps:
+          - { at: "0:00", to: 1.0, note: "Combine; stir thoroughly" }
+          - { note: "Lid on; 12 h in the fridge" }
+          - { note: "Decant gently, stopping before the sediment" }
+        tips: "Ready to drink — no dilution."
+        warn: "Grind in two runs at this dose."
+        confidence: high
+        source: "https://www.youtube.com/watch?v=AB0QLjroFss"
+      - id: bluetokai-cold-brew
+        name: "Blue Tokai cold brew"
+        author: "Blue Tokai"
+        event: "Cold brew guide"
+        dose: 50
+        water: 500
+        temp: "Room temperature"
+        grind: "Coarse"
+        time: "16 h (light 14–16 · medium-dark 16–18)"
+        steps:
+          - { at: "0:00", to: 0.5, note: "Half the water; stir until all wet" }
+          - { to: 1.0, note: "The rest; stir again" }
+          - { note: "Cover; room temperature" }
+          - { at: "16:00:00", note: "Strain; refrigerate; drink within 4–5 days" }
+        tips: "Yields ~75% (grounds hold up to 20%). Black or with milk."
+        warn: "50 g is two to three grinder runs."
+        confidence: high
+        source: "https://bluetokaicoffee.com/pages/how-to-make-cold-brew-coffee"
+
+  # ───────────────────────── Someday ─────────────────────────
+  - id: frenchpress
+    name: "French press"
+    icon: "🪵"
+    page: "/methods/french-press/"
+    group: someday
+    clicks: "17–20"
+    recipes:
+      - id: hoffmann-fp
+        name: "Hoffmann Ultimate French Press"
+        author: "James Hoffmann"
+        event: "The Ultimate French Press Technique"
+        dose: 30
+        water: 500
+        temp: "Freshly boiled"
+        grind: "Medium (not super coarse)"
+        time: "9–12 min"
+        steps:
+          - { at: "0:00", to: 1.0, note: "All the water" }
+          - { at: "4:00", note: "Stir the crust; skim the foam" }
+          - { at: "9:00", note: "Plunger to the surface only — don't plunge; pour gently" }
+        confidence: high
+        source: "https://www.youtube.com/watch?v=st571DYYTR8"
+      - id: bluetokai-fp
+        name: "Blue Tokai French press"
+        author: "Blue Tokai"
+        event: "French press guide"
+        dose: 20
+        water: 240
+        temp: "94 °C"
+        time: "3:30"
+        steps:
+          - { at: "0:00", to: 0.167, note: "Stir 10×; wait 30 s" }
+          - { at: "0:30", to: 1.0, note: "The rest; lid on" }
+          - { at: "3:30", note: "Stir a few times (not for dark roasts); plunge slowly over ~1 min; serve" }
+        confidence: high
+        source: "https://bluetokaicoffee.com/pages/how-to-make-coffee-from-frenchpress"
+  - id: chemex
+    name: "Chemex"
+    icon: "⏳"
+    page: "/methods/chemex/"
+    group: someday
+    recipes:
+      - id: hoffmann-chemex
+        name: "Hoffmann Chemex"
+        author: "James Hoffmann (as transcribed)"
+        event: "The Chemex (2020)"
+        dose: 30
+        water: 500
+        temp: "Boiling"
+        grind: "Medium"
+        time: "~4:10"
+        steps:
+          - { at: "0:00", to: 0.16, note: "Bloom in gentle circles; 35 s" }
+          - { to: 0.6, note: "Circle pour within 30 s" }
+          - { to: 1.0, note: "Circle pour within 30 s" }
+          - { note: "Stir once each way; wait 10 s; gentle shake" }
+        confidence: low
+        source: "https://honestcoffeeguide.com/brew-recipes/james-hoffmann-chemex-recipe/"
+  - id: espresso
+    name: "Espresso"
+    icon: "☕"
+    page: "/methods/espresso/"
+    group: someday
+    clicks: "7–8 (C3S Pro steps are coarse for espresso)"
+    recipes:
+      - id: espresso-12
+        name: "Classic 1:2"
+        author: "Barista Hustle / James Hoffmann"
+        event: "Baseline"
+        dose: 16
+        water: 32
+        output: true
+        time: "25–35 s"
+        steps:
+          - { at: "0:00", to: 1.0, note: "Yield in the cup (range 1:1.8–1:2.5)" }
+        confidence: high
+        source: "https://www.baristahustle.com/espresso-recipes-understanding-yield/"
+      - id: turbo
+        name: "Turbo shot"
+        author: "Cameron et al. (Matter, 2020)"
+        event: "Systematically improving espresso"
+        dose: 15
+        water: 40
+        output: true
+        temp: "92 °C · 6 bar"
+        grind: "Much coarser than usual"
+        time: "under 15 s"
+        steps:
+          - { at: "0:00", to: 1.0, note: "Yield in the cup" }
+        confidence: high
+        source: "https://doi.org/10.1016/j.matt.2019.12.019"
+  - id: switch
+    name: "Hario Switch"
+    icon: "🔀"
+    page: "/methods/hario-switch/"
+    group: someday
+    recipes:
+      - id: kasuya-devil
+        name: "Kasuya hybrid (\"Devil\")"
+        author: "Tetsu Kasuya"
+        dose: 20
+        water: 280
+        temp: "93 °C · then ~75 °C"
+        time: "~3:00"
+        steps:
+          - { at: "0:00", to: 0.214, note: "Switch open" }
+          - { at: "0:30", to: 0.429, note: "Still open; cool the kettle to ~75 °C" }
+          - { at: "1:15", to: 1.0, note: "Close the switch" }
+          - { at: "1:45", note: "Open and drain" }
+        confidence: high
+        source: "https://www.youtube.com/watch?v=gC8K40kZ_6E"
+      - id: winton-switch
+        name: "Matt Winton immersion"
+        author: "Matt Winton · HARIO"
+        dose: 16
+        water: 240
+        temp: "93 °C"
+        steps:
+          - { at: "0:00", to: 1.0, note: "Valve closed; all the water" }
+          - { at: "4:00", note: "Open; small swirl; drain ~1 min" }
+        confidence: high
+        source: "https://www.youtube.com/watch?v=g9diFrEkn3M"
+  - id: clever
+    name: "Clever Dripper"
+    icon: "🥤"
+    page: "/methods/clever-dripper/"
+    group: someday
+    recipes:
+      - id: hoffmann-clever
+        name: "Hoffmann Ultimate Clever"
+        author: "James Hoffmann"
+        dose: 15
+        water: 250
+        temp: "Straight off the boil"
+        grind: "Medium-fine"
+        steps:
+          - { at: "0:00", to: 1.0, note: "Water in first, then the coffee; stir gently" }
+          - { at: "2:00", note: "Break the crust with a gentle stir" }
+          - { at: "2:30", note: "Set on the mug to drain" }
+        confidence: high
+        source: "https://www.youtube.com/watch?v=RpOdennxP24"
+  - id: cezve
+    name: "Cezve (Turkish)"
+    icon: "🏺"
+    page: "/methods/cezve/"
+    group: someday
+    clicks: "Needs powder-fine — beyond the C3S Pro's safe range"
+    recipes:
+      - id: bh-cezve
+        name: "Barista Hustle cezve"
+        author: "Barista Hustle"
+        dose: 8
+        water: 100
+        temp: "Cold water heated to 95 °C"
+        grind: "Powder-fine"
+        steps:
+          - { at: "0:00", to: 1.0, note: "Cold water + coffee; stir" }
+          - { note: "Heat to 95 °C as the foam rises; pour unfiltered" }
+        confidence: high
+        source: "https://www.baristahustle.com/the-cezve-is-mightier-than-the-spro/"
+  - id: phin
+    name: "Vietnamese phin"
+    icon: "🇻🇳"
+    page: "/methods/vietnamese-phin/"
+    group: someday
+    recipes:
+      - id: nguyen-phin
+        name: "Nguyen traditional phin"
+        author: "Nguyen Coffee Supply"
+        dose: 14
+        water: 118
+        temp: "91–93 °C"
+        grind: "Fine, like sand"
+        time: "~5:00"
+        steps:
+          - { note: "Coffee in; shake level; press on top" }
+          - { at: "0:00", to: 0.254, note: "Bloom 45 s" }
+          - { at: "0:45", to: 1.0, note: "Fill to the top" }
+        serve: "Condensed milk to taste; over ice optional."
+        tips: "First drip before 2:00, last around 5:00. Faster → finer; slower → coarser."
+        confidence: medium
+        source: "https://nguyencoffeesupply.com/blogs/vietnamese-coffee-brew-guide/traditional-vietnamese-drip-phin"
+
+# World AeroPress Championship archive — shown on /methods/aeropress/ as a reference.
+# Doses/water as competed; many are inverted (AeroPress discourages that).
+wac:
+  - { year: 2025, place: 1, name: "Némo Pop", country: "Australia", dose: "18 g", water: "100 g + 70 g bypass", temp: "84 °C", inverted: false }
+  - { year: 2025, place: 2, name: "Jan Ahrend", country: "Switzerland", dose: "18 g", water: "100 g, dilute to 152 g", temp: "88 °C", inverted: true }
+  - { year: 2025, place: 3, name: "Dharun Vyas", country: "India", dose: "16 g", water: "208 ml + 12 ml", temp: "88 °C", inverted: true }
+  - { year: 2024, place: 1, name: "George Stanica", country: "Romania", dose: "18 g", water: "~100 g, dilute to ~150–165 g", temp: "96 °C", inverted: true }
+  - { year: 2024, place: 2, name: "Sophan Nugraha", country: "Indonesia", dose: "18 g", water: "190 ml + 10 ml", temp: "room temp → 95 °C", inverted: true }
+  - { year: 2024, place: 3, name: "Mahmoud Jamika", country: "Egypt", dose: "18 g", water: "150 ml + 30 ml", temp: "80 → 75 °C", inverted: true }
+  - { year: 2023, place: 1, name: "Tay Wipvasutt", country: "Thailand", dose: "16 + 2 g", water: "100 g, dilute to ~155 g", temp: "89 °C", inverted: true }
+  - { year: 2023, place: 2, name: "Carlo Graf Bülow", country: "Germany", dose: "18 g", water: "160 g, dilute to 150 g out", temp: "100 °C", inverted: true }
+  - { year: 2023, place: 3, name: "Leon Zhang", country: "China", dose: "18 g", water: "100 g + 135 g", temp: "93 / 75 °C", inverted: false }
+  - { year: 2022, place: 1, name: "Jibbi Little", country: "Australia", dose: "18 g", water: "94 ml, bypass to 150 g", temp: "90 or 92 °C", inverted: true }
+  - { year: 2022, place: 2, name: "Simon Derutter", country: "Belgium", dose: "18 g", water: "140 g + ~46 g", temp: "85 or 90 °C", inverted: false }
+  - { year: 2022, place: 3, name: "Jennifer Rui Ping Ho", country: "Singapore", dose: "18 g", water: "200 ml", temp: "84 °C", inverted: true }
+  - { year: 2021, place: 1, name: "Tuomas Merikanto", country: "Finland", dose: "18 g", water: "200 g", temp: "80 °C", inverted: true }
+  - { year: 2021, place: 2, name: "Maru Mallee", country: "Netherlands", dose: "18 g", water: "150 g + 36 g", temp: "93 °C", inverted: true }
+  - { year: 2021, place: 3, name: "Brandon Smith", country: "South Africa", dose: "18 g", water: "140 g + 80 g", temp: "88 °C", inverted: true }
+  - { year: 2019, place: 1, name: "Wendelien van Bunnik", country: "Netherlands", dose: "30 g", water: "100 g + ~120 g", temp: "92 °C", inverted: true }
+  - { year: 2019, place: 2, name: "Benja Khemacheva", country: "Thailand", dose: "35 g", water: "100 g + 110 g bypass", temp: "94 °C", inverted: true }
+  - { year: 2019, place: 3, name: "Alexis Gagnaire", country: "France", dose: "30 g", water: "135 ml + 110–130 ml", temp: "88 °C", inverted: true }
+  - { year: 2018, place: 1, name: "Carolina Ibarra Garay", country: "USA", dose: "34.9 g", water: "100 g + 100 g", temp: "85 °C", inverted: true }
+  - { year: 2018, place: 2, name: "Xiaobo Zhang", country: "China", dose: "31 g", water: "170 g + 50 g", temp: "80 °C", inverted: true }
+  - { year: 2018, place: 3, name: "Evgeni Pinchukov", country: "Belarus", dose: "15 or 30 g", water: "230 g", temp: "80 °C", inverted: false }
+  - { year: 2017, place: 1, name: "Paulina Miczka", country: "England", dose: "35 g", water: "150 g + 160–200 g", temp: "84 °C", inverted: true }
+  - { year: 2017, place: 2, name: "Yusuke Narisawa", country: "Japan", dose: "29.5 g", water: "170 g + 75 g", temp: "85 °C", inverted: true }
+  - { year: 2017, place: 3, name: "Jeongsu Park", country: "South Korea", dose: "30 g", water: "150 g + 150 g", temp: "86 °C", inverted: false }
+  - { year: 2016, place: 1, name: "Filip Kucharczyk", country: "Poland", dose: "35 g", water: "150 g + 100–120 g", temp: "81 °C", inverted: true }
+  - { year: 2016, place: 2, name: "Jerome Dittmar", country: "France", dose: "20 g", water: "230 g", temp: "—", inverted: false }
+  - { year: 2016, place: 3, name: "Hugo Sousa Rocco", country: "Brazil", dose: "27 g", water: "170 g → 200 g", temp: "82 °C", inverted: false }
+  - { year: 2015, place: 1, name: "Lukas Zahradnik", country: "Slovakia", dose: "20 g", water: "230 g", temp: "79 °C", inverted: true }
+  - { year: 2015, place: 2, name: "Nick Hatch", country: "Canada", dose: "17.5 g", water: "260 g", temp: "85 °C", inverted: false }
+  - { year: 2015, place: 3, name: "Kaye Joy Ong", country: "Philippines", dose: "22.5 g", water: "280 g", temp: "79 °C", inverted: true }
+  - { year: 2014, place: 1, name: "Shuichi Sasaki", country: "Japan", dose: "16.5 g", water: "250 g", temp: "78 °C", inverted: false }
+  - { year: 2014, place: 2, name: "Martin Karabinos", country: "Slovakia", dose: "18.5 g", water: "80 g + 135 g", temp: "35 / 92 °C", inverted: false }
+  - { year: 2014, place: 3, name: "Jeff Verellen", country: "Belgium", dose: "17.5 g", water: "~40 g + 230 g", temp: "82 / 76 °C", inverted: true }
+  - { year: 2013, place: 1, name: "Jeff Verellen", country: "Belgium", dose: "17 g", water: "270 g", temp: "79 °C", inverted: false }
+  - { year: 2012, place: 1, name: "Charlene de Buysere", country: "Belgium", dose: "18.3 g", water: "250 g", temp: "85 °C", inverted: false }
+  - { year: 2011, place: 1, name: "Jeff Verellen", country: "Belgium", dose: "17 g", water: "270 g", temp: "80 °C", inverted: false }
+  - { year: 2010, place: 2, name: "Jeppe Hasager", country: "Denmark", dose: "18 g", water: "230 g", temp: "75 °C", inverted: true }
+  - { year: 2009, place: 1, name: "Lukasz Jura", country: "Poland", dose: "19.5–20 g", water: "200 ml", temp: "75 °C", inverted: true }
+wac_source: "https://worldaeropresschampionship.com/pages/recipes"
