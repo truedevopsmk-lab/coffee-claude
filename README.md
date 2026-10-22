@@ -53,6 +53,7 @@ commit straight to this repo through the GitHub API.
 | **Brew calculator** | Scales a recipe from a dose (V60 4:6 with cumulative pour targets, Hoffmann, AeroPress, …), generates a markdown brew log | `tools/brew-calculator/` |
 | **Log a brew** | Form (or paste markdown) → commits a brew file to the repo | `add-brew/index.html` |
 | **Upload photos** | Batch photo upload: resize, strip GPS/EXIF, thumbnails, per-photo captions → **one commit** | `upload-photo/index.html` |
+| **Manage photos** | Edit captions, move photos between albums, delete; search + album filter; batched → **one commit** | `manage-photos/index.html` |
 | **Settings** | Stores the GitHub token on this device | `journal-settings/index.html` |
 | **Reminders** | Opt in/out of OneSignal push reminders | `notifications/index.html` |
 | **PWA** | Installable, offline fallback, safe-area aware (notch, Dynamic Island, home indicator) | `manifest.json`, `sw.js`, `_includes/head.html` |
@@ -133,6 +134,7 @@ coffee-claude/
 ├── tools/brew-calculator/      # index.md (UI) + calculator.js (recipes & log builder)
 ├── add-brew/index.html         # "Log a brew" (form + paste markdown) → GitHub Contents API
 ├── upload-photo/index.html     # batch photo uploader → GitHub Git Data API (single commit)
+├── manage-photos/index.html    # edit captions / move / delete photos → Git Data API (single commit)
 ├── journal-settings/index.html # save/clear the GitHub token (localStorage "gh_pat")
 ├── notifications/index.html    # OneSignal subscribe/unsubscribe
 ├── offline.html                # service-worker offline fallback (standalone page, no layout)
@@ -170,6 +172,7 @@ coffee-claude/
 | `/tools/brew-calculator/` | `tools/brew-calculator/index.md` | |
 | `/add-brew/` | `add-brew/index.html` | Needs token. |
 | `/upload-photo/` | `upload-photo/index.html` | Needs token. |
+| `/manage-photos/` | `manage-photos/index.html` | Needs token to save. `?photo=/assets/gallery/<album>/<file>` opens on one photo (the lightbox's ✎ Edit link). |
 | `/journal-settings/` | `journal-settings/index.html` | |
 | `/notifications/` | `notifications/index.html` | Linked from the footer ("Reminders"). |
 | `/offline.html` | `offline.html` | Served by the service worker when offline. |
@@ -420,6 +423,21 @@ sequenceDiagram
   the photos aren't uploaded again. Auth or permission errors (401/403) and network errors stop
   the batch; other per-photo errors are shown on that photo's card.
 
+### 9.3 Manage photos — `/manage-photos/`
+
+Edits, moves and deletes are staged on the page and saved as **one commit**:
+
+- **Load:** `git/ref` → `git/commits` → `git/trees/{tree}?recursive=1` plus `contents/_data/gallery.yml`.
+  It reads the repo, not the build, so a photo uploaded a minute ago is already editable.
+  Thumbnails come from Pages, falling back to `raw.githubusercontent.com` until the rebuild lands.
+- **Save:** re-reads the head, then one `POST git/trees` (`base_tree` = head) → `POST git/commits` → `PATCH git/refs` (`force: false`; on 422 it rebuilds on the new head, up to 3×).
+  - **Caption edit:** only that `gallery.yml` line changes. Clearing a caption removes its line.
+  - **Move:** a tree entry at the new path with the **same blob SHA and mode**, plus `sha: null` at the old path, for the image and its thumbnail. Nothing is re-uploaded. Name clashes in the target album get `-2`, `-3`, …. The caption key is re-pointed in place.
+  - **Delete:** `sha: null` for the image and thumbnail, and its caption line is removed. The file stays in git history.
+- `gallery.yml` is edited **line by line** (each caption is one `  "<path>": "<text>"` line), so the
+  rest of the file, including comments, is untouched. New lines are appended (`captions:` stays last).
+- Commit message: `gallery: update N photos (x captions, y moved, z removed)` with one line per change.
+
 ---
 
 ## 10. The photo pipeline
@@ -597,7 +615,7 @@ There's no automated test suite. Before pushing:
 | **Add a calculator recipe** | In `tools/brew-calculator/calculator.js`, push `{ id, name, render: (coffee) => html }` into a method's `recipes`, or add a new method object. `render` returns HTML with a `<ul>` of params; an optional `<table class="pour-schedule">` is copied into generated logs. Grinder, scale and server options are hard-coded in `tools/brew-calculator/index.md`. |
 | **New gallery album** | Upload with "➕ New album…" (it auto-appears at the bottom). For a custom title or position, add a `sections:` entry whose `folder` matches the real path exactly (case-sensitive). |
 | **Add photos via git** | Put URL-safe files (no spaces) in `assets/gallery/<Album>/`, add `captions:` lines, run `python3 scripts/make-thumbs.py`, commit everything. |
-| **Rename or remove a photo** | Change or delete the file in `assets/gallery/…`, its caption key, then run `make-thumbs.py` (it removes orphaned thumbnails). |
+| **Edit, move or remove a photo** | From the phone: `/manage-photos/` (or ✎ Edit in the lightbox). By git: change or delete the file in `assets/gallery/…`, its caption key, then run `make-thumbs.py` (it removes orphaned thumbnails). |
 | **Change colours or fonts** | Edit the tokens at the top of `assets/coffee.css`: the light `:root` **and both dark blocks** (the media query and `[data-theme="dark"]`). Fonts: the `@import` at the top. |
 | **Add a nav item** | `_includes/nav.html` (and optionally the footer links in `_includes/footer.html`). Use `relative_url`; add an `active` class test on `page.url`. |
 | **Add a new page** | `newpage/index.html` or `.md` with `layout: default`, `title`, and usually `show_title: false` + `plain: true` plus your own `.page-head`. Add it to `PRECACHE_URLS` in `sw.js` if it should work offline. |
@@ -699,6 +717,7 @@ to another stack.
 | 2026-06-21 | Calculator: cumulative scale targets for Tetsu Kasuya 4:6; Infographs album |
 | 2026-09-27 | iPhone safe-area fix (header under the Dynamic Island); service-worker cache versioning; single-commit batch uploads with per-photo captions, resizing and EXIF/GPS stripping; gallery thumbnails; full-screen mobile lightbox; brew layout mobile order; Cup Profile bars fix |
 | 2026-09-28 | This documentation, `AGENTS.md`, `CLAUDE.md` |
+| 2026-10-22 | `/manage-photos/`: edit captions, move between albums, delete; ✎ Edit link in the lightbox |
 
 ---
 

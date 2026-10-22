@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const lightboxImage = document.getElementById("gallery-lightbox-image");
   const lightboxCaption = document.getElementById("gallery-lightbox-caption");
   const lightboxCount = document.getElementById("gallery-lightbox-count");
+  const lightboxEdit = document.getElementById("gallery-lightbox-edit");
   const triggerButtons = Array.from(document.querySelectorAll(".gallery-trigger"));
   const closeButtons = lightbox?.querySelectorAll("[data-gallery-close]") || [];
   const prevButton = lightbox?.querySelector("[data-gallery-prev]");
@@ -57,6 +58,9 @@ document.addEventListener("DOMContentLoaded", () => {
     lightboxCaption.textContent = caption;
     lightboxCaption.style.display = caption ? "" : "none";
     if (lightboxCount) lightboxCount.textContent = `${currentIndex + 1} / ${triggerButtons.length}`;
+    if (lightboxEdit && trigger.dataset.galleryPath) {
+      lightboxEdit.href = `${lightboxEdit.dataset.manageUrl}?photo=${encodeURIComponent(trigger.dataset.galleryPath)}`;
+    }
     preload(currentIndex + 1);
     preload(currentIndex - 1);
   }

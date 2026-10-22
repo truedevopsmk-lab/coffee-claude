@@ -14,6 +14,7 @@ const PRECACHE_URLS = [
   '/coffee-claude/tools/brew-calculator/',
   '/coffee-claude/add-brew/',
   '/coffee-claude/upload-photo/',
+  '/coffee-claude/manage-photos/',
   '/coffee-claude/journal-settings/',
   '/coffee-claude/assets/coffee.css',
   '/coffee-claude/offline.html'

@@ -32,7 +32,7 @@ subsystem.
 - Gallery thumbnails mirror the originals: `assets/gallery-thumbs/<Album>/<same filename>`. The grid
   falls back to the full image if a thumbnail is missing. After adding images by git, run
   `python3 scripts/make-thumbs.py`.
-- The upload page must keep creating **one commit per batch** (Git Data API), use
+- The upload and manage pages must keep creating **one commit per batch** (Git Data API), use
   `cache: 'no-store'` on every GitHub call, **strip EXIF/GPS** by re-encoding, and never overwrite
   existing files (it adds `-2` suffixes).
 - The GitHub token lives only in `localStorage.gh_pat` on the device. Never log it, hard-code it,
@@ -52,6 +52,7 @@ subsystem.
 | Brew / bean / method content | `brews/*.md`, `beans/*.md`, `methods/*.md` |
 | Gallery page, tile, lightbox, albums | `brews-and-frames/index.md`, `_includes/gallery-card.html`, `assets/js/gallery.js`, `_data/gallery.yml` |
 | Photo uploader | `upload-photo/index.html` (presets, pipeline, Git Data API) |
+| Photo manager (edit / move / delete) | `manage-photos/index.html` (Git Data API; README §9.3) |
 | Brew logger | `add-brew/index.html` (Contents API) |
 | Calculator recipes | `tools/brew-calculator/calculator.js` |
 | PWA / offline | `manifest.json`, `sw.js`, `offline.html` |
@@ -66,7 +67,7 @@ bundle exec jekyll build --destination /tmp/coffee-site                 # must f
 
 - Look at the pages you touched at **phone width** (393px, touch) **and** desktop (1280px), in
   light and dark. Serve `/tmp/coffee-site` under `/coffee-claude/` (README §15).
-- For the GitHub write flows (`add-brew`, `upload-photo`), **mock `window.fetch`** for
+- For the GitHub write flows (`add-brew`, `upload-photo`, `manage-photos`), **mock `window.fetch`** for
   `api.github.com` and assert on the request sequence and payloads. **Never** run tests against the
   real repo: every call there is a real commit to production.
 - Headless Chrome can emulate safe-area insets (`Emulation.setSafeAreaInsetsOverride`) but not

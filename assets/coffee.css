@@ -696,6 +696,8 @@ h1, h2, h3, h4 {
 .gallery-lightbox-meta { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin: 0.7rem 0.2rem 0.2rem; }
 #gallery-lightbox-caption { margin: 0; color: var(--ink-soft); font-size: 0.95rem; }
 .gallery-lightbox-count { margin: 0 0 0 auto; font-family: var(--mono); font-size: 0.8rem; color: var(--ink-faint); white-space: nowrap; }
+.gallery-lightbox-edit { margin-left: auto; font-size: 0.85rem; font-weight: 600; white-space: nowrap; }
+.gallery-lightbox-edit + .gallery-lightbox-count { margin-left: 0; }
 .gallery-lightbox-close {
   position: absolute; top: -14px; right: -14px; z-index: 2;
   width: 40px; height: 40px; border-radius: var(--radius-pill);
@@ -724,6 +726,7 @@ h1, h2, h3, h4 {
   .gallery-lightbox-meta { padding: 0 0.3rem; }
   #gallery-lightbox-caption { color: #f1e7da; }
   .gallery-lightbox-count { color: #c7b6a4; }
+  .gallery-lightbox-edit { color: #e0b257; }
   .gallery-lightbox-close {
     top: calc(var(--safe-top) + 0.7rem); right: max(0.8rem, var(--safe-right));
     background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.18); color: #fff; box-shadow: none;

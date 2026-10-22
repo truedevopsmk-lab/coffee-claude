@@ -1,0 +1,660 @@
+---
+layout: default
+title: Manage Photos
+permalink: /manage-photos/
+show_title: false
+plain: true
+---
+
+<style>
+  .mg-toolbar { display: grid; gap: 0.8rem; margin-bottom: 1.2rem; }
+  .mg-toolbar .gallery-nav { margin: 0; }
+  .mg-tools { display: flex; gap: 0.6rem; align-items: center; }
+  .mg-search {
+    flex: 1 1 auto; min-width: 0; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-pill); color: var(--ink); padding: 0.6rem 1rem;
+    font: inherit; font-size: 16px; /* 16px stops iOS zoom-on-focus */
+  }
+  .mg-search:focus { outline: none; border-color: var(--brass); box-shadow: 0 0 0 3px color-mix(in srgb, var(--brass) 14%, transparent); }
+  .mg-count { margin: 0; color: var(--ink-faint); font-size: 0.85rem; }
+
+  .mg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 0.9rem; }
+  .mg-empty { border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 1rem; color: var(--ink-faint); grid-column: 1 / -1; }
+  .mg-card {
+    position: relative; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    overflow: hidden; background: var(--surface); transition: border-color .2s, box-shadow .2s;
+  }
+  .mg-card.is-changed { border-color: color-mix(in srgb, var(--gold) 65%, var(--border)); }
+  .mg-card.is-selected { border-color: var(--brass); box-shadow: 0 0 0 2px color-mix(in srgb, var(--brass) 50%, transparent); }
+  .mg-card.is-deleted { border-color: rgba(192,57,43,.45); }
+  .mg-card.is-deleted .mg-media img { opacity: .35; filter: grayscale(1); }
+  .mg-card.is-focus { animation: mg-pulse 1.4s ease 2; }
+  @keyframes mg-pulse { 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--brass) 55%, transparent); } }
+
+  .mg-media { position: relative; display: block; width: 100%; border: 0; padding: 0; background: var(--surface-2); cursor: pointer; }
+  .mg-media img { display: block; width: 100%; aspect-ratio: 1/1; object-fit: cover; transition: opacity .2s, filter .2s; }
+  .mg-check, .mg-delete {
+    position: absolute; top: 0.5rem; z-index: 1; width: 2.4rem; height: 2.4rem; border-radius: var(--radius-pill);
+    display: grid; place-items: center; color: #fff; font-size: 1rem; line-height: 1;
+    background: rgba(20,12,6,.42); border: 2px solid rgba(255,255,255,.85);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); box-shadow: 0 1px 4px rgba(0,0,0,.35);
+  }
+  .mg-check { left: 0.5rem; font-weight: 700; color: transparent; }
+  .mg-card.is-selected .mg-check { background: var(--brass); border-color: var(--brass); color: #fff; }
+  .mg-delete { right: 0.5rem; cursor: pointer; border-width: 1px; border-color: rgba(255,255,255,.4); }
+  .mg-card.is-deleted .mg-delete { background: var(--brass); border-color: var(--brass); }
+  .mg-delete:disabled { opacity: .5; cursor: not-allowed; }
+
+  .mg-body { padding: 0.6rem; display: grid; gap: 0.4rem; }
+  .mg-caption {
+    width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--ink); padding: 0.5rem 0.6rem; font: inherit; font-size: 16px;
+  }
+  .mg-caption:focus { outline: none; border-color: var(--brass); box-shadow: 0 0 0 3px color-mix(in srgb, var(--brass) 14%, transparent); }
+  .mg-caption:disabled { opacity: .6; }
+  .mg-meta { font-size: 0.72rem; color: var(--ink-faint); font-family: var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mg-badges:empty { display: none; }
+  .chip.mg-chip-danger { color: #c0392b; border-color: rgba(192,57,43,.35); }
+
+  .mg-bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    padding: 0.7rem max(var(--gutter), var(--safe-right)) calc(0.7rem + var(--safe-bottom)) max(var(--gutter), var(--safe-left));
+    background: color-mix(in srgb, var(--paper) 92%, transparent);
+    -webkit-backdrop-filter: saturate(140%) blur(12px); backdrop-filter: saturate(140%) blur(12px);
+    border-top: 1px solid var(--border); box-shadow: 0 -10px 30px rgba(40, 24, 16, .12);
+  }
+  .mg-bar-inner { max-width: var(--maxw); margin: 0 auto; display: grid; gap: 0.55rem; }
+  .mg-bar-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+  .mg-bar-label { margin-right: auto; font-weight: 600; font-size: 0.9rem; color: var(--espresso); }
+  .mg-move {
+    font: inherit; font-size: 16px; padding: 0.4rem 0.8rem; max-width: 12rem;
+    border-radius: var(--radius-pill); border: 1px solid var(--border); background: var(--surface); color: var(--ink);
+  }
+  .btn.mg-danger { color: #c0392b; border-color: rgba(192,57,43,.35); }
+  body.mg-bar-on .footer { padding-bottom: calc(8rem + var(--safe-bottom)); }
+  body.mg-bar-on #onesignal-bell-container { margin-bottom: calc(7.5rem + var(--safe-bottom)); }
+
+  @media (max-width: 480px) {
+    .mg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
+    .mg-body { padding: 0.5rem; }
+    /* Label on its own line, controls underneath: the album picker takes the spare width */
+    .mg-bar-label { flex-basis: 100%; }
+    #mg-save-row > :nth-child(2) { margin-left: auto; }
+    .mg-move { flex: 1 1 0; min-width: 0; max-width: none; }
+  }
+</style>
+
+<div class="page-head">
+  <p class="eyebrow">Photo Journal</p>
+  <h1>Manage the Frames</h1>
+  <p>Fix captions, move photos between albums, or remove them. Tap a photo to select it. Nothing changes until you press <b>Save</b>, and then everything lands as one commit.</p>
+  <div class="hero-actions" style="margin-top:1rem">
+    <a class="btn btn-ghost btn-sm" href="{{ '/brews-and-frames/' | relative_url }}">← Gallery</a>
+    <a class="btn btn-ghost btn-sm" href="{{ '/upload-photo/' | relative_url }}">📷 Add photos</a>
+  </div>
+</div>
+
+<div id="page-status" class="status-msg" role="status" aria-live="polite"></div>
+
+<div class="mg-toolbar" id="mg-toolbar" hidden>
+  <nav class="gallery-nav" id="mg-filters" aria-label="Albums"></nav>
+  <div class="mg-tools">
+    <input id="mg-search" class="mg-search" type="search" placeholder="Search captions or file names" autocapitalize="none" aria-label="Search photos">
+    <button class="btn btn-ghost btn-sm" id="mg-select-all" type="button">Select all</button>
+  </div>
+  <p class="mg-count" id="mg-count"></p>
+</div>
+
+<div class="mg-grid" id="mg-grid"></div>
+
+<div class="mg-bar" id="mg-bar" hidden>
+  <div class="mg-bar-inner">
+    <div class="mg-bar-row" id="mg-select-row" hidden>
+      <span class="mg-bar-label" id="mg-select-label"></span>
+      <select id="mg-move" class="mg-move" aria-label="Move selected photos to an album"></select>
+      <button class="btn btn-ghost btn-sm mg-danger" id="mg-delete-selected" type="button">🗑 Delete</button>
+      <button class="btn btn-ghost btn-sm" id="mg-clear-selection" type="button">Done</button>
+    </div>
+    <div class="mg-bar-row" id="mg-save-row" hidden>
+      <span class="mg-bar-label" id="mg-pending-label"></span>
+      <button class="btn btn-ghost btn-sm" id="mg-discard" type="button">Discard</button>
+      <button class="btn btn-primary btn-sm" id="mg-save" type="button">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const REPO_OWNER = 'truedevopsmk-lab';
+  const REPO_NAME = 'coffee-claude';
+  const TARGET_BRANCH = 'main';
+  const GALLERY_PATH = '_data/gallery.yml';
+  const GALLERY_ROOT = 'assets/gallery';
+  const THUMB_ROOT = 'assets/gallery-thumbs';
+  const SITE_ROOT = '{{ "/" | relative_url }}';
+  const RAW_ROOT = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${TARGET_BRANCH}/`;
+  const SETTINGS_URL = '{{ "/journal-settings/" | relative_url }}';
+  const GALLERY_URL = '{{ "/brews-and-frames/" | relative_url }}';
+  const IMAGE_RE = /\.(jpe?g|png|webp|gif)$/i;
+  const galleryData = {{ site.data.gallery | jsonify }};
+
+  let photos = [];
+  let filterAlbum = '';
+  let query = '';
+  let isSaving = false;
+
+  const grid = document.getElementById('mg-grid');
+  const toolbar = document.getElementById('mg-toolbar');
+  const filters = document.getElementById('mg-filters');
+  const searchInput = document.getElementById('mg-search');
+  const selectAllButton = document.getElementById('mg-select-all');
+  const countLabel = document.getElementById('mg-count');
+  const bar = document.getElementById('mg-bar');
+  const selectRow = document.getElementById('mg-select-row');
+  const selectLabel = document.getElementById('mg-select-label');
+  const moveSelect = document.getElementById('mg-move');
+  const deleteSelectedButton = document.getElementById('mg-delete-selected');
+  const clearSelectionButton = document.getElementById('mg-clear-selection');
+  const saveRow = document.getElementById('mg-save-row');
+  const pendingLabel = document.getElementById('mg-pending-label');
+  const discardButton = document.getElementById('mg-discard');
+  const saveButton = document.getElementById('mg-save');
+  const pageStatus = document.getElementById('page-status');
+
+  bindEvents();
+  load();
+
+  function bindEvents() {
+    searchInput.addEventListener('input', () => { query = searchInput.value.trim().toLowerCase(); applyFilter(); });
+    filters.addEventListener('click', (e) => {
+      const button = e.target.closest('[data-album]');
+      if (!button) return;
+      filterAlbum = button.dataset.album;
+      renderFilters();
+      applyFilter();
+    });
+    selectAllButton.addEventListener('click', () => {
+      const shown = visiblePhotos();
+      const select = !shown.every((p) => p.selected);
+      shown.forEach((p) => { p.selected = select; renderCard(p); });
+      renderBar();
+    });
+    moveSelect.addEventListener('change', () => {
+      let album = moveSelect.value;
+      moveSelect.value = '';
+      if (album === '__new__') album = slugifyFolderName(window.prompt('New album name (e.g. morning-rituals)') || '');
+      if (!album) return;
+      selectedPhotos().forEach((p) => { p.newAlbum = album === p.album ? '' : album; p.deleted = false; p.selected = false; renderCard(p); });
+      renderBar();
+    });
+    deleteSelectedButton.addEventListener('click', () => {
+      const selected = selectedPhotos();
+      const restore = selected.every((p) => p.deleted);
+      selected.forEach((p) => { p.deleted = !restore; p.selected = false; renderCard(p); });
+      renderBar();
+    });
+    clearSelectionButton.addEventListener('click', () => {
+      selectedPhotos().forEach((p) => { p.selected = false; renderCard(p); });
+      renderBar();
+    });
+    discardButton.addEventListener('click', discardChanges);
+    saveButton.addEventListener('click', save);
+    window.addEventListener('beforeunload', (e) => {
+      if (isSaving || photos.some(isChanged)) { e.preventDefault(); e.returnValue = ''; }
+    });
+  }
+
+  // Reads the live repo, not the build, so photos uploaded a minute ago show up before Pages rebuilds.
+  async function load() {
+    const api = githubClient(getToken());
+    showPageStatus('loading', 'Loading photos from GitHub…');
+    try {
+      const ref = await api(`git/ref/heads/${TARGET_BRANCH}`);
+      const commit = await api(`git/commits/${ref.object.sha}`);
+      const [tree, yamlFile] = await Promise.all([
+        api(`git/trees/${commit.tree.sha}?recursive=1`),
+        api(`contents/${GALLERY_PATH}?ref=${ref.object.sha}`)
+      ]);
+      const captions = parseCaptions(safeBase64Decode(yamlFile.content || ''));
+      const files = tree.tree.filter((e) => e.type === 'blob').map((e) => e.path);
+      const thumbs = new Set(files.filter((path) => path.startsWith(`${THUMB_ROOT}/`)));
+      photos = files
+        .filter((path) => path.startsWith(`${GALLERY_ROOT}/`) && path.split('/').length === 4 && IMAGE_RE.test(path))
+        .map((path) => {
+          const [, , album, name] = path.split('/');
+          const caption = captions[`/${path}`] || '';
+          const thumbPath = toThumbPath(path);
+          return {
+            path, album, name, caption, newCaption: caption, newAlbum: '', deleted: false, selected: false,
+            src: SITE_ROOT + encodeURI(thumbs.has(thumbPath) ? thumbPath : path), el: null
+          };
+        });
+      sortPhotos();
+      clearPageStatus();
+      if (!getToken()) showPageStatus('error', `⚠ You can look, but saving needs a GitHub token. <a href="${SETTINGS_URL}">Add one in Settings →</a>`);
+      toolbar.hidden = photos.length === 0;
+      focusFromQuery();
+      renderAll();
+    } catch (err) {
+      showPageStatus('error', err.html || escapeHtml(err.message || 'Could not load the gallery.'));
+    }
+  }
+
+  // /manage-photos/?photo=/assets/gallery/<album>/<file> (the gallery lightbox's ✎ Edit link)
+  function focusFromQuery() {
+    const wanted = (new URLSearchParams(location.search).get('photo') || '').replace(/^\//, '');
+    const photo = photos.find((p) => p.path === wanted);
+    if (!photo) return;
+    filterAlbum = photo.album;
+    requestAnimationFrame(() => {
+      photo.el.scrollIntoView({ block: 'center' });
+      photo.el.classList.add('is-focus');
+    });
+  }
+
+  function renderAll() {
+    renderFilters();
+    renderMoveOptions();
+    if (photos.length === 0) grid.innerHTML = '<div class="mg-empty">No photos in the gallery yet.</div>';
+    photos.forEach((p) => { renderCard(p); grid.appendChild(p.el); });
+    applyFilter();
+    renderBar();
+  }
+
+  function renderFilters() {
+    const counts = {};
+    photos.forEach((p) => { counts[p.album] = (counts[p.album] || 0) + 1; });
+    const chip = (album, label, count) =>
+      `<button type="button" class="filter-btn${filterAlbum === album ? ' active' : ''}" data-album="${escapeHtml(album)}">${escapeHtml(label)} <span style="opacity:.6">${count}</span></button>`;
+    filters.innerHTML = [chip('', 'All', photos.length), ...albumOrder().filter((a) => counts[a]).map((a) => chip(a, albumTitle(a), counts[a]))].join('');
+  }
+
+  function renderMoveOptions() {
+    moveSelect.innerHTML = [
+      '<option value="">Move to…</option>',
+      ...albumOrder().map((a) => `<option value="${escapeHtml(a)}">${escapeHtml(albumTitle(a))}</option>`),
+      '<option value="__new__">➕ New album…</option>'
+    ].join('');
+  }
+
+  // Cards are built once and patched in place, so a caption mid-typing survives re-renders.
+  function renderCard(p) {
+    if (!p.el) {
+      const el = document.createElement('article');
+      el.className = 'mg-card';
+      el.innerHTML = `
+        <button class="mg-media" type="button" aria-pressed="false">
+          <img alt="" loading="lazy" decoding="async">
+          <span class="mg-check" aria-hidden="true">✓</span>
+        </button>
+        <button class="mg-delete" type="button"></button>
+        <div class="mg-body">
+          <input class="mg-caption" type="text" maxlength="140" enterkeyhint="done" placeholder="Add a caption">
+          <div class="mg-meta"></div>
+          <div class="chip-row mg-badges"></div>
+        </div>`;
+      const img = el.querySelector('img');
+      // Not on Pages yet (uploaded or moved since the last build): fall back to the repo copy
+      img.addEventListener('error', () => { if (!img.src.startsWith(RAW_ROOT)) img.src = RAW_ROOT + encodeURI(p.path); });
+      img.src = p.src;
+      el.querySelector('.mg-media').addEventListener('click', () => {
+        if (isSaving) return;
+        p.selected = !p.selected;
+        renderCard(p);
+        renderBar();
+      });
+      el.querySelector('.mg-delete').addEventListener('click', () => {
+        if (isSaving) return;
+        p.deleted = !p.deleted;
+        renderCard(p);
+        renderBar();
+      });
+      const captionField = el.querySelector('.mg-caption');
+      captionField.value = p.newCaption;
+      captionField.addEventListener('input', () => { p.newCaption = captionField.value; renderCard(p); renderBar(); });
+      captionField.addEventListener('keydown', (e) => { if (e.key === 'Enter') captionField.blur(); });
+      p.el = el;
+    }
+
+    const el = p.el;
+    const label = p.newCaption.trim() || p.name;
+    const media = el.querySelector('.mg-media');
+    media.setAttribute('aria-pressed', p.selected ? 'true' : 'false');
+    media.setAttribute('aria-label', `${p.selected ? 'Deselect' : 'Select'} ${label}`);
+    const deleteButton = el.querySelector('.mg-delete');
+    deleteButton.textContent = p.deleted ? '↩' : '🗑';
+    deleteButton.setAttribute('aria-label', `${p.deleted ? 'Keep' : 'Delete'} ${label}`);
+    deleteButton.disabled = isSaving;
+    el.querySelector('.mg-caption').disabled = isSaving || p.deleted;
+    el.querySelector('.mg-caption').setAttribute('aria-label', `Caption for ${p.name}`);
+    el.querySelector('.mg-meta').textContent = `${p.album}/${p.name}`;
+    el.querySelector('.mg-meta').title = p.path;
+    const badges = [];
+    if (p.deleted) badges.push('<span class="chip mg-chip-danger">🗑 Will delete</span>');
+    else {
+      if (isMoved(p)) badges.push(`<span class="chip chip-method">→ ${escapeHtml(albumTitle(p.newAlbum))}</span>`);
+      if (isCaptionChanged(p)) badges.push('<span class="chip chip-method">✎ Caption</span>');
+    }
+    el.querySelector('.mg-badges').innerHTML = badges.join('');
+    el.classList.toggle('is-selected', p.selected);
+    el.classList.toggle('is-deleted', p.deleted);
+    el.classList.toggle('is-changed', isChanged(p));
+  }
+
+  function applyFilter() {
+    let shown = 0;
+    photos.forEach((p) => {
+      const inAlbum = !filterAlbum || p.album === filterAlbum;
+      const matches = !query || `${p.newCaption} ${p.caption} ${p.name}`.toLowerCase().includes(query);
+      p.el.hidden = !(inAlbum && matches);
+      if (!p.el.hidden) shown++;
+    });
+    countLabel.textContent = `Showing ${shown} of ${photos.length} photo${photos.length === 1 ? '' : 's'}`;
+  }
+
+  function renderBar() {
+    const selected = selectedPhotos();
+    const changed = photos.filter(isChanged);
+    selectRow.hidden = selected.length === 0;
+    selectLabel.textContent = `${selected.length} selected`;
+    deleteSelectedButton.textContent = selected.length && selected.every((p) => p.deleted) ? '↩ Keep' : '🗑 Delete';
+    saveRow.hidden = changed.length === 0;
+    pendingLabel.textContent = summarize(changed);
+    saveButton.textContent = isSaving ? 'Saving…' : `Save ${changed.length} change${changed.length === 1 ? '' : 's'}`;
+    [saveButton, discardButton, moveSelect, deleteSelectedButton, clearSelectionButton, selectAllButton].forEach((b) => { b.disabled = isSaving; });
+    bar.hidden = selected.length === 0 && changed.length === 0;
+    document.body.classList.toggle('mg-bar-on', !bar.hidden);
+  }
+
+  function summarize(changed) {
+    const deleted = changed.filter((p) => p.deleted).length;
+    const moved = changed.filter((p) => !p.deleted && isMoved(p)).length;
+    const captioned = changed.filter((p) => !p.deleted && !isMoved(p) && isCaptionChanged(p)).length;
+    return [
+      captioned && `${captioned} caption${captioned === 1 ? '' : 's'}`,
+      moved && `${moved} moved`,
+      deleted && `${deleted} to delete`
+    ].filter(Boolean).join(' · ');
+  }
+
+  function discardChanges() {
+    photos.forEach((p) => {
+      p.newCaption = p.caption;
+      p.newAlbum = '';
+      p.deleted = false;
+      p.selected = false;
+      if (p.el) p.el.querySelector('.mg-caption').value = p.caption;
+      renderCard(p);
+    });
+    clearPageStatus();
+    renderBar();
+  }
+
+  async function save() {
+    if (isSaving) return;
+    const token = getToken();
+    if (!token) { showPageStatus('error', `⚠ No GitHub token saved. <a href="${SETTINGS_URL}">Go to Settings →</a>`); return; }
+    if (!navigator.onLine) { showPageStatus('error', '❌ No internet connection.'); return; }
+    const changed = photos.filter(isChanged);
+    if (changed.length === 0) return;
+    const deleting = changed.filter((p) => p.deleted).length;
+    if (deleting && !window.confirm(`Delete ${deleting} photo${deleting === 1 ? '' : 's'} from the gallery? Git history keeps a copy, but they disappear from the site.`)) return;
+
+    isSaving = true;
+    photos.forEach(renderCard);
+    renderBar();
+    showPageStatus('loading', 'Saving to GitHub…');
+    const wakeLock = await requestWakeLock();
+    try {
+      const { commit, moves, missing } = await commitChanges(githubClient(token), changed);
+      applySaved(changed, moves, missing);
+      showPageStatus('success',
+        `✅ Saved in one <a href="${escapeHtml(commit.html_url)}" target="_blank" rel="noopener">commit</a>.` +
+        (missing.length ? ` ${missing.length} photo${missing.length === 1 ? ' was' : 's were'} already gone on GitHub and ${missing.length === 1 ? 'was' : 'were'} skipped.` : '') +
+        ` The gallery rebuilds in ~1 min. <a href="${GALLERY_URL}">View gallery →</a>`);
+    } catch (err) {
+      showPageStatus('error', err.html || escapeHtml(err.message || 'Save failed.'));
+    } finally {
+      isSaving = false;
+      releaseWakeLock(wakeLock);
+      photos.forEach(renderCard);
+      renderBar();
+    }
+  }
+
+  // One commit via the Git Data API. Moves reuse the existing blob SHAs (no re-upload), deletes
+  // are tree entries with sha: null, and gallery.yml caption lines are edited in the same commit.
+  async function commitChanges(api, changed) {
+    for (let attempt = 1; ; attempt++) {
+      const ref = await api(`git/ref/heads/${TARGET_BRANCH}`);
+      const headSha = ref.object.sha;
+      const head = await api(`git/commits/${headSha}`);
+      const [tree, yamlFile] = await Promise.all([
+        api(`git/trees/${head.tree.sha}?recursive=1`),
+        api(`contents/${GALLERY_PATH}?ref=${headSha}`)
+      ]);
+      if (tree.truncated) throw new Error('❌ The repo tree is too large to edit from the browser.');
+      const files = new Map(tree.tree.filter((e) => e.type === 'blob').map((e) => [e.path, e]));
+      const plan = planChanges(changed, files);
+      if (plan.entries.length === 0 && plan.captionEdits.length === 0) {
+        throw new Error('Nothing to save: those photos were already changed on GitHub. Reload the page.');
+      }
+      const updatedYaml = applyCaptionEdits(safeBase64Decode(yamlFile.content || ''), plan.captionEdits);
+      isValidGalleryYaml(updatedYaml);
+
+      const newTree = await api('git/trees', 'POST', {
+        base_tree: head.tree.sha,
+        tree: [...plan.entries, { path: GALLERY_PATH, mode: '100644', type: 'blob', content: updatedYaml }]
+      });
+      const commit = await api('git/commits', 'POST', { message: plan.message, tree: newTree.sha, parents: [headSha] });
+      try {
+        await api(`git/refs/heads/${TARGET_BRANCH}`, 'PATCH', { sha: commit.sha, force: false });
+        return { commit, moves: plan.moves, missing: plan.missing };
+      } catch (err) {
+        // main moved while we worked (e.g. a photo upload landed): rebuild on the new head
+        if (err.status === 422 && attempt < 3) continue;
+        throw err;
+      }
+    }
+  }
+
+  function planChanges(changed, files) {
+    const entries = [];
+    const captionEdits = [];
+    const lines = [];
+    const moves = new Map();
+    const missing = [];
+    const taken = new Set(files.keys());
+    const remove = (entry) => ({ path: entry.path, mode: entry.mode, type: 'blob', sha: null });
+    const copy = (entry, path) => ({ path, mode: entry.mode, type: 'blob', sha: entry.sha });
+
+    changed.forEach((p) => {
+      const full = files.get(p.path);
+      if (!full) { missing.push(p); return; }
+      const thumb = files.get(toThumbPath(p.path));
+      const key = `/${p.path}`;
+      const short = p.path.slice(GALLERY_ROOT.length + 1);
+
+      if (p.deleted) {
+        entries.push(remove(full));
+        if (thumb) entries.push(remove(thumb));
+        captionEdits.push({ key, newKey: null });
+        lines.push(`- remove ${short}`);
+        return;
+      }
+      const caption = isCaptionChanged(p) ? p.newCaption.trim() : undefined; // undefined = keep the line's value
+      if (isMoved(p)) {
+        const newPath = makeUniquePath(`${GALLERY_ROOT}/${p.newAlbum}`, p.name, taken);
+        entries.push(remove(full), copy(full, newPath));
+        if (thumb) entries.push(remove(thumb), copy(thumb, toThumbPath(newPath)));
+        captionEdits.push({ key, newKey: `/${newPath}`, caption });
+        moves.set(p, newPath);
+        lines.push(`- move ${short} → ${newPath.slice(GALLERY_ROOT.length + 1)}${caption !== undefined ? ' (+ caption)' : ''}`);
+        return;
+      }
+      captionEdits.push({ key, newKey: key, caption });
+      lines.push(`- caption ${short}`);
+    });
+
+    const done = changed.filter((p) => !missing.includes(p));
+    const counts = summarize(done).replace(' to delete', ' removed').replace(/ · /g, ', ');
+    const message = [`gallery: update ${done.length} photo${done.length === 1 ? '' : 's'} (${counts})`, '', ...lines].join('\n');
+    return { entries, captionEdits, message, moves, missing };
+  }
+
+  // Line-based edit of the `captions:` block. Every caption is one `  "<path>": "<text>"` line,
+  // so lines are swapped in place; new ones go at the end (captions: is the last key).
+  function applyCaptionEdits(content, edits) {
+    const lines = content.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').split('\n');
+    if (lines[lines.length - 1] === '') lines.pop();
+    edits.forEach(({ key, newKey, caption }) => {
+      const quoted = `"${key}"`;
+      const index = lines.findIndex((line) => {
+        const t = line.trimStart();
+        return t.startsWith(quoted) && /^\s*:/.test(t.slice(quoted.length));
+      });
+      const keepValue = caption === undefined;
+      if (!newKey || (!keepValue && !caption)) {
+        if (index !== -1) lines.splice(index, 1);
+        return;
+      }
+      if (keepValue) {
+        if (index !== -1) lines[index] = lines[index].replace(quoted, () => `"${newKey}"`);
+        return;
+      }
+      const line = `  "${newKey}": ${yamlQuote(caption)}`;
+      if (index !== -1) lines[index] = line;
+      else lines.push(line);
+    });
+    return `${lines.join('\n')}\n`;
+  }
+
+  function applySaved(changed, moves, missing) {
+    const gone = new Set([...changed.filter((p) => p.deleted), ...missing]);
+    gone.forEach((p) => p.el.remove());
+    photos = photos.filter((p) => !gone.has(p));
+    changed.filter((p) => !gone.has(p)).forEach((p) => {
+      if (moves.has(p)) {
+        p.path = moves.get(p);
+        [, , p.album, p.name] = p.path.split('/');
+      }
+      p.caption = p.newCaption.trim();
+      p.newCaption = p.caption;
+      p.newAlbum = '';
+      p.el.querySelector('.mg-caption').value = p.caption;
+    });
+    sortPhotos();
+    toolbar.hidden = photos.length === 0;
+    renderAll();
+  }
+
+  function parseCaptions(content) {
+    const captions = {};
+    let inCaptions = false;
+    content.replace(/\r\n/g, '\n').split('\n').forEach((line) => {
+      if (/^captions:\s*$/.test(line)) { inCaptions = true; return; }
+      if (/^[^\s#]/.test(line)) inCaptions = false;
+      const m = inCaptions && line.match(/^\s+"([^"]+)"\s*:\s*"((?:[^"\\]|\\.)*)"\s*$/);
+      if (m) captions[m[1]] = m[2].replace(/\\(["\\n])/g, (_, c) => (c === 'n' ? '\n' : c));
+    });
+    return captions;
+  }
+
+  function isValidGalleryYaml(content) {
+    const clean = content.trimStart();
+    if (!/^[-\w#]/.test(clean)) throw new Error('gallery.yml appears corrupt. Nothing was saved.');
+    if (!/^captions:\s*$/m.test(clean)) throw new Error('gallery.yml has no captions: block. Nothing was saved.');
+    return true;
+  }
+
+  function githubClient(token) {
+    return async function api(path, method = 'GET', body) {
+      let response;
+      try {
+        response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/${path}`, {
+          method,
+          cache: 'no-store', // a cached ref would make the fast-forward update fail
+          headers: {
+            ...(token ? { Authorization: `token ${token}` } : {}),
+            Accept: 'application/vnd.github+json',
+            ...(body ? { 'Content-Type': 'application/json' } : {})
+          },
+          body: body ? JSON.stringify(body) : undefined
+        });
+      } catch (err) {
+        throw requestError(navigator.onLine ? '❌ GitHub didn’t respond. Check your connection and try again.' : '❌ No internet connection.');
+      }
+      if (response.ok) return response.json();
+
+      let detail = '';
+      try { detail = (await response.json()).message || ''; } catch (e) {}
+      const suffix = detail ? `: ${detail}` : '';
+      if (response.status === 401) {
+        throw requestError('❌ Token rejected. It may have expired.', {
+          status: 401, html: `❌ Token rejected. It may have expired. <a href="${SETTINGS_URL}">Update it in Settings →</a>`
+        });
+      }
+      if (response.status === 403 || (response.status === 404 && method !== 'GET')) {
+        throw requestError(`❌ GitHub refused the request (${response.status}${suffix}). Check the token has Contents: write on ${REPO_NAME}.`, { status: response.status });
+      }
+      throw requestError(`❌ GitHub ${response.status}${suffix}`, { status: response.status });
+    };
+  }
+
+  function requestError(message, extra) { return Object.assign(new Error(message), extra); }
+  function getToken() { try { return localStorage.getItem('gh_pat') || ''; } catch (e) { return ''; } }
+  function visiblePhotos() { return photos.filter((p) => p.el && !p.el.hidden); }
+  function selectedPhotos() { return photos.filter((p) => p.selected); }
+  function isMoved(p) { return Boolean(p.newAlbum) && p.newAlbum !== p.album; }
+  function isCaptionChanged(p) { return p.newCaption.trim() !== p.caption; }
+  function isChanged(p) { return p.deleted || isMoved(p) || isCaptionChanged(p); }
+  function toThumbPath(path) { return path.replace(`${GALLERY_ROOT}/`, `${THUMB_ROOT}/`); }
+
+  // Configured sections first (gallery page order), then any other album A→Z
+  function albumOrder() {
+    const configured = (galleryData.sections || []).map((s) => getFolderFromGalleryPath(s.folder || '')).filter(Boolean);
+    const others = [...new Set(photos.map((p) => p.album))].filter((a) => !configured.includes(a)).sort();
+    return [...configured, ...others];
+  }
+  function albumTitle(album) {
+    const section = (galleryData.sections || []).find((s) => getFolderFromGalleryPath(s.folder || '') === album);
+    return section ? section.title : `📸 ${humanizeFolder(album)}`;
+  }
+  function sortPhotos() {
+    const order = albumOrder();
+    photos.sort((a, b) => (order.indexOf(a.album) - order.indexOf(b.album)) || a.path.localeCompare(b.path));
+  }
+  function makeUniquePath(dir, name, taken) {
+    const dot = name.lastIndexOf('.');
+    const base = dot === -1 ? name : name.slice(0, dot);
+    const ext = dot === -1 ? '' : name.slice(dot);
+    let candidate = `${dir}/${name}`, suffix = 2;
+    while (taken.has(candidate)) { candidate = `${dir}/${base}-${suffix}${ext}`; suffix++; }
+    taken.add(candidate);
+    return candidate;
+  }
+
+  // Keep the screen awake so iOS doesn't suspend the page mid-save
+  async function requestWakeLock() {
+    try { return navigator.wakeLock ? await navigator.wakeLock.request('screen') : null; } catch (e) { return null; }
+  }
+  function releaseWakeLock(lock) {
+    if (lock) lock.release().catch(() => {});
+  }
+
+  function getFolderFromGalleryPath(path) { const m = path.match(/\/assets\/gallery\/([^/]+)\//); return m ? m[1] : ''; }
+  function humanizeFolder(folder) { return folder.replace(/[-_]+/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()); }
+  function slugifyFolderName(v) { return v.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
+  function yamlQuote(v) { return `"${String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\r?\n/g, '\\n')}"`; }
+  function safeBase64Decode(b64) {
+    const binary = atob(b64.replace(/\n/g, ''));
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new TextDecoder('utf-8').decode(bytes).replace(/^\uFEFF/, '');
+  }
+  function showPageStatus(type, html) {
+    pageStatus.className = `status-msg ${type} visible`;
+    pageStatus.innerHTML = html;
+  }
+  function clearPageStatus() { pageStatus.className = 'status-msg'; pageStatus.innerHTML = ''; }
+  function escapeHtml(v) { return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+</script>

@@ -11,6 +11,7 @@
     class="gallery-trigger"
     type="button"
     data-gallery-image="{{ include.file.path | relative_url }}"
+    data-gallery-path="{{ include.file.path }}"
     data-gallery-caption="{{ caption | escape }}"
     aria-label="Open image{% if caption != '' %}: {{ caption | escape }}{% endif %}">
     <img src="{{ thumb | relative_url }}" alt="{{ caption | escape }}" loading="lazy" decoding="async">

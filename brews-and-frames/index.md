@@ -21,6 +21,7 @@ plain: true
   <p>A visual archive of my coffee rituals — brewers, beans, crema, and experiments. {{ gallery_files | size }} frames and counting.</p>
   <div class="hero-actions" style="margin-top:1rem">
     <a class="btn btn-primary" href="{{ '/upload-photo/' | relative_url }}">📷 Add photos</a>
+    <a class="btn btn-ghost" href="{{ '/manage-photos/' | relative_url }}">✎ Edit &amp; delete</a>
   </div>
 </div>
 
@@ -81,6 +82,7 @@ plain: true
     <img id="gallery-lightbox-image" src="" alt="" loading="eager">
     <div class="gallery-lightbox-meta">
       <p id="gallery-lightbox-caption"></p>
+      <a class="gallery-lightbox-edit" id="gallery-lightbox-edit" href="{{ '/manage-photos/' | relative_url }}" data-manage-url="{{ '/manage-photos/' | relative_url }}">✎ Edit</a>
       <p class="gallery-lightbox-count" id="gallery-lightbox-count" aria-live="polite"></p>
     </div>
   </div>
