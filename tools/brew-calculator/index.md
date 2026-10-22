@@ -65,6 +65,106 @@ plain: true
     .calc-output table.pour-schedule { font-size: 0.84rem; }
     .calc-output table.pour-schedule th, .calc-output table.pour-schedule td { padding: 0.4rem 0.45rem; }
   }
+
+  /* ---------- Brew timer (full-screen overlay) ---------- */
+  #brew-log-actions { flex-wrap: wrap; gap: 0.7rem; }
+  #brew-log-actions .btn { min-height: 44px; }
+  body.bt-open { overflow: hidden; }
+  /* The OneSignal bell would sit on top of the controls */
+  body.bt-open #onesignal-bell-container { display: none; }
+  /* Same status-bar band as the topbar, so white iOS status text stays readable in the app */
+  .brew-timer {
+    position: fixed; inset: 0; z-index: 1000; background: var(--paper); color: var(--ink);
+    border-top: var(--safe-top) solid var(--statusbar);
+    overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  }
+  /* Step-change flash: a brass wash that fades out */
+  .brew-timer::after {
+    content: ""; position: fixed; inset: 0; pointer-events: none; opacity: 0;
+    background: color-mix(in srgb, var(--brass) 38%, transparent);
+  }
+  .brew-timer.bt-flash::after { animation: bt-flash .7s ease-out; }
+  @keyframes bt-flash { from { opacity: 1; } to { opacity: 0; } }
+  .bt-inner {
+    max-width: 560px; margin: 0 auto; min-height: 100%;
+    display: flex; flex-direction: column; gap: 1rem;
+    padding: 0.9rem max(1.1rem, var(--safe-right)) calc(var(--safe-bottom) + 1rem) max(1.1rem, var(--safe-left));
+  }
+  /* Clock + step sit in the middle of the screen; the controls stay in thumb reach */
+  .bt-main { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 1rem; }
+  .brew-timer button { -webkit-tap-highlight-color: transparent; }
+  .bt-head { display: flex; align-items: flex-start; gap: 0.8rem; }
+  .bt-head-text { flex: 1; min-width: 0; }
+  .bt-eyebrow, .bt-label {
+    margin: 0; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-faint); font-weight: 600;
+  }
+  .brew-timer h2 { margin: 0.1rem 0 0; font-size: 1.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bt-meta { margin: 0.15rem 0 0; font-size: 0.88rem; color: var(--ink-soft); }
+  .bt-close {
+    flex: 0 0 auto; width: 44px; height: 44px; border-radius: var(--radius-pill);
+    border: 1px solid var(--border); background: var(--surface); color: var(--ink);
+    font-size: 1.6rem; line-height: 1; cursor: pointer;
+  }
+  .bt-clock {
+    text-align: center; font-family: var(--mono); font-variant-numeric: tabular-nums;
+    font-size: clamp(4.2rem, 23vw, 7.5rem); font-weight: 500; line-height: 1;
+    color: var(--espresso); letter-spacing: -0.03em; margin: 0.6rem 0 0.2rem;
+  }
+  .bt-clock.is-long { font-size: clamp(3rem, 16vw, 5.5rem); }
+  .bt-step {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1.1rem 1.2rem; box-shadow: var(--shadow);
+  }
+  .bt-now {
+    margin: 0.35rem 0 0; font-family: var(--serif); color: var(--espresso);
+    font-size: clamp(1.9rem, 9vw, 2.6rem); line-height: 1.1;
+  }
+  /* Sans with tabular figures: the mono face's wide space split "90 g" apart */
+  .bt-now strong { font-family: var(--sans); font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: -0.02em; color: var(--brass-deep); white-space: nowrap; }
+  .bt-now.is-action { font-size: clamp(1.35rem, 6.2vw, 1.8rem); line-height: 1.25; }
+  .bt-note { margin: 0.45rem 0 0; color: var(--ink-soft); font-size: 1rem; line-height: 1.4; }
+  /* Untimed step: the "wait for the drain" cue is the instruction, so it gets its own line */
+  .bt-when {
+    margin: 0.7rem 0 0; padding: 0.45rem 0.7rem; border-radius: var(--radius-sm); font-size: 0.95rem; line-height: 1.35;
+    color: var(--ink); background: color-mix(in srgb, var(--gold) 16%, transparent);
+    border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent);
+  }
+  .bt-next-row { display: flex; align-items: baseline; gap: 0.7rem; margin: 0 0 0.45rem; font-size: 0.95rem; color: var(--ink-soft); line-height: 1.4; }
+  .bt-next-row > span:first-child { flex: 1; min-width: 0; }
+  .bt-next-row strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .bt-next-in { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--brass-deep); white-space: nowrap; }
+  .bt-bar { height: 8px; border-radius: var(--radius-pill); background: var(--border); overflow: hidden; }
+  .bt-bar-fill { height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--gold), var(--brass)); transition: width .15s linear; }
+  .bt-controls { display: grid; grid-template-columns: 1fr 1.25fr 1.15fr; gap: 0.5rem; }
+  .bt-controls .btn, .bt-big { min-height: 56px; justify-content: center; font-size: 1rem; padding: 0.6rem 0.4rem; white-space: nowrap; }
+  .bt-controls #bt-toggle { font-size: 1.1rem; }
+  /* Nothing will advance by itself: point at Next */
+  .bt-controls .bt-wait {
+    border-color: var(--brass); color: var(--brass-deep);
+    background: color-mix(in srgb, var(--brass) 14%, var(--surface));
+  }
+  .bt-done { text-align: center; display: grid; gap: 0.7rem; }
+  .bt-done-title { margin: 0; font-family: var(--serif); font-size: 3rem; color: var(--espresso); line-height: 1.1; }
+  .bt-done-time { margin: 0; color: var(--ink-soft); font-size: 1.05rem; }
+  .bt-done-time strong {
+    display: block; margin-top: 0.3rem; font-family: var(--mono); font-variant-numeric: tabular-nums;
+    font-size: clamp(3rem, 16vw, 4.5rem); font-weight: 500; line-height: 1; color: var(--sage-deep);
+  }
+  /* Done: the summary shows the total, so the running clock steps aside */
+  .brew-timer.is-done .bt-clock { display: none; }
+  .bt-done-actions { display: grid; gap: 0.6rem; }
+  @media (hover: hover) { .bt-close:hover { border-color: var(--brass); } }
+  /* Short screens (landscape phones): tighten so the controls stay on screen */
+  @media (max-height: 560px) {
+    .bt-inner { gap: 0.6rem; }
+    .bt-clock { font-size: clamp(3rem, 14vh, 4.5rem); margin: 0; }
+    .bt-now { font-size: 1.6rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .brew-timer.bt-flash::after { animation: none; }
+    .bt-bar-fill { transition: none; }
+  }
 </style>
 
 <div class="page-head">
@@ -94,7 +194,48 @@ plain: true
 </div>
 
 <div id="brew-log-actions" style="display:none; margin-top:1rem">
+  <button type="button" class="btn btn-primary" id="start-timer" hidden>▶ Start brewing</button>
   <button type="button" class="btn btn-ghost" onclick="openBrewLogBuilder()">📝 Create brew log</button>
+</div>
+
+<div id="brew-timer" class="brew-timer" role="dialog" aria-modal="true" aria-labelledby="bt-title" hidden>
+  <div class="bt-inner">
+    <div class="bt-head">
+      <div class="bt-head-text">
+        <p class="bt-eyebrow">Brewing</p>
+        <h2 id="bt-title"></h2>
+        <p id="bt-meta" class="bt-meta"></p>
+      </div>
+      <button type="button" id="bt-close" class="bt-close" aria-label="Close timer">×</button>
+    </div>
+
+    <div class="bt-main">
+      <div id="bt-clock" class="bt-clock" role="timer" aria-label="Elapsed time">0:00</div>
+
+      <div id="bt-step" class="bt-step" aria-live="polite"></div>
+
+      <div id="bt-next" class="bt-next">
+        <p class="bt-next-row"><span id="bt-next-text"></span><span id="bt-next-in" class="bt-next-in"></span></p>
+        <div id="bt-bar" class="bt-bar"><div id="bt-bar-fill" class="bt-bar-fill"></div></div>
+      </div>
+
+      <div id="bt-done" class="bt-done" hidden>
+        <p class="bt-done-title">Done ☕</p>
+        <p class="bt-done-time">Total time <strong id="bt-done-time">0:00</strong></p>
+      </div>
+    </div>
+
+    <div id="bt-done-actions" class="bt-done-actions" hidden>
+      <button type="button" id="bt-log" class="btn btn-primary bt-big">📝 Create brew log</button>
+      <button type="button" id="bt-again" class="btn btn-ghost bt-big">↺ Brew again</button>
+    </div>
+
+    <div id="bt-controls" class="bt-controls">
+      <button type="button" id="bt-reset" class="btn btn-ghost">↺ Reset</button>
+      <button type="button" id="bt-toggle" class="btn btn-primary">▶ Start</button>
+      <button type="button" id="bt-next-btn" class="btn btn-ghost">Next step ›</button>
+    </div>
+  </div>
 </div>
 
 <div id="brew-log-builder" class="card" style="display:none; margin-top:1.4rem">
