@@ -4,6 +4,11 @@ title: Hill Groove — Lithanro Partner Farms, Wokha - Nagaland
 origin: Wokha, Nagaland, India
 variety: SL 9/15
 process: Honey Sundried
+roaster: "Hill Groove Coffee Roasters"
+altitude: "1400 m"
+roasted: 2026-02-10
+country: "India"
+process_group: "Honey & pulped natural"
 ---
 
 ## Hill Groove (Honey Sundried) - Wokha, Nagaland

@@ -1,8 +1,20 @@
 ---
-layout: default
-title: AeroPress Brew Log — ONA La Huerta (Honduras)
+layout: brew
+title: "AeroPress Brew Log — ONA La Huerta (Honduras)"
+date: 2026-01-27
+bean: "ONA — La Huerta, Honduras"
+roaster: "ONA Coffee"
+method: "AeroPress"
+recipe: "Inverted · sweet & balanced"
+dose: 10
+water: 160
+water_temp: 90
+brew_time: "2:35"
+grind: "15 clicks"
+body: 3
+flavors: ["Caramel", "Yellow fruit", "Toffee", "Brown sugar"]
+next_time: "92 °C if flat; 145 ml for more body"
 ---
-
 This entry documents my AeroPress recipe and brew notes for **ONA – La Huerta**, a washed coffee from Honduras.
 
 ---
@@ -34,16 +46,6 @@ This entry documents my AeroPress recipe and brew notes for **ONA – La Huerta*
 - **Server / Cup:** Borosil Thermo Cup (360 ml)
 
 ---
-
-## ⚖️ Brew Recipe (Sweet & Balanced)
-
-- **Coffee:** 10 g
-- **Water:** 160 ml
-- **Ratio:** 1:16
-- **Grind Size:** 15 clicks (C3S Pro)
-- **Water Temperature:** 90°C
-- **Brew Time:** ~2:30 min
-
 
 ---
 

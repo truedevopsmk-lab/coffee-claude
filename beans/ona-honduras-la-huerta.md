@@ -4,6 +4,11 @@ title: ONA — La Huerta, Honduras
 origin: Honduras
 variety: Catimor
 process: Washed
+roaster: "ONA Coffee"
+altitude: "1550–1700 MASL"
+roasted: 2025-12-04
+country: "Honduras"
+process_group: "Washed"
 ---
 
 ## ONA — La Huerta, Honduras (Washed)
@@ -29,6 +34,3 @@ ONA Coffee is known for competition-level roasting with a strong emphasis on bal
 La Huerta is a Honduran farm producing coffee at relatively high altitude, contributing to structured acidity and slower cherry maturation. The Catimor variety, while often associated with resilience and yield, can express pleasant sweetness and approachability when grown at elevation and carefully processed.
 
 This coffee is well suited for daily filter brewing where balance and sweetness are prioritized over intensity.
-
-### Brew History
-_(To be filled after brewing)_

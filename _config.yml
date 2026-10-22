@@ -9,6 +9,14 @@ url: https://truedevopsmk-lab.github.io
 plugins:
   - jekyll-seo-tag
 
+# Link previews (WhatsApp, iMessage, Slack…): jekyll-seo-tag uses this unless a page sets `image:`
+defaults:
+  - scope: { path: "" }
+    values:
+      image: /assets/og-image.jpg
+twitter:
+  card: summary_large_image
+
 # Keep local tooling out of the built site.
 exclude:
   - Gemfile

@@ -4,6 +4,9 @@ title: Subtext — Pablo Andres Guerrero, Colombia Narino
 origin: Colombia, Nariño
 variety: Pink Bourbon
 process: Washed
+roaster: "Subtext"
+country: "Colombia"
+process_group: "Washed"
 ---
 
 ## Subtext — Pablo Andres Guerrero, Colombia Narino (Washed)
@@ -15,9 +18,6 @@ process: Washed
 **Variety:** Pink Bourbon  
 **Process:** Washed  
 **Roast:** Filter  
-**Altitude:** Not specified  
-**Roasted On:** Not specified  
-
 ### Flavor Notes (Roaster)
 - Rose  
 - White strawberry  
@@ -25,6 +25,3 @@ process: Washed
 
 ### Extra Context
 Elegant washed Pink Bourbon emphasizing florals, citrus brightness, and refined sweetness. Coffees of this style are often prized for balance and clarity.
-
-### Brew History
-_(To be filled after brewing)_

@@ -254,48 +254,24 @@ plain: true
     const slug = `${date}-${bean.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${method.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
     const filename = `brews/${slug}.md`;
 
-    const flavorList = flavors ? flavors.split(',').map((f) => `- ${f.trim()}`).filter((f) => f !== '-').join('\n') : '';
-    const taste = `| Strength | Acidity | Body | Sweetness |\n|:--:|:--:|:--:|:--:|\n| ${strength}/5 | ${acidity}/5 | ${body}/5 | ${sweetness}/5 |`;
+    // Specs, cup profile, flavours and "next time" live in front matter (the brew layout's side
+    // panels render them); the body keeps only the prose.
+    const yq = (x) => `"${String(x).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+    const flavorArr = flavors ? flavors.split(',').map((f) => f.trim()).filter(Boolean) : [];
+    const fmLine = (k, val) => (val === '' || val === undefined || val === null ? '' : `\n${k}: ${val}`);
+    const technique = [bloom && `- **Bloom:** ${bloom}`, agitation && `- **Agitation:** ${agitation}`].filter(Boolean).join('\n');
 
     const content = `---
 layout: brew
-title: "${method} Brew Log — ${bean}"
+title: ${yq(`${method} Brew Log — ${bean}`)}
 date: ${date}
-bean: "${bean}"
-roaster: "${roaster}"
-method: "${method}"
-dose: ${dose || ''}
-water: ${water || ''}
-water_temp: ${temp || ''}
-brew_time: "${brewTime}"
-grind: "${grind}"
-rating: ${rating}
-strength: ${strength}
-acidity: ${acidity}
-body: ${body}
-sweetness: ${sweetness}
+bean: ${yq(bean)}${fmLine('roaster', roaster && yq(roaster))}
+method: ${yq(method)}${fmLine('dose', dose)}${fmLine('water', water)}${fmLine('water_temp', temp)}${fmLine('brew_time', brewTime && yq(brewTime))}${fmLine('grind', grind && yq(grind))}${fmLine('rating', rating > 0 ? rating : '')}${fmLine('strength', strength)}${fmLine('acidity', acidity)}${fmLine('body', body)}${fmLine('sweetness', sweetness)}${fmLine('flavors', flavorArr.length ? `[${flavorArr.map(yq).join(', ')}]` : '')}${fmLine('next_time', nextTime && yq(nextTime))}
 ---
-
-## ⚖️ Recipe
-
-- **Method:** ${method}
-- **Dose:** ${dose || '—'} g
-- **Water:** ${water || '—'} g${ratio ? `\n- **Ratio:** 1:${ratio}` : ''}
-- **Water temp:** ${temp || '—'} °C
-- **Grind:** ${grind || '—'}
-- **Brew time:** ${brewTime || '—'}${bloom ? `\n- **Bloom:** ${bloom}` : ''}${agitation ? `\n- **Agitation:** ${agitation}` : ''}
-
-## 👅 Cup Profile
-
-${taste}
-${flavorList ? `\n**Flavor notes**\n\n${flavorList}\n` : ''}
+${technique ? `\n## ⚖️ Technique\n\n${technique}\n` : ''}
 ## 📝 Tasting Notes
 
 ${notes || '_No notes recorded._'}
-
-## 🔁 What I'd Change Next Time
-
-${nextTime || '_Nothing noted._'}
 `;
 
     const encoded = btoa(unescape(encodeURIComponent(content)));

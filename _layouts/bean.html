@@ -6,20 +6,59 @@
 <body>
   {% include nav.html %}
 
+  {%- comment -%} Brews link to a bean by `bean:` matching this page's title exactly {%- endcomment -%}
+  {% assign bean_brews = site.pages | where_exp: "p", "p.path contains 'brews/'" | where: "bean", page.title | sort: "date" %}
+
   <main class="wrap wrap-narrow">
     <div class="page-head">
       <p class="eyebrow">Bean Profile</p>
       <h1>{{ page.title }}</h1>
       <div class="chip-row" style="margin-top:0.7rem">
-        {% if page.origin %}<span class="chip chip-origin">📍 {{ page.origin }}</span>{% endif %}
-        {% if page.process %}<span class="chip chip-process">{{ page.process }}</span>{% endif %}
+        {% if page.origin and page.origin != "Not specified" %}<span class="chip chip-origin">📍 {{ page.origin }}</span>{% endif %}
+        {% if page.process and page.process != "Not specified" %}<span class="chip chip-process">{{ page.process }}</span>{% endif %}
         {% if page.variety and page.variety != "Not specified" %}<span class="chip">{{ page.variety }}</span>{% endif %}
+        {% if page.altitude %}<span class="chip">⛰ {{ page.altitude }}</span>{% endif %}
+        {% if page.roasted %}<span class="chip">🔥 Roasted {{ page.roasted | date: "%d %b %Y" }}</span>{% endif %}
       </div>
     </div>
 
     <article class="prose">
       {{ content }}
     </article>
+
+    {% if bean_brews.size > 0 %}
+    <section class="bean-brews" aria-labelledby="bean-brews-h">
+      <h2 id="bean-brews-h">☕ Brewed in this journal</h2>
+      {%- assign graded = bean_brews | where_exp: "b", "b.grind" -%}
+      {% if graded.size > 1 %}
+      <p class="bb-dial"><b>Dial-in:</b> {% for b in graded %}<span>{{ b.grind }}</span>{% unless forloop.last %} → {% endunless %}{% endfor %}</p>
+      {% endif %}
+      <ol class="bean-brew-list">
+        {% for b in bean_brews %}
+        <li>
+          <a href="{{ b.url | relative_url }}">
+            <span class="bb-date">{{ b.date | date: "%d %b %Y" }}</span>
+            <span class="bb-main">
+              <span class="bb-title"><b>{{ b.method }}</b>{% if b.recipe %} · {{ b.recipe }}{% endif %}</span>
+              <span class="bb-specs">
+                {%- if b.dose and b.water -%}{% include ratio.html dose=b.dose water=b.water %}{%- endif -%}
+                {%- if b.grind %} · {{ b.grind }}{% endif -%}
+                {%- if b.water_temp %} · {{ b.water_temp }}°C{% endif -%}
+                {%- if page.roasted -%}
+                  {%- assign brewed_s = b.date | date: "%s" | plus: 0 -%}{%- assign roasted_s = page.roasted | date: "%s" | plus: 0 -%}
+                  {%- assign days_off = brewed_s | minus: roasted_s | divided_by: 86400 -%}
+                  {%- if days_off >= 0 %} · {{ days_off }} days off roast{% endif -%}
+                {%- endif -%}
+              </span>
+              {% if b.next_time %}<span class="bb-next">Next time: {{ b.next_time }}</span>{% endif %}
+            </span>
+            {% if b.rating and b.rating != 0 %}<span class="rating bb-rating" aria-label="{{ b.rating }} out of 5">{% for i in (1..5) %}<span class="{% if i <= b.rating %}on{% endif %}">★</span>{% endfor %}</span>{% endif %}
+          </a>
+        </li>
+        {% endfor %}
+      </ol>
+    </section>
+    {% endif %}
 
     <p style="margin-top:2rem"><a class="btn btn-ghost btn-sm" href="{{ '/beans/' | relative_url }}">← All beans</a></p>
   </main>

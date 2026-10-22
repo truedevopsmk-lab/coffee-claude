@@ -4,6 +4,11 @@ title: Dark Room Natural — Chikmagalur, India
 origin: Chikmagalur, Karnataka, India
 variety: Catuai
 process: Anaerobic Natural
+roaster: "Dark Room Natural (DrN)"
+altitude: "1300–1350 MASL"
+roasted: 2025-12-29
+country: "India"
+process_group: "Anaerobic & experimental"
 ---
 
 ## Dark Room Natural — Chikmagalur, India (Anaerobic Natural)

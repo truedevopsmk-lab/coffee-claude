@@ -34,9 +34,7 @@ plain: true
       <div class="brew-card-specs">
         {% if brew.bean %}<span>🌱 {{ brew.bean | truncate: 30 }}</span>{% endif %}
         {% if brew.dose and brew.dose != "" and brew.water and brew.water != "" %}
-          {% assign dose_f = brew.dose | plus: 0.0 %}
-          {% assign r = brew.water | divided_by: dose_f | round: 1 %}
-          <span>⚖ <b>1:{{ r }}</b></span>
+          <span>⚖ <b>{% include ratio.html dose=brew.dose water=brew.water %}</b></span>
         {% endif %}
         {% if brew.water_temp and brew.water_temp != "" %}<span>🌡 <b>{{ brew.water_temp }}°</b></span>{% endif %}
         {% if brew.rating and brew.rating != 0 and brew.rating != "" %}<span class="rating">{% for i in (1..5) %}<span class="{% if i <= brew.rating %}on{% endif %}">★</span>{% endfor %}</span>{% endif %}

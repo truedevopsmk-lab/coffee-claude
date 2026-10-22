@@ -51,6 +51,7 @@ commit straight to this repo through the GitHub API.
 | **Methods** | One page per brewer: my notes + a "Recipe library" rendered from `_data/recipes.yml`; split into **My gear** and **Someday**; AeroPress page has the World AeroPress Championship archive | `methods/*.md`, `_includes/recipe-library.html` |
 | **Brews & Frames** | Photo gallery grouped into albums, thumbnails, lightbox with swipe | `brews-and-frames/index.md`, `_data/gallery.yml` |
 | **Brew calculator** | 41 sourced recipes (World Brewers Cup / AeroPress champions, Hoffmann, Blue Tokai, TIMEMORE, Bialetti…) for my gear plus a "Someday" group; every pour scales to the dose as cumulative scale targets; C3S Pro grind guide; deep links `?method=&recipe=`; generates a markdown brew log | `tools/brew-calculator/`, `_data/recipes.yml` |
+| **Brew timer** | "▶ Start brewing" on the calculator: full-screen guide with the scaled "pour to X g" target, next step + countdown, beep/flash cues, 3-2-1 pre-beeps, screen wake lock; untimed steps wait for "Next step"; hidden for steps past 30 min (cold brew) | `tools/brew-calculator/` |
 | **Log a brew** | Form (or paste markdown) → commits a brew file to the repo | `add-brew/index.html` |
 | **Upload photos** | Batch photo upload: resize, strip GPS/EXIF, thumbnails, per-photo captions → **one commit** | `upload-photo/index.html` |
 | **Manage photos** | Edit captions, move photos between albums, delete; search + album filter; batched → **one commit** | `manage-photos/index.html` |
@@ -58,6 +59,8 @@ commit straight to this repo through the GitHub API.
 | **Reminders** | Opt in/out of OneSignal push reminders | `notifications/index.html` |
 | **PWA** | Installable, offline fallback, safe-area aware (notch, Dynamic Island, home indicator) | `manifest.json`, `sw.js`, `_includes/head.html` |
 | **Dark mode** | Follows the OS, with a manual ◐ toggle (remembered) | `assets/coffee.css`, `_includes/footer.html` |
+| **Insights** | Build-time stats from the logs: average ratio/temp, median dose, days off roast, methods, processes, flavour families, ratings, dial-in notes | `insights/index.html` |
+| **Origins** | Every country with flags, regions, processes and beans | `origins/index.html` |
 
 ---
 
@@ -223,6 +226,11 @@ sweetness: 4
 | `water_temp`, `brew_time`, `grind` | spec rail (+ temp on the card) |
 | `rating` | stars on card & page |
 | `strength`, `acidity`, `body`, `sweetness` | cup-profile bars (value × 20 %) |
+| `recipe` | spec rail, bean page brew list (e.g. "Tetsu Kasuya 4:6") |
+| `flavors` | `["Plum", "Oolong"]` → family-coloured chips (`_data/flavors.yml`) and the insights flavour panel |
+| `next_time` | "Next Time" panel, bean page, insights dial-in list |
+
+`bean:` must equal a bean page's `title` exactly to link the brew to the bean (bean link, days off roast, the bean page's brew list).
 
 **Free-form (legacy):** `layout: default`, with only `title` and everything else written in the
 markdown body. These still render, but without the spec rail or card metadata. Eight of the
@@ -237,6 +245,11 @@ title: "Cafes Muda — Nestor Lasso Sidra, Colombia Huila"
 origin: "Colombia, Huila"
 variety: "Sidra"          # "Not specified" is hidden in chips
 process: "Natural"        # drives the shelf's filter chips; "Not specified" is hidden
+country: "Colombia"       # origins page + flags
+process_group: "Natural"  # Washed | Natural | Honey & pulped natural | Anaerobic & experimental | Decaf (insights)
+roaster: "Cafes Muda"
+roasted: 2026-09-01       # YYYY-MM-DD → "days off roast" on brews; leave out if unknown
+altitude: "1700 m"
 ---
 ## … roaster, farm, producer, altitude, flavor notes, context, brew history …
 ```
@@ -728,10 +741,10 @@ to another stack.
 
 | # | Issue | Notes / fix idea |
 |---|---|---|
-| 1 | **Existing photos contain GPS coordinates.** 36 of the 50 images in `assets/gallery/` carry GPS in their EXIF, and the repo is public. | New uploads are clean. Strip the old ones losslessly (e.g. `exiftool -gps:all= -overwrite_original`), or re-encode. The data also stays in git history unless history is rewritten. |
-| 2 | **Brew "Older / Newer" links never render.** `brew.html` uses `page.previous/next`, which only exist for posts and collections, not plain pages. | Compute neighbours in Liquid from the date-sorted brew list, or move brews into a collection. |
-| 3 | **8 of 11 brews are free-form** (`layout: default`), so they get no spec rail, method chip or card metadata. | Convert them to `layout: brew` with the §6.1 fields. |
-| 4 | **6 brews have no `date`** (the January/February logs), so they show no date and sort to the end. | Add `date:` to their front matter. |
+| 1 | ~~36 photos carried GPS in EXIF.~~ Fixed 2026-10-23 (auto-oriented, stripped, 7 oversized ones resized to 2048 px; gallery 23.6 → 13.5 MB). **Still in git history** until it is rewritten (force-push). | `git filter-repo` if wanted. |
+| 2 | ~~Brew "Older / Newer" links never render.~~ Fixed 2026-10-23: computed from the date-sorted brew list. | — |
+| 3 | ~~8 of 11 brews were free-form.~~ Fixed 2026-10-23: all are `layout: brew`. Overall `rating` is still blank on 9 — add it by hand. | — |
+| 4 | ~~6 brews had no `date`.~~ Fixed: dated by filename. Kava and Miners' body text say 2026-01-23 / 01-28, a few days after their filenames (18 / 23 Jan); filenames kept so URLs don't change. | — |
 | 5 | `brews/2026-02-22-sidama-moka pot.md` has a **space in its filename**, which gives a `%20` URL. | Rename (and consider a redirect). |
 | 6 | `/add-brew/` defaults the date with `toISOString()` (UTC), so between midnight and 05:30 IST it pre-fills **yesterday**. | Use the local-date helper from the upload page. |
 | 7 | `/add-brew/` never overwrites, but a second brew with the same date + bean + method fails with a GitHub 422 (the file already exists). | Add a `-2` suffix like the uploader does. |
@@ -754,6 +767,7 @@ to another stack.
 | 2026-09-27 | iPhone safe-area fix (header under the Dynamic Island); service-worker cache versioning; single-commit batch uploads with per-photo captions, resizing and EXIF/GPS stripping; gallery thumbnails; full-screen mobile lightbox; brew layout mobile order; Cup Profile bars fix |
 | 2026-09-28 | This documentation, `AGENTS.md`, `CLAUDE.md` |
 | 2026-10-22 | `/manage-photos/`: edit captions, move between albums, delete; ✎ Edit link in the lightbox |
+| 2026-10-23 | Polish pass: all brews structured; bean roast dates, days off roast, bean ↔ brew links, dial-in trend; flavour wheel; insights + origins pages; new icon set, favicon, link-preview image, 404 page; GPS stripped from photos; Older/Newer links fixed |
 | 2026-10-22 | Recipe library: `_data/recipes.yml` (41 sourced recipes) drives the calculator and method pages; My gear / Someday split; new South Indian filter, drip bag, Switch, Clever, cezve and phin pages; WAC archive; Kasuya 4:6 corrected to his published 1:15 / 93 °C / 0:00-0:45-1:30-2:10-2:40 |
 
 ---

@@ -1,0 +1,57 @@
+# Flavour families, after the SCA / World Coffee Research Coffee Taster's Flavor Wheel (2016).
+# `notes` maps each note used in brews/*.md `flavors:` to its family (lowercase keys).
+# A note that isn't listed still shows, just without a family colour.
+families:
+  - { id: fruity, name: "Fruity", color: "#c2410c" }
+  - { id: floral, name: "Floral", color: "#be4b8b" }
+  - { id: sweet, name: "Sweet", color: "#b5621e" }
+  - { id: nutty-cocoa, name: "Nutty / Cocoa", color: "#7c4a2d" }
+  - { id: sour-fermented, name: "Sour / Fermented", color: "#a16207" }
+  - { id: green-vegetative, name: "Green / Vegetative", color: "#4f6d54" }
+  - { id: spices, name: "Spices", color: "#9a3412" }
+  - { id: roasted, name: "Roasted", color: "#44403c" }
+
+notes:
+  # Fruity — berry, dried, other fruit, citrus
+  passionfruit: fruity
+  passion fruit: fruity
+  pineapple: fruity
+  persimmon: fruity
+  white grape: fruity
+  honeydew: fruity
+  yellow fruit: fruity
+  plum: fruity
+  mosambi: fruity        # sweet lime — citrus
+  strawberry: fruity
+  mango: fruity
+  ripe mango: fruity
+  cherry: fruity
+  stone fruit: fruity
+  tropical fruits: fruity
+  # Floral — black tea, floral
+  floral: floral
+  orange blossom: floral
+  rose: floral
+  jasmine: floral
+  black tea: floral       # the wheel files black tea under Floral
+  oolong: floral
+  # Sweet — brown sugar, vanilla, overall sweet
+  toffee: sweet
+  caramel: sweet
+  brown sugar: sweet
+  vanilla: sweet
+  nougat: sweet
+  marble cake: sweet
+  honey: sweet
+  # Nutty / Cocoa
+  chocolate: nutty-cocoa
+  cocoa: nutty-cocoa
+  dark chocolate: nutty-cocoa
+  almond: nutty-cocoa
+  hazelnut: nutty-cocoa
+  # Sour / Fermented — sour, alcohol/fermented
+  wine: sour-fermented
+  tamarind: sour-fermented
+  # Green / Vegetative
+  lemongrass: green-vegetative
+  herbal: green-vegetative

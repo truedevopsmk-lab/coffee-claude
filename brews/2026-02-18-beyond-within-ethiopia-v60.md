@@ -1,9 +1,21 @@
 ---
-
-layout: default
-title: V60 Brew Log — Ethiopia Bekele (Sidama, Ethiopia)
+layout: brew
+title: "V60 Brew Log — Ethiopia Bekele (Sidama, Ethiopia)"
+date: 2026-02-18
+bean: "Beyond Within — Ethiopia Bekele"
+roaster: "Beyond Within Coffee Roasters"
+method: "V60"
+recipe: "Multi-pour (Pranoy variant)"
+dose: 14
+water: 210
+water_temp: 88
+brew_time: "2:50–3:00"
+grind: "Medium-fine"
+acidity: 2
+body: 2
+flavors: ["Floral", "Lemongrass", "Toffee", "Oolong"]
+next_time: "Slightly finer; 90–91 °C; more agitation on the 2nd pour"
 ---
-
 This entry documents my V60 recipe and brew notes for **Ethiopia Bekele**, a natural coffee from Sidama, Ethiopia.
 
 ---
@@ -35,15 +47,6 @@ This entry documents my V60 recipe and brew notes for **Ethiopia Bekele**, a nat
 * **Cup:** Borosil Thermo Cup (360 ml)
 
 ---
-
-## ⚖️ Brew Recipe (Custom / Pranoy Variant)
-
-* **Coffee:** 14 g
-* **Water:** 210 g
-* **Ratio:** 1:15
-* **Grind Size:** Medium-fine (around mid-range, adjusted for ~3:00 drawdown)
-* **Water Temperature:** 88°C
-* **Brew Time:** ~2:50–3:00
 
 ---
 

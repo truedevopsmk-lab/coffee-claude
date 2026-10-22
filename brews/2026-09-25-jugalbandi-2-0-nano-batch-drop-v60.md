@@ -1,9 +1,17 @@
 ---
-layout: default
-title: V60 Brew Log — Jugalbandi 2.0 nano batch drop
+layout: brew
+title: "V60 Brew Log — Jugalbandi 2.0 nano batch drop"
 date: 2026-09-25
+bean: "Jugalbandi — Jugalbandi 2.0 nano batch drop"
+roaster: "Jugalbandi"
+method: "V60"
+recipe: "4:6 sweetness-focused · Daiso porcelain"
+dose: 12
+water: 200
+water_temp: 92
+brew_time: "2:45"
+grind: "16 clicks"
 ---
-
 This entry documents my V60 4:6 recipe and brew notes for **Jugalbandi 2.0 nano batch drop**, a 145hr Koji coffee from an unspecified origin.
 
 ---
@@ -38,15 +46,6 @@ This entry documents my V60 4:6 recipe and brew notes for **Jugalbandi 2.0 nano 
 * **Cup:** Borosil Thermo Cup (360 ml)
 
 ---
-
-## ⚖️ Brew Recipe (Winey Sweet)
-
-* **Coffee:** 12 g
-* **Water:** 200 g
-* **Ratio:** 1:16.7
-* **Grind Size:** 16 clicks on Timemore Chestnut C3S Pro
-* **Water Temperature:** 92°C
-* **Brew Time:** ~2:45 target
 
 ---
 

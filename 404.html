@@ -1,0 +1,26 @@
+---
+layout: default
+title: Page not found
+permalink: /404.html
+show_title: false
+plain: true
+---
+
+<style>
+  .nf { text-align: center; padding: 3rem 0 2rem; max-width: 34rem; margin: 0 auto; }
+  .nf-num { font-family: var(--serif); font-size: clamp(4.5rem, 16vw, 7rem); line-height: 1; color: var(--brass); margin: 0; }
+  .nf h1 { font-size: clamp(1.6rem, 4vw, 2.1rem); margin: 0.6rem 0 0.5rem; }
+  .nf p { color: var(--ink-soft); }
+  .nf .hero-actions { justify-content: center; margin-top: 1.4rem; }
+</style>
+
+<div class="nf">
+  <p class="nf-num" aria-hidden="true">404</p>
+  <h1>This cup ran dry.</h1>
+  <p>The page you were looking for isn't here. It may have been renamed or moved. Try the logbook, or search from the home page.</p>
+  <div class="hero-actions">
+    <a class="btn btn-primary" href="{{ '/' | relative_url }}">☕ Home</a>
+    <a class="btn btn-ghost" href="{{ '/brews/' | relative_url }}">The logbook</a>
+    <a class="btn btn-ghost" href="{{ '/tools/brew-calculator/' | relative_url }}">Calculator</a>
+  </div>
+</div>

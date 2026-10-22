@@ -4,6 +4,10 @@ title: Subtext Gesha — La Pradera, Colombia
 origin: Colombia, Nariño
 variety: Gesha
 process: Washed CM
+roaster: "Subtext Coffee"
+roasted: 2025-12-01
+country: "Colombia"
+process_group: "Washed"
 ---
 
 ## Subtext Gesha — La Pradera, Colombia (Washed CM)
@@ -15,7 +19,6 @@ process: Washed CM
 **Variety:** Gesha  
 **Process:** Washed CM  
 **Roast:** Light  
-**Altitude:** Not specified  
 **Roasted On:** 01-12-2025  
 
 ### Flavor Notes (Roaster)
@@ -25,6 +28,3 @@ process: Washed CM
 
 ### Extra Context
 Ultra-clean Gesha highlighting florals, tropical fruit, and vibrant acidity. Subtext is known for clarity-focused roasting that preserves aromatic intensity.
-
-### Brew History
-_(To be filled after brewing)_

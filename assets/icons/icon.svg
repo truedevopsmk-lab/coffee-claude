@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c46d26"/>
+      <stop offset="1" stop-color="#7d3f14"/>
+    </linearGradient>
+    <linearGradient id="cone" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff7ee"/>
+      <stop offset="1" stop-color="#f3d9a8"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- V60 cone with its ribs, on a server -->
+  <path d="M136 150 H376 L286 300 H226 Z" fill="url(#cone)"/>
+  <path d="M186 172 L240 286 M232 172 L250 286 M280 172 L262 286 M326 172 L272 286" stroke="#c9945a" stroke-width="7" stroke-linecap="round" opacity=".55"/>
+  <rect x="120" y="138" width="272" height="22" rx="11" fill="#fff7ee"/>
+  <rect x="214" y="298" width="84" height="16" rx="8" fill="#f3d9a8"/>
+  <!-- the drop -->
+  <path d="M256 330 C256 330 238 354 238 368 a18 18 0 0 0 36 0 C274 354 256 330 256 330 Z" fill="#fff7ee"/>
+  <rect x="156" y="396" width="200" height="18" rx="9" fill="#fff7ee" opacity=".85"/>
+</svg>

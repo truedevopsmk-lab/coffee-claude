@@ -11,6 +11,32 @@
     {% assign has_specs = false %}
     {% if page.method or page.bean or page.dose or page.water or page.grind or page.water_temp or page.brew_time %}{% assign has_specs = true %}{% endif %}
 
+    {%- comment -%} Link to the bean page whose title matches `bean:`; days off roast from its `roasted:` {%- endcomment -%}
+    {% assign bean_page = nil %}
+    {% assign days_off = nil %}
+    {% if page.bean %}
+      {% assign bean_page = site.pages | where_exp: "p", "p.path contains 'beans/'" | where: "title", page.bean | first %}
+      {% if bean_page and bean_page.roasted %}
+        {% assign brewed_s = page.date | date: "%s" | plus: 0 %}
+        {% assign roasted_s = bean_page.roasted | date: "%s" | plus: 0 %}
+        {% assign days_calc = brewed_s | minus: roasted_s | divided_by: 86400 %}
+        {% if days_calc >= 0 %}{% assign days_off = days_calc %}{% endif %}
+      {% endif %}
+    {% endif %}
+
+    {%- comment -%} Previous/next brew by date (plain pages have no page.previous/next) {%- endcomment -%}
+    {% assign dated_brews = site.pages | where_exp: "p", "p.path contains 'brews/'" | where_exp: "p", "p.date" | sort: "date" %}
+    {% assign older = nil %}
+    {% assign newer = nil %}
+    {% for b in dated_brews %}
+      {% if b.url == page.url %}
+        {% assign prev_i = forloop.index0 | minus: 1 %}
+        {% assign next_i = forloop.index0 | plus: 1 %}
+        {% if prev_i >= 0 %}{% assign older = dated_brews[prev_i] %}{% endif %}
+        {% assign newer = dated_brews[next_i] %}
+      {% endif %}
+    {% endfor %}
+
     <div class="brew-detail">
       <header class="brew-head">
         <p class="brew-eyebrow">{{ page.date | date: "%A, %d %B %Y" }}</p>
@@ -29,14 +55,14 @@
           <h3>Brew Spec</h3>
           <dl class="specs">
             {% if page.method %}<dt>Method</dt><dd>{{ page.method }}</dd>{% endif %}
-            {% if page.bean %}<dt>Bean</dt><dd style="font-family:var(--sans);font-weight:600">{{ page.bean }}</dd>{% endif %}
+            {% if page.recipe %}<dt>Recipe</dt><dd style="font-family:var(--sans);font-weight:600">{{ page.recipe }}</dd>{% endif %}
+            {% if page.bean %}<dt>Bean</dt><dd style="font-family:var(--sans);font-weight:600">{% if bean_page %}<a href="{{ bean_page.url | relative_url }}">{{ page.bean }}</a>{% else %}{{ page.bean }}{% endif %}</dd>{% endif %}
+            {% if days_off %}<dt>Rest</dt><dd>{{ days_off }} days off roast</dd>{% endif %}
             {% if page.roaster and page.roaster != "" %}<dt>Roaster</dt><dd style="font-family:var(--sans);font-weight:600">{{ page.roaster }}</dd>{% endif %}
             {% if page.dose and page.dose != "" %}<dt>Dose</dt><dd>{{ page.dose }} g</dd>{% endif %}
             {% if page.water and page.water != "" %}<dt>Water</dt><dd>{{ page.water }} g</dd>{% endif %}
             {% if page.dose and page.dose != "" and page.water and page.water != "" %}
-              {% assign dose_f = page.dose | plus: 0.0 %}
-              {% assign ratio = page.water | divided_by: dose_f | round: 1 %}
-              <dt>Ratio</dt><dd>1:{{ ratio }}</dd>
+              <dt>Ratio</dt><dd>{% include ratio.html dose=page.dose water=page.water %}</dd>
             {% endif %}
             {% if page.water_temp and page.water_temp != "" %}<dt>Temp</dt><dd>{{ page.water_temp }}°C</dd>{% endif %}
             {% if page.brew_time and page.brew_time != "" %}<dt>Time</dt><dd>{{ page.brew_time }}</dd>{% endif %}
@@ -76,6 +102,21 @@
         </div>
         {% endif %}
 
+        <div class="brew-extras brew-extras-rail">
+        {% if page.flavors %}
+        <div class="panel">
+          <h3>Flavour Notes</h3>
+          <div class="brew-flavors">{% for f in page.flavors %}{% include flavor-chip.html note=f %}{% endfor %}</div>
+        </div>
+        {% endif %}
+
+        {% if page.next_time %}
+        <div class="panel">
+          <h3>Next Time</h3>
+          <p class="brew-next">{{ page.next_time }}</p>
+        </div>
+        {% endif %}
+
         <div class="panel">
           <h3>Logbook</h3>
           <dl class="specs">
@@ -84,6 +125,7 @@
           </dl>
           <p style="margin:0.9rem 0 0"><a class="btn btn-ghost btn-sm" href="{{ '/brews/' | relative_url }}">← All brews</a></p>
         </div>
+        </div>
       </aside>
 
       <article class="brew-body">
@@ -91,17 +133,42 @@
           {{ content }}
         </div>
 
+        <div class="brew-extras brew-extras-after">
+        {% if page.flavors %}
+        <div class="panel">
+          <h3>Flavour Notes</h3>
+          <div class="brew-flavors">{% for f in page.flavors %}{% include flavor-chip.html note=f %}{% endfor %}</div>
+        </div>
+        {% endif %}
+
+        {% if page.next_time %}
+        <div class="panel">
+          <h3>Next Time</h3>
+          <p class="brew-next">{{ page.next_time }}</p>
+        </div>
+        {% endif %}
+
+        <div class="panel">
+          <h3>Logbook</h3>
+          <dl class="specs">
+            <dt>Date</dt><dd>{{ page.date | date: "%d %b %Y" }}</dd>
+            <dt>Entry</dt><dd style="font-family:var(--sans);font-weight:600">Brew log</dd>
+          </dl>
+          <p style="margin:0.9rem 0 0"><a class="btn btn-ghost btn-sm" href="{{ '/brews/' | relative_url }}">← All brews</a></p>
+        </div>
+        </div>
+
         <nav class="brew-nav">
           <div>
-            {% if page.previous %}
+            {% if older %}
               <span class="nv-label">← Older</span>
-              <a href="{{ page.previous.url | relative_url }}">{{ page.previous.title | truncate: 42 }}</a>
+              <a href="{{ older.url | relative_url }}">{{ older.title | truncate: 42 }}</a>
             {% endif %}
           </div>
           <div style="text-align:right">
-            {% if page.next %}
+            {% if newer %}
               <span class="nv-label">Newer →</span>
-              <a href="{{ page.next.url | relative_url }}">{{ page.next.title | truncate: 42 }}</a>
+              <a href="{{ newer.url | relative_url }}">{{ newer.title | truncate: 42 }}</a>
             {% endif %}
           </div>
         </nav>

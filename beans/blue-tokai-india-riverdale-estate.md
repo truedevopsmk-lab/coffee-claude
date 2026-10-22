@@ -4,6 +4,11 @@ title: Blue Tokai — Riverdale Estate, Yercaud, India
 origin: Yercaud, Tamil Nadu, India
 variety: SLN9 + S5B
 process: Anaerobic Natural
+roaster: "Blue Tokai Coffee Roasters"
+altitude: "1450 m"
+roasted: 2025-10-15
+country: "India"
+process_group: "Anaerobic & experimental"
 ---
 
 ## Blue Tokai — Riverdale Estate, Yercaud, India (Anaerobic Natural)
@@ -11,7 +16,6 @@ process: Anaerobic Natural
 **Roaster:** Blue Tokai Coffee Roasters  
 **Origin:** Yercaud, Tamil Nadu, India  
 **Estate / Farm:** Riverdale Estate  
-**Producer:** Not specified  
 **Variety:** SLN9 + S5B  
 **Process:** Anaerobic Natural  
 **Roast:** Light  
@@ -28,6 +32,3 @@ process: Anaerobic Natural
 Blue Tokai is one of India’s most prominent specialty coffee roasters, known for transparent sourcing and roast profiles designed to highlight origin character. Their Anaerobic Natural offerings typically emphasize fruit-forward sweetness while maintaining approachability.
 
 Riverdale Estate, located in Yercaud, Tamil Nadu, produces high-altitude coffees that benefit from cooler temperatures and slower cherry maturation. Indian anaerobic naturals from estates like Riverdale are often appreciated for **juicy fruit notes, elevated aromatics, and medium-high acidity**, without the heavy ferment character seen in some experimental lots. This coffee is positioned as a vibrant yet balanced cup suitable for filter brewing.
-
-### Brew History
-_(To be filled after brewing)_

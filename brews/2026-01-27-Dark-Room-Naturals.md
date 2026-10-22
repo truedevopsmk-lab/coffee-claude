@@ -1,13 +1,24 @@
 ---
-layout: default
-title: 4:6 Pourover Brew Log — Dark Room Natural (Chikmagalur|India)
+layout: brew
+title: "4:6 Pourover Brew Log — Dark Room Natural (Chikmagalur|India)"
+date: 2026-01-27
+bean: "Dark Room Natural — Chikmagalur, India"
+roaster: "Dark Room Natural (DrN)"
+method: "V60"
+recipe: "Tetsu Kasuya 4:6 (sweetness-focused)"
+dose: 12
+water: 200
+water_temp: "90–92"
+brew_time: "3:00–3:30"
+grind: "18–19 clicks"
+rating: 5
+sweetness: 4
+flavors: ["Passionfruit", "Mosambi", "Pineapple", "Black tea"]
+next_time: "1 click coarser to soften acidity; try a 50 s bloom"
 ---
-
 This entry documents my AeroPress recipe and brew notes for **Dark Room Natural*, a Anaerobic Natural (Dark Room Drying) coffee from CKM, India.
 
 ---
-
-
 
 ## Coffee Details
 - **Roaster**: Dark Room Natural (DrN)

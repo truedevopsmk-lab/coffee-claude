@@ -1,8 +1,20 @@
 ---
-layout: default
-title: V60 Brew Log — Hill Groove (Wokha, Nagaland)
+layout: brew
+title: "V60 Brew Log — Hill Groove (Wokha, Nagaland)"
+date: 2026-02-17
+bean: "Hill Groove — Lithanro Partner Farms, Wokha - Nagaland"
+roaster: "Hill Groove Coffee Roasters"
+method: "V60"
+recipe: "Tetsu Kasuya 4:6"
+dose: 15
+water: 240
+water_temp: "92–94"
+brew_time: "2:45–3:00"
+grind: "18–20 clicks"
+body: 2
+flavors: ["Floral", "Plum", "Wine", "Tamarind", "Oolong"]
+next_time: "90–91 °C if acidity feels sharp; 1 click finer for body"
 ---
-
 This entry documents my V60 4:6 recipe and brew notes for **Hill Groove — Lithanro Partner Farms**, a honey sundried coffee from Nagaland, India.
 
 ---
@@ -38,15 +50,6 @@ This entry documents my V60 4:6 recipe and brew notes for **Hill Groove — Lith
 - **Cup:** Borosil Thermo Cup (360 ml)
 
 ---
-
-## ⚖️ Brew Recipe (Balanced & Layered)
-
-- **Coffee:** 15 g
-- **Water:** 240 ml
-- **Ratio:** 1:16
-- **Grind Size:** 18–20 clicks (C3S Pro)
-- **Water Temperature:** 92–94°C
-- **Brew Time:** ~2:45–3:00 min
 
 ---
 

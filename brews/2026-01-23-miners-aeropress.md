@@ -1,8 +1,20 @@
 ---
-layout: default
-title: AeroPress Brew Log — Miners (Colombia)
+layout: brew
+title: "AeroPress Brew Log — Miners (Colombia)"
+date: 2026-01-23
+bean: "Miners Prague — Colombia Franco Alexis Garzón"
+roaster: "Miners Prague"
+method: "AeroPress"
+recipe: "Inverted · 30 g / 30 s bloom"
+dose: 10
+water: 150
+water_temp: 89
+brew_time: "2:10"
+grind: "12 clicks"
+sweetness: 3
+flavors: ["White grape", "Persimmon", "Orange blossom"]
+next_time: "Grind 1 click finer to add body"
 ---
-
 This entry documents my AeroPress recipe and brew notes for **Miners*, a washed coffee from Colombia.
 
 ---
@@ -13,17 +25,6 @@ This entry documents my AeroPress recipe and brew notes for **Miners*, a washed 
 **Coffee:** Miners Prague — Colombia Franco Alexis Garzón  
 **Process:** Washed  
 **Roast:** Filter  
-
-## Brew Parameters
-- Method: AeroPress (Inverted)
-- Dose: 10 g
-- Water: 150 g
-- Ratio: 1:15
-- Grind: Medium-fine (C3S Pro – 12 clicks)
-- Temp: 89°C
-- Bloom: 30 g / 30 s
-- Agitation: Stir x5
-- Total Time: 2:10
 
 ## Tasting
 - Acidity: Medium-high (juicy)

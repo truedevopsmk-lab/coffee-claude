@@ -1,0 +1,5 @@
+{%- comment -%} One flavour note as a chip, coloured by its wheel family (_data/flavors.yml). Param: note. {%- endcomment -%}
+{%- assign _key = include.note | downcase | strip -%}
+{%- assign _fam_id = site.data.flavors.notes[_key] -%}
+{%- assign _fam = site.data.flavors.families | where: "id", _fam_id | first -%}
+<span class="chip flavor-chip"{% if _fam %} style="--fam: {{ _fam.color }}" title="{{ _fam.name }}"{% endif %}>{% if _fam %}<span class="flavor-dot" aria-hidden="true"></span>{% endif %}{{ include.note }}</span>

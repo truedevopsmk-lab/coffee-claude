@@ -1,9 +1,20 @@
 ---
-layout: default
-title: Cold Brew Brew Log — Cold Brew Concentrate (Not specified)
+layout: brew
+title: "Cold Brew Brew Log — Cold Brew Concentrate (Not specified)"
 date: 2026-04-13
+bean: "Cold Brew Concentrate"
+method: "Cold Brew"
+recipe: "Immersion concentrate"
+dose: 100
+water: 1000
+water_temp: "Room temp"
+brew_time: "12–18 h"
+grind: "Coarse, ~25–30 clicks"
+acidity: 1
+body: 5
+flavors: ["Chocolate"]
+next_time: "Try a slightly finer grind"
 ---
-
 This entry documents my cold brew recipe and brew notes for **Cold Brew Concentrate**, a not specified coffee from not specified.
 
 ---
@@ -31,15 +42,6 @@ This entry documents my cold brew recipe and brew notes for **Cold Brew Concentr
 * **Cup:** Borosil Thermo Cup (360 ml)
 
 ---
-
-## ⚖️ Brew Recipe (Cold Brew Concentrate)
-
-* **Coffee:** 100 g
-* **Water:** 1000 ml
-* **Ratio:** 1:10
-* **Grind Size:** Coarse (French press range, ~25–30 clicks)
-* **Water Temperature:** Room temperature
-* **Brew Time:** 12–18 hours
 
 ---
 

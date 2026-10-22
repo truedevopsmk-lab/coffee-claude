@@ -17,27 +17,11 @@ body: 4
 sweetness: 4
 ---
 
-## ⚖️ Recipe
+## ⚖️ Technique
 
-- **Method:** V60
-- **Dose:** 15 g
-- **Water:** 200 g
-- **Ratio:** 1:13.3
-- **Water temp:** 95 °C
-- **Grind:** 18 Clicks
-- **Brew time:** 2:55
 - **Bloom:** 45s
-
-## 👅 Cup Profile
-
-| Strength | Acidity | Body | Sweetness |
-|:--:|:--:|:--:|:--:|
-| 4/5 | 2/5 | 4/5 | 4/5 |
 
 ## 📝 Tasting Notes
 
 _No notes recorded._
 
-## 🔁 What I'd Change Next Time
-
-_Nothing noted._

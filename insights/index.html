@@ -1,0 +1,168 @@
+---
+layout: default
+title: Insights
+permalink: /insights/
+show_title: false
+plain: true
+description: What my brew logs say — ratios, temperatures, methods, processes and how long beans rested before I brewed them.
+---
+
+{%- comment -%}
+  Everything here is computed at build time from brews/*.md and beans/*.md front matter.
+  Brews link to beans when `bean:` equals a bean page's title.
+{%- endcomment -%}
+{% assign brews = site.pages | where_exp: "p", "p.path contains 'brews/'" | where_exp: "p", "p.name != 'index.md'" | sort: "date" %}
+{% assign beans = site.pages | where_exp: "p", "p.path contains 'beans/'" | where_exp: "p", "p.name != 'index.md'" %}
+{% assign spec_brews = brews | where_exp: "b", "b.dose" | where_exp: "b", "b.water" %}
+{% assign rated = brews | where_exp: "b", "b.rating" %}
+
+{%- comment -%} Ratio + temp stats {%- endcomment -%}
+{% assign ratio_sum = 0.0 %}{% assign ratio_min = 99.0 %}{% assign ratio_max = 0.0 %}
+{% assign dose_sum = 0.0 %}
+{% for b in spec_brews %}
+  {% assign d = b.dose | plus: 0.0 %}
+  {% assign r = b.water | divided_by: d %}
+  {% assign ratio_sum = ratio_sum | plus: r %}{% assign dose_sum = dose_sum | plus: d %}
+  {% if r < ratio_min %}{% assign ratio_min = r %}{% endif %}
+  {% if r > ratio_max %}{% assign ratio_max = r %}{% endif %}
+{% endfor %}
+{% assign n_spec = spec_brews | size %}
+{% if n_spec > 0 %}
+  {% assign n_spec_f = n_spec | plus: 0.0 %}
+  {% assign ratio_avg = ratio_sum | divided_by: n_spec_f | round: 1 | append: "" %}
+  {% assign ratio_tail = ratio_avg | slice: -2, 2 %}{% if ratio_tail == ".0" %}{% assign ratio_avg = ratio_avg | split: "." | first %}{% endif %}
+  {%- comment -%} Median dose: one 100 g cold brew would drag a mean far above a usual cup {%- endcomment -%}
+  {% assign doses = spec_brews | map: "dose" | sort %}
+  {% assign mid = n_spec | divided_by: 2 %}
+  {% assign odd = n_spec | modulo: 2 %}
+  {% if odd == 1 %}{% assign dose_med = doses[mid] %}{% else %}{% assign lo_i = mid | minus: 1 %}{% assign dose_med = doses[lo_i] | plus: doses[mid] | divided_by: 2.0 %}{% endif %}
+  {% assign dose_med = dose_med | append: "" %}{% assign dose_tail = dose_med | slice: -2, 2 %}{% if dose_tail == ".0" %}{% assign dose_med = dose_med | split: "." | first %}{% endif %}
+{% endif %}
+{% assign temp_sum = 0.0 %}{% assign temp_n = 0 %}
+{% for b in brews %}{% assign t = b.water_temp | plus: 0 %}{% if t > 50 %}{% assign temp_sum = temp_sum | plus: t %}{% assign temp_n = temp_n | plus: 1 %}{% endif %}{% endfor %}
+{% if temp_n > 0 %}{% assign temp_n_f = temp_n | plus: 0.0 %}{% assign temp_avg = temp_sum | divided_by: temp_n_f | round: 1 %}{% endif %}
+
+{%- comment -%} Days off roast, via the linked bean {%- endcomment -%}
+{% assign rest_rows = "" %}{% assign rest_sum = 0 %}{% assign rest_n = 0 %}
+{% for b in brews %}
+  {% assign bp = beans | where: "title", b.bean | first %}
+  {% if bp and bp.roasted %}
+    {% assign bs = b.date | date: "%s" | plus: 0 %}{% assign rs = bp.roasted | date: "%s" | plus: 0 %}
+    {% assign days = bs | minus: rs | divided_by: 86400 %}
+    {% if days >= 0 %}{% assign rest_sum = rest_sum | plus: days %}{% assign rest_n = rest_n | plus: 1 %}{% endif %}
+  {% endif %}
+{% endfor %}
+{% if rest_n > 0 %}{% assign rest_n_f = rest_n | plus: 0.0 %}{% assign rest_avg = rest_sum | divided_by: rest_n_f | round %}{% endif %}
+
+{% assign methods = brews | map: "method" | compact | uniq | sort %}
+{% assign groups = beans | map: "process_group" | compact | uniq | sort %}
+{% assign countries = beans | map: "country" | compact | uniq %}
+
+<div class="page-head">
+  <p class="eyebrow">Insights</p>
+  <h1>What the logbook says</h1>
+  <p>Numbers worked out from {{ brews | size }} brews and {{ beans | size }} beans. They update every time I log something.</p>
+</div>
+
+<div class="stats ins-stats">
+  <div class="stat"><span class="stat-num">{% if ratio_avg %}1:{{ ratio_avg }}{% else %}—{% endif %}</span><span class="stat-label">Average ratio</span></div>
+  <div class="stat"><span class="stat-num">{% if temp_avg %}{{ temp_avg }}°{% else %}—{% endif %}</span><span class="stat-label">Average temp</span></div>
+  <div class="stat"><span class="stat-num">{% if dose_med %}{{ dose_med }} g{% else %}—{% endif %}</span><span class="stat-label">Typical dose</span></div>
+  <div class="stat"><span class="stat-num">{% if rest_avg %}{{ rest_avg }} d{% else %}—{% endif %}</span><span class="stat-label">Avg days off roast</span></div>
+</div>
+{% if n_spec > 0 %}<p class="ins-note">Ratios range from {% include ratio.html dose=1 water=ratio_min %} to {% include ratio.html dose=1 water=ratio_max %} across {{ n_spec }} brews with dose and water logged; typical dose is the median.{% if rest_n > 0 %} Days off roast come from the {{ rest_n }} brews whose bean has a roast date.{% endif %}</p>{% endif %}
+
+<div class="ins-grid">
+  <section class="panel">
+    <h3>Brews by method</h3>
+    {% assign max_m = 0 %}{% for m in methods %}{% assign c = brews | where: "method", m | size %}{% if c > max_m %}{% assign max_m = c %}{% endif %}{% endfor %}
+    <dl class="ins-bars">
+      {% for m in methods %}
+        {% assign mb = brews | where: "method", m %}{% assign c = mb | size %}
+        {% assign pct = c | times: 100 | divided_by: max_m %}
+        <div><dt>{{ m }}</dt><dd><span class="ins-bar" style="width:{{ pct }}%"></span><b>{{ c }}</b></dd></div>
+      {% endfor %}
+    </dl>
+  </section>
+
+  <section class="panel">
+    <h3>Beans by process</h3>
+    {% assign max_g = 0 %}{% for g in groups %}{% assign c = beans | where: "process_group", g | size %}{% if c > max_g %}{% assign max_g = c %}{% endif %}{% endfor %}
+    <dl class="ins-bars">
+      {% for g in groups %}
+        {% assign c = beans | where: "process_group", g | size %}{% assign pct = c | times: 100 | divided_by: max_g %}
+        <div><dt>{{ g }}</dt><dd><span class="ins-bar sage" style="width:{{ pct }}%"></span><b>{{ c }}</b></dd></div>
+      {% endfor %}
+    </dl>
+  </section>
+
+  <section class="panel">
+    <h3>Flavour families I taste</h3>
+    {%- assign fam_counts = "" -%}
+    {%- for fam in site.data.flavors.families -%}
+      {%- assign c = 0 -%}
+      {%- for b in brews -%}{%- for f in b.flavors -%}{%- assign k = f | downcase | strip -%}{%- if site.data.flavors.notes[k] == fam.id -%}{%- assign c = c | plus: 1 -%}{%- endif -%}{%- endfor -%}{%- endfor -%}
+      {%- if c > 0 -%}{%- capture fam_counts -%}{{ fam_counts }}{{ c | prepend: "000" | slice: -3, 3 }}|{{ fam.id }},{%- endcapture -%}{%- endif -%}
+    {%- endfor -%}
+    {%- assign fam_sorted = fam_counts | split: "," | sort | reverse -%}
+    {%- assign fam_max = fam_sorted.first | split: "|" | first | plus: 0 -%}
+    <dl class="ins-bars">
+      {%- for row in fam_sorted -%}
+        {%- assign parts = row | split: "|" -%}{%- assign c = parts[0] | plus: 0 -%}
+        {%- assign fam = site.data.flavors.families | where: "id", parts[1] | first -%}
+        {%- assign pct = c | times: 100 | divided_by: fam_max -%}
+        <div><dt>{{ fam.name }}</dt><dd><span class="ins-bar" style="width:{{ pct }}%;background:{{ fam.color }}"></span><b>{{ c }}</b></dd></div>
+      {%- endfor -%}
+    </dl>
+    <p class="ins-foot">Notes from my brew logs, grouped by the SCA / WCR Coffee Taster's Flavor Wheel.</p>
+  </section>
+
+  <section class="panel">
+    <h3>Rest before brewing</h3>
+    {% if rest_n > 0 %}
+    <ul class="ins-list">
+      {% for b in brews %}
+        {% assign bp = beans | where: "title", b.bean | first %}
+        {% if bp and bp.roasted %}
+          {% assign bs = b.date | date: "%s" | plus: 0 %}{% assign rs = bp.roasted | date: "%s" | plus: 0 %}
+          {% assign days = bs | minus: rs | divided_by: 86400 %}
+          {% if days >= 0 %}<li><a href="{{ b.url | relative_url }}">{{ bp.title | split: ' — ' | last | truncate: 34 }}</a><span>{{ days }} days</span></li>{% endif %}
+        {% endif %}
+      {% endfor %}
+    </ul>
+    <p class="ins-foot">Specialty filter coffee usually peaks 1–4 weeks off roast.</p>
+    {% else %}<p class="ins-foot">Add <code>roasted:</code> dates to beans to see this.</p>{% endif %}
+  </section>
+
+  <section class="panel">
+    <h3>Ratings</h3>
+    {% if rated.size > 0 %}
+    <ul class="ins-list">
+      {% assign by_rating = rated | sort: "rating" | reverse %}
+      {% for b in by_rating %}<li><a href="{{ b.url | relative_url }}">{{ b.title | split: ' — ' | last | truncate: 34 }}</a><span class="rating">{% for i in (1..5) %}<span class="{% if i <= b.rating %}on{% endif %}">★</span>{% endfor %}</span></li>{% endfor %}
+    </ul>
+    {% endif %}
+    {% assign unrated = brews | size | minus: rated.size %}
+    <p class="ins-foot">{{ rated | size }} rated · {{ unrated }} still to rate. Ratings unlock "best process" and "best brewer" comparisons.</p>
+  </section>
+
+  <section class="panel">
+    <h3>Dial-in notes</h3>
+    {% assign dial = brews | where_exp: "b", "b.next_time" | reverse %}
+    {% if dial.size > 0 %}
+    <ul class="ins-list ins-dial">
+      {% for b in dial limit: 6 %}<li><a href="{{ b.url | relative_url }}">{{ b.date | date: "%d %b" }} · {{ b.method }}</a><span>{{ b.next_time }}</span></li>{% endfor %}
+    </ul>
+    {% endif %}
+  </section>
+
+  <section class="panel">
+    <h3>Grinder settings used</h3>
+    <ul class="ins-list">
+      {% for b in brews %}{% if b.grind %}<li><a href="{{ b.url | relative_url }}">{{ b.method }} · {{ b.date | date: "%d %b" }}</a><span>{{ b.grind }}</span></li>{% endif %}{% endfor %}
+    </ul>
+    <p class="ins-foot">Timemore C3S Pro. TIMEMORE's pour-over band is 13–16 clicks.</p>
+  </section>
+</div>
+
+<p style="margin-top:2rem"><a class="btn btn-ghost btn-sm" href="{{ '/origins/' | relative_url }}">🌍 Origins map → {{ countries | size }} countries</a></p>

@@ -1,0 +1,44 @@
+---
+layout: default
+title: Origins
+permalink: /origins/
+show_title: false
+plain: true
+description: Every coffee origin in my journal, with regions, processes and the beans I've tried.
+---
+
+{% assign beans = site.pages | where_exp: "p", "p.path contains 'beans/'" | where_exp: "p", "p.name != 'index.md'" | sort: "title" %}
+{% assign countries = beans | map: "country" | compact | uniq | sort %}
+{%- comment -%} Country → flag. Add a pair when a new origin appears. {%- endcomment -%}
+{% assign flag_pairs = "Brazil:🇧🇷,Colombia:🇨🇴,Ecuador:🇪🇨,El Salvador:🇸🇻,Ethiopia:🇪🇹,Honduras:🇭🇳,India:🇮🇳,Kenya:🇰🇪,Rwanda:🇷🇼,Panama:🇵🇦,Guatemala:🇬🇹,Costa Rica:🇨🇷,Peru:🇵🇪,Indonesia:🇮🇩,Yemen:🇾🇪,Burundi:🇧🇮,Mexico:🇲🇽,Bolivia:🇧🇴,Nicaragua:🇳🇮,Uganda:🇺🇬,Tanzania:🇹🇿,Vietnam:🇻🇳,China:🇨🇳" | split: "," %}
+
+<div class="page-head">
+  <p class="eyebrow">Origins</p>
+  <h1>Where my coffee comes from</h1>
+  <p>{{ countries | size }} countries and {{ beans | size }} beans so far — with a soft spot for Indian estates.</p>
+</div>
+
+<div class="origin-grid">
+  {% for c in countries %}
+    {% assign cbeans = beans | where: "country", c %}
+    {% assign flag = "📍" %}
+    {% for pair in flag_pairs %}{% assign kv = pair | split: ":" %}{% if kv[0] == c %}{% assign flag = kv[1] %}{% endif %}{% endfor %}
+    {% assign procs = cbeans | map: "process_group" | uniq %}
+    <section class="origin-card" id="origin-{{ c | slugify }}">
+      <header>
+        <span class="origin-flag" aria-hidden="true">{{ flag }}</span>
+        <h2>{{ c }}</h2>
+        <span class="origin-count">{{ cbeans | size }} bean{% if cbeans.size != 1 %}s{% endif %}</span>
+      </header>
+      <div class="chip-row">{% for p in procs %}<span class="chip chip-process">{{ p }}</span>{% endfor %}</div>
+      <ul>
+        {% for b in cbeans %}
+          <li><a href="{{ b.url | relative_url }}">{{ b.title | split: ' — ' | last }}</a><span>{{ b.roaster | default: b.title | split: ' — ' | first }} · {{ b.origin }}{% if b.altitude %} · ⛰ {{ b.altitude }}{% endif %}</span></li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endfor %}
+</div>
+
+{% assign unknown = beans | where_exp: "b", "b.country == nil" %}
+{% if unknown.size > 0 %}<p class="ins-note">Origin not published: {% for b in unknown %}<a href="{{ b.url | relative_url }}">{{ b.title }}</a>{% unless forloop.last %}, {% endunless %}{% endfor %}.</p>{% endif %}

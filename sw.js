@@ -15,6 +15,8 @@ const PRECACHE_URLS = [
   '/coffee-claude/add-brew/',
   '/coffee-claude/upload-photo/',
   '/coffee-claude/manage-photos/',
+  '/coffee-claude/insights/',
+  '/coffee-claude/origins/',
   '/coffee-claude/journal-settings/',
   '/coffee-claude/assets/coffee.css',
   '/coffee-claude/offline.html'

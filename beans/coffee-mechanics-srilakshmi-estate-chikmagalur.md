@@ -4,6 +4,10 @@ title: Coffee Mechanics — Srilakshmi Estate, Chikmagalur
 origin: Chikmagalur, Karnataka, India
 variety: Not specified
 process: Fully Washed
+roaster: "Coffee Mechanics"
+altitude: "4000 ft ASL"
+country: "India"
+process_group: "Washed"
 ---
 
 ## Coffee Mechanics — Srilakshmi Estate, Chikmagalur (Fully Washed)
@@ -11,13 +15,9 @@ process: Fully Washed
 **Roaster:** Coffee Mechanics  
 **Origin:** Chikmagalur, Karnataka, India  
 **Estate / Farm:** Srilakshmi Estate  
-**Producer:** Not specified  
-**Variety:** Not specified  
 **Process:** Fully Washed  
 **Roast:** American Roast  
 **Altitude:** 4000 ft ASL  
-**Roasted On:** Not specified  
-
 ### Flavor Notes (Roaster)
 - Dark chocolate  
 - Caramel  
@@ -28,5 +28,4 @@ Srilakshmi Estate is a well-established coffee estate in the Chikmagalur region 
 Coffee Mechanics positions this coffee as an **American roast**, indicating a medium roast profile designed to emphasize sweetness and body while maintaining clarity. Within the specialty community, washed Chikmagalur coffees roasted to this level are typically valued for their approachability, chocolate-forward character, and suitability for everyday brewing across both filter and immersion methods.
 
 ### Brew History
-_(To be filled after brewing)_
 ```

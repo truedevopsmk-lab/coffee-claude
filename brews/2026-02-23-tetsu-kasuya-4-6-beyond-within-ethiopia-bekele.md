@@ -1,7 +1,17 @@
 ---
 layout: brew
-title: Tetsu Kasuya 4:6 — Beyond Within — Ethiopia Bekele
+title: "Tetsu Kasuya 4:6 — Beyond Within — Ethiopia Bekele"
 date: 2026-02-23
+bean: "Beyond Within — Ethiopia Bekele"
+roaster: "Beyond Within Coffee Roasters"
+method: "V60"
+recipe: "Tetsu Kasuya 4:6"
+dose: 12
+water: 199
+water_temp: "90–92"
+strength: 4
+acidity: 4
+sweetness: 4
 ---
 
 This entry documents my **Tetsu Kasuya 4:6** brew and tasting notes for **Beyond Within — Ethiopia Bekele**.
@@ -36,8 +46,6 @@ This entry documents my **Tetsu Kasuya 4:6** brew and tasting notes for **Beyond
 - **Strength**: 4
 - **Acidity**: 4
 - **Sweetness**: 4
-
-
 
 ---
 

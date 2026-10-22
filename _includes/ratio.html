@@ -1,0 +1,9 @@
+{%- comment -%}
+  Prints a brew ratio like "1:16.7" or "1:15" (no trailing .0). Params: dose, water.
+  Coerces dose to a float first — Liquid's divided_by truncates on two integers.
+{%- endcomment -%}
+{%- assign _dose_f = include.dose | plus: 0.0 -%}
+{%- assign _ratio = include.water | divided_by: _dose_f | round: 1 | append: "" -%}
+{%- assign _tail = _ratio | slice: -2, 2 -%}
+{%- if _tail == ".0" -%}{%- assign _ratio = _ratio | split: "." | first -%}{%- endif -%}
+1:{{ _ratio }}

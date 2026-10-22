@@ -460,6 +460,10 @@ h1, h2, h3, h4 {
 .brew-detail > .brew-aside { grid-area: aside; }
 .brew-detail > .brew-body { grid-area: body; min-width: 0; }
 .brew-aside { display: grid; gap: 1.1rem; }
+/* Flavours / next time / logbook: in the sticky rail on wide screens, after the notes on phones */
+.brew-extras { display: grid; gap: 1.1rem; }
+.brew-extras-rail { display: none; }
+.brew-extras-after { margin-top: 1.6rem; }
 @media (min-width: 880px) {
   .brew-detail {
     grid-template-columns: 300px minmax(0, 1fr); grid-template-rows: auto 1fr;
@@ -467,9 +471,11 @@ h1, h2, h3, h4 {
   }
   .brew-aside { position: sticky; top: var(--sticky-top); align-self: start; }
   .brew-detail > .brew-body { margin-top: 1.4rem; }
+  .brew-extras-rail { display: grid; }
+  .brew-extras-after { display: none; }
 }
 @media (min-width: 560px) and (max-width: 879px) {
-  .brew-aside { grid-template-columns: 1fr 1fr; align-items: start; }
+  .brew-aside, .brew-extras-after { grid-template-columns: 1fr 1fr; align-items: start; }
 }
 .panel {
   background: var(--surface);
@@ -634,6 +640,65 @@ h1, h2, h3, h4 {
 .tab.active { color: var(--brass-deep); border-bottom-color: var(--brass); }
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
+
+/* ---------- Bean page: brews of this bean ---------- */
+.bean-brews { margin-top: 2.2rem; }
+.bean-brews h2 { font-size: 1.35rem; margin: 0 0 0.8rem; }
+.bean-brew-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
+.bean-brew-list a {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 0.3rem 0.9rem; align-items: baseline;
+  padding: 0.8rem 0.95rem; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--ink); text-decoration: none;
+}
+@media (hover: hover) { .bean-brew-list a:hover { border-color: var(--brass); } }
+.bb-date { font-family: var(--mono); font-size: 0.8rem; color: var(--ink-faint); white-space: nowrap; }
+.bb-main { min-width: 0; display: grid; gap: 0.15rem; }
+.bb-specs { font-family: var(--mono); font-size: 0.8rem; color: var(--ink-soft); }
+.bb-next { font-size: 0.82rem; color: var(--brass-deep); }
+.bb-dial { margin: -0.3rem 0 0.8rem; font-size: 0.88rem; color: var(--ink-soft); }
+.bb-dial span { font-family: var(--mono); font-size: 0.82rem; color: var(--ink); }
+.bb-title { display: block; }
+@media (max-width: 480px) {
+  .bean-brew-list a { grid-template-columns: 1fr auto; }
+  .bb-date { grid-column: 1 / -1; }
+}
+
+/* ---------- Insights & origins ---------- */
+.ins-stats { margin-bottom: 0.6rem; }
+.ins-note { color: var(--ink-faint); font-size: 0.86rem; margin: 0 0 1.6rem; }
+.ins-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+.ins-grid .panel h3 { margin-top: 0; }
+.ins-bars { margin: 0; display: grid; gap: 0.55rem; }
+.ins-bars div { display: grid; grid-template-columns: 9.5rem 1fr; align-items: center; gap: 0.6rem; }
+.ins-bars dt { font-size: 0.86rem; color: var(--ink-soft); }
+.ins-bars dd { margin: 0; display: flex; align-items: center; gap: 0.5rem; }
+.ins-bars b { font-family: var(--mono); font-size: 0.85rem; }
+.ins-bar { display: block; height: 10px; min-width: 6px; border-radius: var(--radius-pill); background: linear-gradient(90deg, var(--gold), var(--brass)); }
+.ins-bar.sage { background: linear-gradient(90deg, var(--sage), var(--sage-deep)); }
+.ins-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45rem; font-size: 0.88rem; }
+.ins-list li { display: flex; justify-content: space-between; gap: 0.8rem; align-items: baseline; border-bottom: 1px dashed var(--border-soft); padding-bottom: 0.35rem; }
+.ins-list li > span { font-family: var(--mono); font-size: 0.8rem; color: var(--ink-soft); text-align: right; }
+.ins-dial li { flex-direction: column; gap: 0.15rem; }
+.ins-dial li > span { font-family: var(--sans); text-align: left; color: var(--ink); }
+.ins-foot { margin: 0.7rem 0 0; font-size: 0.8rem; color: var(--ink-faint); }
+.origin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+.origin-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.2rem; box-shadow: var(--shadow); display: grid; gap: 0.7rem; align-content: start; }
+.origin-card header { display: flex; align-items: center; gap: 0.6rem; }
+.origin-card h2 { margin: 0; font-size: 1.3rem; }
+.origin-flag { font-size: 1.8rem; line-height: 1; }
+.origin-count { margin-left: auto; font-family: var(--mono); font-size: 0.8rem; color: var(--ink-faint); }
+.origin-card ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.origin-card li { display: grid; gap: 0.1rem; font-size: 0.9rem; }
+.origin-card li span { font-size: 0.78rem; color: var(--ink-faint); }
+@media (max-width: 480px) { .ins-bars div { grid-template-columns: 7.5rem 1fr; } }
+
+/* ---------- Brew page extras ---------- */
+.brew-flavors { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.flavor-chip { gap: 0.4rem; }
+.flavor-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--fam, var(--ink-faint)); flex: 0 0 auto; }
+.fam-legend { display: flex; flex-wrap: wrap; gap: 0.35rem 0.9rem; margin: 0.6rem 0 0; font-size: 0.78rem; color: var(--ink-soft); }
+.fam-legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+.brew-next { margin: 0; font-size: 0.9rem; color: var(--ink); }
 
 /* ---------- Recipe library (method pages) ---------- */
 .recipe-library { margin-top: 2.4rem; }

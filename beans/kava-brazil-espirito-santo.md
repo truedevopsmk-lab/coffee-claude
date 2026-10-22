@@ -4,20 +4,17 @@ title: Kava Coffee — Brazil Espirito Santo
 origin: Espirito Santo, Brazil
 variety: Not specified
 process: Pulped Natural
+roaster: "Kava Coffee"
+country: "Brazil"
+process_group: "Honey & pulped natural"
 ---
 
 ## Kava Coffee — Brazil Espirito Santo (Competition Lot)
 
 **Roaster:** Kava Coffee  
 **Origin:** Espirito Santo, Brazil  
-**Estate / Farm:** Not specified  
-**Producer:** Not specified  
-**Variety:** Not specified  
 **Process:** Pulped Natural  
 **Roast:** Medium / Filter  
-**Altitude:** Not specified  
-**Roasted On:** Not specified  
-
 ### Flavor Notes (Roaster)
 - Marble cake  
 - Nougat  

@@ -4,20 +4,18 @@ title: Miners Prague — Colombia Franco Alexis Garzón
 origin: Colombia
 variety: Not specified
 process: Washed
+roaster: "Miners Prague"
+country: "Colombia"
+process_group: "Washed"
 ---
 
 ## Miners Prague — Colombia Franco Alexis Garzón (Washed)
 
 **Roaster:** Miners Prague  
 **Origin:** Colombia  
-**Estate / Farm:** Not specified  
 **Producer:** Franco Alexis Garzón  
-**Variety:** Not specified  
 **Process:** Washed  
 **Roast:** Filter  
-**Altitude:** Not specified  
-**Roasted On:** Not specified  
-
 ### Flavor Notes (Roaster)
 
 - White grape  

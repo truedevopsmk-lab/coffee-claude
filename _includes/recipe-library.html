@@ -17,13 +17,9 @@
           {%- if r.dose > 0 %}<div><dt>Coffee</dt><dd>{{ r.dose }} g</dd></div>{% endif -%}
           {%- if r.water > 0 %}<div><dt>Water</dt><dd>{{ r.water }} ml</dd></div>{% endif -%}
         {%- else -%}
-          {%- assign dose_f = r.dose | plus: 0.0 -%}
-          {%- assign ratio = r.water | divided_by: dose_f | round: 1 | append: "" -%}
-          {%- assign ratio_tail = ratio | slice: -2, 2 -%}
-          {%- if ratio_tail == ".0" %}{% assign ratio = ratio | split: "." | first %}{% endif -%}
           <div><dt>Coffee</dt><dd>{{ r.dose }} g</dd></div>
           <div><dt>{% if r.output %}Yield{% else %}Water{% endif %}</dt><dd>{{ r.water }} g</dd></div>
-          <div><dt>Ratio</dt><dd>1:{{ ratio }}</dd></div>
+          <div><dt>Ratio</dt><dd>{% include ratio.html dose=r.dose water=r.water %}</dd></div>
         {%- endif -%}
         {%- if r.temp %}<div><dt>Temp</dt><dd>{{ r.temp }}</dd></div>{% endif -%}
         {%- if r.time %}<div><dt>Time</dt><dd>{{ r.time }}</dd></div>{% endif -%}

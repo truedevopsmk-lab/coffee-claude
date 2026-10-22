@@ -4,6 +4,9 @@ title: MAME — Brazil Decaf Omni
 origin: Brazil, Santos
 variety: Not specified
 process: Swiss Water Decaf
+roaster: "MAME Coffee"
+country: "Brazil"
+process_group: "Decaf"
 ---
 
 ## MAME — Brazil Decaf Omni (Swiss Water Decaf)
@@ -11,13 +14,8 @@ process: Swiss Water Decaf
 **Roaster:** MAME Coffee  
 **Origin:** Brazil, Santos  
 **Estate / Farm:** Comercio  
-**Producer:** Not specified  
-**Variety:** Not specified  
 **Process:** Swiss Water Decaf  
 **Roast:** Omni (Espresso / Filter)  
-**Altitude:** Not specified  
-**Roasted On:** Not specified  
-
 ### Flavor Notes (Roaster)
 - Gingerbread  
 - Almond  
@@ -29,5 +27,4 @@ This coffee is MAME Coffee’s sole decaffeinated offering, selected to demonstr
 Within the specialty community, Brazilian Swiss Water decafs are typically appreciated for their smooth texture, low bitterness, and confectionery sweetness rather than pronounced acidity. Coffees of this style are commonly described as approachable and versatile, performing well both as straight espresso and in milk-based drinks, including plant-based milk.
 
 ### Brew History
-_(To be filled after brewing)_
 ```

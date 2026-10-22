@@ -1,8 +1,22 @@
 ---
-layout: default
-title: AeroPress Brew Log — Kava Coffee — Espirito Santo (Brazil)
+layout: brew
+title: "AeroPress Brew Log — Kava Coffee — Espirito Santo (Brazil)"
+date: 2026-01-18
+bean: "Kava Coffee — Brazil Espirito Santo"
+roaster: "Kava Coffee"
+method: "AeroPress"
+recipe: "Inverted"
+dose: 15
+water: 220
+water_temp: 92
+brew_time: "1:45"
+grind: "14 clicks"
+acidity: 2
+body: 3
+sweetness: 4
+flavors: ["Nougat", "Vanilla", "Marble cake", "Honeydew"]
+next_time: "Try slightly hotter water (93 °C)"
 ---
-
 This entry documents my AeroPress recipe and brew notes for **Kava Coffee*, a Pulped Natural coffee from Brazil.
 
 ---
@@ -13,17 +27,6 @@ This entry documents my AeroPress recipe and brew notes for **Kava Coffee*, a Pu
 **Coffee:** Kava Coffee — Brazil Espirito Santo  
 **Process:** Pulped Natural  
 **Roast:** Medium  
-
-## Brew Parameters
-- Method: AeroPress (Inverted)
-- Dose: 15 g
-- Water: 220 g
-- Ratio: 1:14.6
-- Grind: Medium (C3S Pro – 14 clicks)
-- Temp: 92°C
-- Bloom: Yes
-- Agitation: Stir x4
-- Total Time: 1:45
 
 ## Tasting
 - Acidity: Low
